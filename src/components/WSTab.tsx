@@ -104,19 +104,8 @@ export const WSTab: React.FC = () => {
 
   // Handle standard level clicks -> now navigates to purchase details page
   const handleUpgradeClick = (tier: any) => {
-    const levelIndex = (l: string) => parseInt(l.slice(-1) || '0');
-    const isActive = user.level === tier.level;
-    const isEligible = levelIndex(tier.level) > levelIndex(user.level);
-    const isPurchased = levelIndex(tier.level) <= levelIndex(user.level);
-
-    if (isPurchased) {
-      return;
-    }
-    if (!isEligible) {
-      alert('Erro de Atribuição: Esta conta possui graduação superior.');
-      return;
-    }
-
+    // Permite a compra livre por saldo: qualquer usuário pode comprar qualquer WS em qualquer ordem.
+    // Navega para a tela de detalhes de compra passando o produto selecionado no botão.
     navigate(`/ws/compra/${tier.level}`, { state: { tier } });
   };
 
@@ -165,11 +154,6 @@ export const WSTab: React.FC = () => {
       {/* 3. Horizontal wavy reflection list of tiers (WS1, WS2, WS3...) */}
       <div className="px-4 space-y-4" id="member-tiers-list">
         {tiers.filter(t => t.level !== 'WS0').map((tier) => {
-          const levelIndex = (l: string) => parseInt(l.slice(-1) || '0');
-          const isActive = user.level === tier.level;
-          const isPurchased = levelIndex(tier.level) <= levelIndex(user.level);
-          const isEligible = levelIndex(tier.level) > levelIndex(user.level);
-          
           return (
             <div 
               key={tier.level}
@@ -189,30 +173,19 @@ export const WSTab: React.FC = () => {
                   </p>
                 </div>
 
-                {/* Right side action button / purchased icon in card header */}
+                {/* Right side action button in card header */}
                 <div className="pr-1 pt-1">
-                  {isPurchased ? (
-                    <div className="flex h-[32px] w-[32px] items-center justify-center rounded-full bg-emerald-500 text-white shadow-sm">
-                      <Check className="h-4 w-4" />
-                    </div>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleUpgradeClick(tier);
-                      }}
-                      disabled={!isEligible}
-                      id={`buy-button-${tier.level}`}
-                      className={`h-[32px] rounded-full px-4 text-[12px] font-bold transition-all focus:outline-none ${
-                        isEligible
-                          ? 'bg-white/95 text-slate-800 hover:bg-white border border-white/50 shadow-sm'
-                          : 'bg-neutral-300 text-slate-500 cursor-not-allowed'
-                      }`}
-                    >
-                      {isEligible ? 'Comprar' : 'Indisponível'}
-                    </button>
-                  )}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleUpgradeClick(tier);
+                    }}
+                    id={`buy-button-${tier.level}`}
+                    className="h-[32px] rounded-full px-4 text-[12px] font-bold transition-all focus:outline-none bg-white/95 text-slate-800 hover:bg-white border border-white/50 shadow-sm"
+                  >
+                    Comprar
+                  </button>
                 </div>
               </div>
 

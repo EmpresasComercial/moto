@@ -30,8 +30,8 @@ export const MeuTab: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Fetch latest user profile info when the tab loads, but do not show the global spinner on the Meu page.
-    refreshUserProfile(false);
+    // Removed refreshUserProfile(false) to prevent "saldo piscado" (balance flashing) 
+    // and to improve performance since AppContext already handles state sync and polling.
   }, []);
 
   useEffect(() => {
@@ -461,16 +461,16 @@ export const MeuTab: React.FC = () => {
       </div>
 
 
-      {/* Profile Modals portal section */}
-      <BankModal isOpen={isBankOpen} onClose={() => setIsBankOpen(false)} />
-      <WalletModal isOpen={isWalletOpen} onClose={() => setIsWalletOpen(false)} initialTab={walletTab} />
-      <InviteModal isOpen={isInviteOpen} onClose={() => setIsInviteOpen(false)} />
-      <TeamReportModal isOpen={isTeamOpen} onClose={() => setIsTeamOpen(false)} fill-current="currentColor" />
-      <RulesModal isOpen={isRulesOpen} onClose={() => setIsRulesOpen(false)} />
-      <DailyDeclarationModal isOpen={isChartOpen} onClose={() => setIsChartOpen(false)} />
-      <LedgerLogsModal isOpen={isLedgerOpen} onClose={() => setIsLedgerOpen(false)} type={ledgerType} />
-      <MyInfoModal isOpen={isMyInfoOpen} onClose={() => setIsMyInfoOpen(false)} onOpenBank={() => setIsBankOpen(true)} />
-      <CurrencyConverterModal isOpen={isConverterOpen} onClose={() => setIsConverterOpen(false)} />
+      {/* Profile Modals portal section - conditionally rendered for performance */}
+      {isBankOpen && <BankModal isOpen={isBankOpen} onClose={() => setIsBankOpen(false)} />}
+      {isWalletOpen && <WalletModal isOpen={isWalletOpen} onClose={() => setIsWalletOpen(false)} initialTab={walletTab} />}
+      {isInviteOpen && <InviteModal isOpen={isInviteOpen} onClose={() => setIsInviteOpen(false)} />}
+      {isTeamOpen && <TeamReportModal isOpen={isTeamOpen} onClose={() => setIsTeamOpen(false)} fill-current="currentColor" />}
+      {isRulesOpen && <RulesModal isOpen={isRulesOpen} onClose={() => setIsRulesOpen(false)} />}
+      {isChartOpen && <DailyDeclarationModal isOpen={isChartOpen} onClose={() => setIsChartOpen(false)} />}
+      {isLedgerOpen && <LedgerLogsModal isOpen={isLedgerOpen} onClose={() => setIsLedgerOpen(false)} type={ledgerType} />}
+      {isMyInfoOpen && <MyInfoModal isOpen={isMyInfoOpen} onClose={() => setIsMyInfoOpen(false)} onOpenBank={() => setIsBankOpen(true)} />}
+      {isConverterOpen && <CurrencyConverterModal isOpen={isConverterOpen} onClose={() => setIsConverterOpen(false)} />}
 
     </div>
   );
