@@ -6,6 +6,7 @@ import {
   Gift, Layers, HelpCircle, UserCheck, Receipt, 
   Coins, Wallet2, Download, Landmark, LogOut, Check, Headphones, Award
 } from 'lucide-react';
+import { MinhasFinancasModal } from './MinhasFinancasTab';
 import { 
   BankModal, WalletModal, InviteModal, TeamReportModal, 
   RulesModal, DailyDeclarationModal, LedgerLogsModal, CurrencyConverterModal
@@ -60,6 +61,7 @@ export const MeuTab: React.FC = () => {
   const [isLedgerOpen, setIsLedgerOpen] = useState(false);
   const [isMyInfoOpen, setIsMyInfoOpen] = useState(false);
   const [isConverterOpen, setIsConverterOpen] = useState(false);
+  const [isFinancaOpen, setIsFinancaOpen] = useState(false);
   const [ledgerType, setLedgerType] = useState<'receita' | 'recarga' | 'retirada'>('receita');
 
   const copyInviteCode = () => {
@@ -113,6 +115,9 @@ export const MeuTab: React.FC = () => {
       case 'logout':
         logout();
         break;
+      case 'financa':
+        setIsFinancaOpen(true);
+        break;
       case 'reset':
         resetAll();
         alert('Simulador: Base de dados reiniciada para os padrões de fábrica.');
@@ -120,7 +125,7 @@ export const MeuTab: React.FC = () => {
     }
   };
 
-  const formattedBalance = stats.balance.toLocaleString('pt-AO', {
+  const formattedBalance = Math.max(0, stats.balance).toLocaleString('pt-AO', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
@@ -234,7 +239,7 @@ export const MeuTab: React.FC = () => {
             <div className="pl-2">
               <span className="text-[11px] font-bold text-[#ff3b30]">USDT_TRC</span>
               <div className="text-[18px] font-bold text-[#ff3b30] mt-1">
-                {(stats.balanceUSDT / 1000).toFixed(2)}
+                {Math.max(0, stats.balanceUSDT / 1000).toFixed(2)}
               </div>
             </div>
           </div>
@@ -452,9 +457,15 @@ export const MeuTab: React.FC = () => {
             <span className="text-[11px] font-normal text-neutral-500">Terminar sessão</span>
           </div>
 
-          {/* Tile 12: Blank cell */}
-          <div className="py-5 px-1 h-[100px] select-none bg-white border-none">
-            &nbsp;
+          {/* Tile 12: Minha Finança */}
+          <div 
+            onClick={() => handleGridOption('financa')}
+            className="py-5 px-1 text-center cursor-pointer flex flex-col justify-center items-center gap-2 h-[100px] select-none"
+          >
+            <div className="h-[30px] flex items-center justify-center">
+              <Wallet className="w-[26px] h-[26px] text-neutral-500 stroke-[1.5]" />
+            </div>
+            <span className="text-[11px] font-normal text-neutral-500">Minha Finança</span>
           </div>
 
         </div>
@@ -471,6 +482,7 @@ export const MeuTab: React.FC = () => {
       {isLedgerOpen && <LedgerLogsModal isOpen={isLedgerOpen} onClose={() => setIsLedgerOpen(false)} type={ledgerType} />}
       {isMyInfoOpen && <MyInfoModal isOpen={isMyInfoOpen} onClose={() => setIsMyInfoOpen(false)} onOpenBank={() => setIsBankOpen(true)} />}
       {isConverterOpen && <CurrencyConverterModal isOpen={isConverterOpen} onClose={() => setIsConverterOpen(false)} />}
+      {isFinancaOpen && <MinhasFinancasModal isOpen={isFinancaOpen} onClose={() => setIsFinancaOpen(false)} />}
 
     </div>
   );

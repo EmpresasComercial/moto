@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
-import { ShieldCheck, Check, User } from 'lucide-react';
+import { Check, User } from 'lucide-react';
 import { GATEWAY_URL, getAccessToken } from '../lib/supabase';
 
 // Custom high-fidelity credit card SVG resembling a standard blue bank card with golden chip
@@ -34,9 +34,11 @@ export const WSTab: React.FC = () => {
   const { user, isSessionExpired, showLoading, hideLoading, ensureInternetConnectivity } = useApp();
 
   const [dbProducts, setDbProducts] = useState<any[]>([]);
+  // Set of WS names the user has already purchased and are active (e.g. "WS1", "WS2")
+  const [purchasedNames, setPurchasedNames] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    if (isSessionExpired) return; // Block data fetching when session expired
+    if (isSessionExpired) return;
 
     const loadProducts = async () => {
       if (!(await ensureInternetConnectivity())) return;
@@ -44,27 +46,40 @@ export const WSTab: React.FC = () => {
       try {
         const token = await getAccessToken();
         if (!token) return;
-        const resp = await fetch(GATEWAY_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({ op: 512, data: {} })
-        });
 
-        // Intercept 401/force_logout from gateway
-        if (resp.status === 401) {
-          const errData = await resp.json().catch(() => ({}));
-          const msg = errData?.error || 'Sessão inválida. Faça login novamente.';
-          window.dispatchEvent(new CustomEvent('force-logout', { detail: { message: msg } }));
+        // Fetch products catalog (op 512) and user's purchased items (op 601) in parallel
+        const [respProducts, respShop] = await Promise.all([
+          fetch(GATEWAY_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ op: 512, data: {} })
+          }),
+          fetch(GATEWAY_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ op: 601, data: {} })
+          })
+        ]);
+
+        if (respProducts.status === 401) {
+          const errData = await respProducts.json().catch(() => ({}));
+          window.dispatchEvent(new CustomEvent('force-logout', { detail: { message: errData?.error || 'Sessão inválida.' } }));
           return;
         }
 
-        if (resp.ok) {
-          const res = await resp.json();
+        if (respProducts.ok) {
+          const res = await respProducts.json();
           if (res?.success && Array.isArray(res.result)) {
             setDbProducts(res.result);
+          }
+        }
+
+        if (respShop.ok) {
+          const shopRes = await respShop.json();
+          if (shopRes?.success && Array.isArray(shopRes.result)) {
+            // Build a set of purchased product names (e.g. "WS1", "WS2")
+            const names = new Set<string>(shopRes.result.map((s: any) => String(s.nome_produto || '').toUpperCase()));
+            setPurchasedNames(names);
           }
         }
       } catch (err) {
@@ -74,28 +89,30 @@ export const WSTab: React.FC = () => {
       }
     };
     loadProducts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSessionExpired]);
 
-  const visualMap: Record<string, { dailyTasks: number; bgStyle: string }> = {
-    WS0: { dailyTasks: 1, bgStyle: 'linear-gradient(135deg, #a1a1aa 0%, #e4e4e7 15%, #a1a1aa 30%, #d4d4d8 45%, #f4f4f5 60%, #a1a1aa 75%, #d4d4d8 90%, #e4e4e7 100%)' },
-    WS1: { dailyTasks: 2, bgStyle: 'linear-gradient(135deg, #3b608c 0%, #c0d1e5 15%, #3b608c 30%, #517ca8 45%, #e1ecf7 60%, #3b608c 75%, #517ca8 90%, #5d8dc2 100%)' },
-    WS2: { dailyTasks: 4, bgStyle: 'linear-gradient(135deg, #5c6773 0%, #d1dbe5 15%, #5c6773 30%, #7d8b9c 45%, #eef3f7 60%, #5c6773 75%, #7d8b9c 90%, #8b99a6 100%)' },
-    WS3: { dailyTasks: 6, bgStyle: 'linear-gradient(135deg, #4c2254 0%, #dab5dc 15%, #4c2254 30%, #7b4382 45%, #f6eff7 60%, #4c2254 75%, #7b4382 90%, #8c5294 100%)' },
-    WS4: { dailyTasks: 10, bgStyle: 'linear-gradient(135deg, #946916 0%, #f6e3bd 15%, #946916 30%, #ca9b3b 45%, #fffbf2 60%, #946916 75%, #ca9b3b 90%, #dbac4d 100%)' },
-    WS5: { dailyTasks: 20, bgStyle: 'linear-gradient(135deg, #a82424 0%, #fcdcdd 15%, #a82424 30%, #d44848 45%, #fff5f5 60%, #a82424 75%, #d44848 90%, #e05e5e 100%)' }
+  const visualMap: Record<string, { dailyTasks: number; bgStyle: string; btnColor: string }> = {
+    WS0: { dailyTasks: 1, bgStyle: 'linear-gradient(135deg, #a1a1aa 0%, #e4e4e7 15%, #a1a1aa 30%, #d4d4d8 45%, #f4f4f5 60%, #a1a1aa 75%, #d4d4d8 90%, #e4e4e7 100%)', btnColor: 'text-zinc-600' },
+    WS1: { dailyTasks: 1, bgStyle: 'linear-gradient(135deg, #3b608c 0%, #c0d1e5 15%, #3b608c 30%, #517ca8 45%, #e1ecf7 60%, #3b608c 75%, #517ca8 90%, #5d8dc2 100%)', btnColor: 'text-blue-900' },
+    WS2: { dailyTasks: 1, bgStyle: 'linear-gradient(135deg, #5c6773 0%, #d1dbe5 15%, #5c6773 30%, #7d8b9c 45%, #eef3f7 60%, #5c6773 75%, #7d8b9c 90%, #8b99a6 100%)', btnColor: 'text-slate-800' },
+    WS3: { dailyTasks: 1, bgStyle: 'linear-gradient(135deg, #4c2254 0%, #dab5dc 15%, #4c2254 30%, #7b4382 45%, #f6eff7 60%, #4c2254 75%, #7b4382 90%, #8c5294 100%)', btnColor: 'text-fuchsia-900' },
+    WS4: { dailyTasks: 1, bgStyle: 'linear-gradient(135deg, #946916 0%, #f6e3bd 15%, #946916 30%, #ca9b3b 45%, #fffbf2 60%, #946916 75%, #ca9b3b 90%, #dbac4d 100%)', btnColor: 'text-amber-800' },
+    WS5: { dailyTasks: 1, bgStyle: 'linear-gradient(135deg, #a82424 0%, #fcdcdd 15%, #a82424 30%, #d44848 45%, #fff5f5 60%, #a82424 75%, #d44848 90%, #e05e5e 100%)', btnColor: 'text-red-800' }
   };
 
   const defaultStyle = 'linear-gradient(135deg, #5c6773 0%, #d1dbe5 15%, #5c6773 30%, #7d8b9c 45%, #eef3f7 60%, #5c6773 75%, #7d8b9c 90%, #8b99a6 100%)';
 
   const tiers = dbProducts.map(dbP => {
-    const vis = visualMap[dbP.name] || { dailyTasks: 1, bgStyle: defaultStyle };
+    const vis = visualMap[dbP.name] || { dailyTasks: 1, bgStyle: defaultStyle, btnColor: 'text-slate-800' };
     return {
       level: dbP.name,
       dbId: dbP.id,
       price: Number(dbP.price),
       dailyTasks: Number(dbP.tarefa_por_dia) || vis.dailyTasks,
       payPerTask: Number(dbP.daily_income),
-      bgStyle: vis.bgStyle
+      bgStyle: vis.bgStyle,
+      btnColor: vis.btnColor
     };
   }).sort((a, b) => a.price - b.price);
 
@@ -154,12 +171,13 @@ export const WSTab: React.FC = () => {
       {/* 3. Horizontal wavy reflection list of tiers (WS1, WS2, WS3...) */}
       <div className="px-4 space-y-4" id="member-tiers-list">
         {tiers.filter(t => t.level !== 'WS0').map((tier) => {
+          const isPurchased = purchasedNames.has(tier.level.toUpperCase());
           return (
             <div 
               key={tier.level}
-              onClick={() => handleUpgradeClick(tier)}
+              onClick={() => !isPurchased && handleUpgradeClick(tier)}
               style={{ backgroundImage: tier.bgStyle }}
-              className="relative w-full h-[120px] rounded-[24px] border-2 border-white/95 overflow-hidden flex flex-col justify-between p-4 cursor-pointer text-slate-800 shadow-none transition-all active:scale-[0.98]"
+              className={`relative w-full h-[120px] rounded-[24px] border-2 border-white/95 overflow-hidden flex flex-col justify-between p-4 text-slate-800 shadow-none transition-all ${isPurchased ? 'cursor-default' : 'cursor-pointer active:scale-[0.98]'}`}
               id={`tier-card-${tier.level}`}
             >
               {/* Top Row: VIP name and target price badge */}
@@ -173,26 +191,36 @@ export const WSTab: React.FC = () => {
                   </p>
                 </div>
 
-                {/* Right side action button in card header */}
+                {/* Right side: check icon if purchased, buy button if not */}
                 <div className="pr-1 pt-1">
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleUpgradeClick(tier);
-                    }}
-                    id={`buy-button-${tier.level}`}
-                    className="h-[32px] rounded-full px-4 text-[12px] font-bold transition-all focus:outline-none bg-white/95 text-slate-800 hover:bg-white border border-white/50 shadow-sm"
-                  >
-                    Comprar
-                  </button>
+                  {isPurchased ? (
+                    // Green circle check — product already owned
+                    <div
+                      id={`buy-button-${tier.level}`}
+                      className="h-[32px] w-[32px] rounded-full bg-green-500 flex items-center justify-center shadow-md border-2 border-white/80"
+                    >
+                      <Check className="text-white h-[18px] w-[18px]" strokeWidth={3} />
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleUpgradeClick(tier);
+                      }}
+                      id={`buy-button-${tier.level}`}
+                      className={`h-[32px] rounded-full px-4 text-[12px] font-bold transition-all focus:outline-none bg-white/95 hover:bg-white border border-white/50 shadow-sm ${tier.btnColor}`}
+                    >
+                      Comprar
+                    </button>
+                  )}
                 </div>
               </div>
 
               {/* Bottom Row: Darkened translucent footer strip inside card */}
               <div className="absolute bottom-0 left-0 right-0 bg-black/15 py-1.5 px-6 flex justify-between items-center text-[11px] font-bold select-none border-t border-white/5">
                 <span className="tracking-wide">
-                  {tier.dailyTasks} tarefas por dia
+                  {tier.dailyTasks} tarefa por dia
                 </span>
                 
                 <span className="text-slate-800/80 font-mono text-[10px] font-normal">

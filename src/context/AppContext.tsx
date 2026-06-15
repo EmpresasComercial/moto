@@ -16,6 +16,17 @@ const normalizeBankName = (bankName?: string) => {
   return normalized[bankName] || bankName;
 };
 
+export interface MinhaFinanca {
+  saldo_atual_kz: number;
+  saldo_atual_usdt: number;
+  total_retirado: number;
+  total_depositado: number;
+  ganho_tarefas: number;
+  quantidade_tarefas: number;
+  bonus_convite: number;
+  quantidade_convidados: number;
+}
+
 export interface AlertConfig {
   message: string;
   title?: string;
@@ -52,6 +63,7 @@ interface AppContextProps {
   upgradeMembership: (level: string, cost: number, productId?: string) => Promise<boolean>;
   increaseCreditScore: (points: number) => void;
   updateUserPaymentPin: (newPin: string, oldPin?: string) => Promise<{ success: boolean; message: string }>;
+  updateUserLoginPassword: (oldPin: string, newPin: string) => Promise<{ success: boolean; message: string }>;
   resetAll: () => void;
   showAlert: (message: string, title?: string, type?: 'info' | 'success' | 'warning' | 'error') => void;
   showConfirm: (message: string, onConfirm: () => void, title?: string) => void;
@@ -69,6 +81,7 @@ interface AppContextProps {
   hideLoading: () => void;
   ensureInternetConnectivity: (showError?: boolean) => Promise<boolean>;
   fetchWithdrawalRecords: () => Promise<LogRecord[]>;
+  fetchMinhaFinanca: () => Promise<MinhaFinanca | null>;
   isSessionExpired: boolean;
   setIsSessionExpired: (expired: boolean) => void;
   sessionExpiredMessage: string;
@@ -892,6 +905,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
+  const fetchMinhaFinanca = async (): Promise<MinhaFinanca | null> => {
+    if (!isLoggedIn || !user.id || !isOnline) return null;
+    try {
+      const res = await gatewayFetch(103, {});
+      if (res && res.resData && res.resData.success && res.resData.result) {
+        return res.resData.result;
+      }
+      return null;
+    } catch (error) {
+      console.error('Error fetching Minha Financas:', error);
+      return null;
+    }
+  };
+
   // Convert USDT balance to KZ via Gateway OP 310 calling transfer_reproducao_to_balance
   const convertUsdToKz = async (usdAmount: number): Promise<{ success: boolean; message: string }> => {
     try {
@@ -1097,6 +1124,38 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
+  const updateUserLoginPassword = async (oldPassword: string, newPassword: string): Promise<{ success: boolean; message: string }> => {
+    if (!(await ensureInternetConnectivity())) {
+      return { success: false, message: 'Sem conexão à internet.' };
+    }
+    showLoading('A processar segurança...');
+    try {
+      const cleanPhone = user.phone.replace(/[^0-9]/g, '');
+      const email = `${cleanPhone}@user.com`;
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password: oldPassword
+      });
+      if (signInError || !signInData.session) {
+        return { success: false, message: 'Senha Antiga incorreta.' };
+      }
+
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+
+      if (updateError) {
+        return { success: false, message: updateError.message };
+      }
+
+      return { success: true, message: 'Senha de Login alterada com sucesso!' };
+    } catch (e) {
+      return { success: false, message: (e as Error).message };
+    } finally {
+      hideLoading();
+    }
+  };
+
   const resetAll = () => {
     setIsLoggedIn(true);
     setUser({
@@ -1116,7 +1175,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setTeam(INITIAL_REFERRALS);
   };
 
-  return <AppContext.Provider value={{ isLoggedIn, user, stats, tasks, logs, team, login, logout, registerUser, refreshUserProfile, claimTask, approvePendingTasks, addRecharge, addWithdrawal, convertUsdToKz, updateBankInfo, upgradeMembership, increaseCreditScore, updateUserPaymentPin, resetAll, fetchWithdrawalRecords, showAlert, showConfirm, alertConfig, closeAlert, toasts, addToast, removeToast, isFullScreenActive, setIsFullScreenActive, isLoading, loadingMessage, showLoading, hideLoading, isOnline, ensureInternetConnectivity, isSessionExpired, setIsSessionExpired, sessionExpiredMessage, setSessionExpiredMessage }}>{children}</AppContext.Provider>;
+  return <AppContext.Provider value={{ isLoggedIn, user, stats, tasks, logs, team, login, logout, registerUser, refreshUserProfile, claimTask, approvePendingTasks, addRecharge, addWithdrawal, convertUsdToKz, updateBankInfo, upgradeMembership, increaseCreditScore, updateUserPaymentPin, updateUserLoginPassword, resetAll, fetchWithdrawalRecords, fetchMinhaFinanca, showAlert, showConfirm, alertConfig, closeAlert, toasts, addToast, removeToast, isFullScreenActive, setIsFullScreenActive, isLoading, loadingMessage, showLoading, hideLoading, isOnline, ensureInternetConnectivity, isSessionExpired, setIsSessionExpired, sessionExpiredMessage, setSessionExpiredMessage }}>{children}</AppContext.Provider>;
 };
 
 export const useApp = () => {

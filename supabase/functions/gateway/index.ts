@@ -35,6 +35,7 @@ const OP_RULES: Record<number, OperationRule> = {
   802: { name: "get_weekly_income", roles: ["user"] },
   803: { name: "get_bonus_history", roles: ["user"] },
   901: { name: "get_support", roles: ["user"] },
+  103: { name: "get_minha_financa", roles: ["user"] },
 };
 
 const MAX_BODY_BYTES = 5242880; // 5MB para suportar imagens em base64
@@ -189,6 +190,13 @@ serve(async (req) => {
 
       case 102: {
         const { data, error } = await supabase.rpc("get_home_financial_stats_v2");
+        if (error) throw error;
+        result = data;
+        break;
+      }
+
+      case 103: {
+        const { data, error } = await supabase.rpc("get_minha_financa");
         if (error) throw error;
         result = data;
         break;

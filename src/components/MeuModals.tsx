@@ -4,7 +4,6 @@ import { X, Copy, Check, QrCode, ClipboardList, Wallet, Sparkles, Building, Land
 import { LogRecord } from '../types';
 import { EmptyState } from './EmptyState';
 import { GATEWAY_URL, getAccessToken } from '../lib/supabase';
-import inviteBannerImg from '../../assets/invite_banner.png';
 
 interface ModalProps {
   isOpen: boolean;
@@ -771,7 +770,8 @@ export const InviteModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
       setIsFullScreenActive(false);
       setDomain(null);
     };
-  }, [isOpen, setIsFullScreenActive, ensureInternetConnectivity, showLoading, hideLoading]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   const cleanDomain = domain ? domain.replace(/\/$/, '') : '';
   const inviteUrl = domain && user?.inviteCode ? `${cleanDomain}/Public/reg/smid/${user.inviteCode}` : '';
@@ -835,14 +835,17 @@ export const InviteModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
           </button>
         </div>
 
-        {/* Promotional Banner Image */}
-        <div className="w-full max-w-[340px] mt-8 bg-white">
-          <img 
-            src={inviteBannerImg}
-            alt="Join Us Promotional Banner" 
-            className="w-full h-auto object-contain bg-white"
-          />
-        </div>
+        {/* Promotional QR Code */}
+        {inviteUrl && (
+          <div className="w-full max-w-[200px] mt-8 bg-white p-3 border border-gray-200 rounded-lg shadow-sm flex flex-col items-center">
+            <img 
+              src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(inviteUrl)}`}
+              alt="QR Code Convite" 
+              className="w-full h-auto object-contain bg-white"
+            />
+            <span className="text-[10px] text-gray-500 mt-2 font-medium">Digitalize para se registar</span>
+          </div>
+        )}
 
       </div>
     </div>
@@ -1215,7 +1218,8 @@ export const DailyDeclarationModal: React.FC<ModalProps> = ({ isOpen, onClose })
     };
 
     loadDeclaration();
-  }, [isOpen, ensureInternetConnectivity, showLoading, hideLoading]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   // Use real week data or fallback to 7 zeros while loading
   const dataPoints: WeekDay[] = weekData.length === 7

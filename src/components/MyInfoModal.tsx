@@ -12,7 +12,7 @@ interface MyInfoModalProps {
 }
 
 export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => {
-  const { user, logout, resetAll, addToast, updateBankInfo, updateUserPaymentPin, showLoading, hideLoading, setIsFullScreenActive } = useApp();
+  const { user, logout, resetAll, addToast, updateBankInfo, updateUserPaymentPin, updateUserLoginPassword, showLoading, hideLoading, setIsFullScreenActive } = useApp();
   
   // Sub-page state: 'none' (main menu), 'withdrawInfo', 'personalInfo', 'loginPassword', 'payPasswordCreate', 'payPasswordChange'
   const [activeSubPage, setActiveSubPage] = useState<'none' | 'withdrawInfo' | 'personalInfo' | 'loginPassword' | 'payPasswordCreate' | 'payPasswordChange'>('none');
@@ -68,7 +68,7 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
     const isValidPin = (pin: string) => /^\d{4}$/.test(pin);
 
     if (type === 'login') {
-      if (!newPassword || !confirmPassword) {
+      if (!oldPassword || !newPassword || !confirmPassword) {
         alert('Por favor preencha todos os campos.');
         return;
       }
@@ -78,11 +78,15 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
       }
 
       addToast('A processar segurança de chaves AES-256...', 'info');
-      setTimeout(() => {
-        addToast('Senha de Login alterada com sucesso!', 'success');
-        resetPasswordInputs();
-        setActiveSubPage('none');
-      }, 1200);
+      updateUserLoginPassword(oldPassword, newPassword).then(res => {
+        if (res.success) {
+          addToast(res.message, 'success');
+          resetPasswordInputs();
+          setActiveSubPage('none');
+        } else {
+          alert(res.message);
+        }
+      });
       return;
     }
 
@@ -134,10 +138,6 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
       }
       if (!isValidPin(newPassword)) {
         alert('O novo PIN deve conter exatamente 4 dígitos numéricos.');
-        return;
-      }
-      if (oldPassword !== user.paymentPin) {
-        alert('O PIN antigo informado não corresponde ao PIN atual.');
         return;
       }
       if (newPassword !== confirmPassword) {
