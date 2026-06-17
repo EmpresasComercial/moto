@@ -24,6 +24,8 @@ import deveLerIcon from '../../assets/icons8-deve-ler-64.png';
 import downloadAppIcon from '../../assets/icons8-download-da-aplicacao-64.png';
 import terminarSessaoIcon from '../../assets/icons8-terminar-sessao-64.png';
 import dailyDeclarationIcon from '../../assets/icons8-tether-64.png';
+import settingsIcon from '../../assets/icons8-settings-48.png';
+import financasIcon from '../../assets/icons8-financas-48.png';
 
 export const MeuTab: React.FC = () => {
   const { user, stats, logout, resetAll, refreshUserProfile } = useApp();
@@ -165,13 +167,9 @@ export const MeuTab: React.FC = () => {
           <button 
             id="settings-btn"
             onClick={() => handleGridOption('info')}
-            className="text-neutral-500 p-2 cursor-pointer"
+            className="p-2 cursor-pointer flex items-center justify-center"
           >
-            {/* Hexagon Settings cog outline */}
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-[21px] w-[21px] text-neutral-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
+            <img src={settingsIcon} className="h-[21px] w-[21px] object-contain" alt="settings" />
           </button>
         </div>
 
@@ -369,15 +367,15 @@ export const MeuTab: React.FC = () => {
             <span className="text-[11px] font-normal text-neutral-500">deve ler</span>
           </div>
 
-          {/* Tile 4: Config conta */}
+          {/* Tile 4: configurações */}
           <div 
             onClick={() => handleGridOption('info')}
             className="py-5 px-1 text-center cursor-pointer flex flex-col justify-center items-center gap-2 h-[100px] select-none"
           >
             <div className="h-[30px] flex items-center justify-center">
-              <img src={infoIcon} alt="Config conta" className="w-[26px] h-[26px] object-contain" />
+              <img src={settingsIcon} alt="configurações" className="w-[26px] h-[26px] object-contain" />
             </div>
-            <span className="text-[11px] font-normal text-neutral-500">Config conta</span>
+            <span className="text-[11px] font-normal text-neutral-500">configurações</span>
           </div>
 
           {/* Tile 5: declaração diária */}
@@ -463,7 +461,7 @@ export const MeuTab: React.FC = () => {
             className="py-5 px-1 text-center cursor-pointer flex flex-col justify-center items-center gap-2 h-[100px] select-none"
           >
             <div className="h-[30px] flex items-center justify-center">
-              <Wallet className="w-[26px] h-[26px] text-neutral-500 stroke-[1.5]" />
+              <img src={financasIcon} className="w-[26px] h-[26px] object-contain" alt="Minha Finança" />
             </div>
             <span className="text-[11px] font-normal text-neutral-500">Minha Finança</span>
           </div>

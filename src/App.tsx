@@ -17,6 +17,11 @@ import { CustomSpinner } from './components/CustomSpinner';
 import { SessionExpiredModal } from './components/SessionExpiredModal';
 import { Settings, LogOut, Check, HelpCircle, Phone, X, AlertCircle, RefreshCw, Smartphone, Package, Shield, Home, Sparkles, ClipboardCheck, User } from 'lucide-react';
 import supportIcon from '../assets/icons8-support-fluente64.png';
+import abaHomepageIcon from '../assets/icons8-aba-homepage-48.png';
+import abaMeuIcon from '../assets/icons8-aba-meu-48.png';
+import wsIcon from '../assets/icons8-buy-48.png';
+import tarefaIcon from '../assets/task-search.png';
+import gravarIcon from '../assets/icons8-purchase-order-48.png';
 import { TaskType } from './types';
 import { Routes, Route, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
 
@@ -322,9 +327,13 @@ function MainAppLayout() {
                     <button
                       id="btn-nav-inicial"
                       onClick={() => setActiveTab('inicial')}
-                      className={`flex-1 flex flex-col items-center gap-1 transition-all duration-300 cursor-pointer hover-lift ${activeTab === 'inicial' ? 'text-red-600 font-bold scale-110' : 'text-slate-500 hover:text-slate-700'}`}
+                      className={`flex-1 flex flex-col items-center gap-1 transition-all duration-300 cursor-pointer hover-lift ${activeTab === 'inicial' ? 'text-red-600 scale-110' : 'text-slate-500 hover:text-slate-700'}`}
                     >
-                      <Home size={20} className={activeTab === 'inicial' ? 'stroke-[2.5] drop-shadow-[0_0_8px_rgba(220,38,38,0.3)]' : 'stroke-[1.5]'} />
+                      <img 
+                        src={abaHomepageIcon} 
+                        alt="Início" 
+                        className={`w-[24px] h-[24px] object-contain transition-all duration-300 ${activeTab === 'inicial' ? 'drop-shadow-[0_0_8px_rgba(220,38,38,0.3)]' : 'opacity-70'}`} 
+                      />
                       <span className="text-[10px] tracking-tight">Início</span>
                     </button>
  
@@ -332,9 +341,13 @@ function MainAppLayout() {
                     <button
                       id="btn-nav-ws"
                       onClick={() => setActiveTab('ws')}
-                      className={`flex-1 flex flex-col items-center gap-1 transition-all duration-300 cursor-pointer hover-lift ${activeTab === 'ws' ? 'text-red-600 font-bold scale-110' : 'text-slate-500 hover:text-slate-700'}`}
+                      className={`flex-1 flex flex-col items-center gap-1 transition-all duration-300 cursor-pointer hover-lift ${activeTab === 'ws' ? 'text-red-600 scale-110' : 'text-slate-500 hover:text-slate-700'}`}
                     >
-                      <Shield size={20} className={activeTab === 'ws' ? 'stroke-[2.5] drop-shadow-[0_0_8px_rgba(220,38,38,0.4)]' : 'stroke-[1.5]'} />
+                      <img 
+                        src={wsIcon} 
+                        alt="WS" 
+                        className={`w-[24px] h-[24px] object-contain transition-all duration-300 ${activeTab === 'ws' ? 'drop-shadow-[0_0_8px_rgba(220,38,38,0.4)]' : 'opacity-70'}`} 
+                      />
                       <span className="text-[10px] tracking-tight">WS</span>
                     </button>
  
@@ -342,28 +355,40 @@ function MainAppLayout() {
                     <button
                       id="btn-nav-tarefa"
                       onClick={() => setActiveTab('tarefa')}
-                      className={`flex-1 flex flex-col items-center gap-1 transition-all duration-300 cursor-pointer hover-lift ${activeTab === 'tarefa' ? 'text-red-600 font-bold scale-110' : 'text-slate-500 hover:text-slate-700'}`}
+                      className={`flex-1 flex flex-col items-center gap-1 transition-all duration-300 cursor-pointer hover-lift ${activeTab === 'tarefa' ? 'text-red-600 scale-110' : 'text-slate-500 hover:text-slate-700'}`}
                     >
-                      <Sparkles size={20} className={activeTab === 'tarefa' ? 'stroke-[2.5] drop-shadow-[0_0_8px_rgba(220,38,38,0.3)]' : 'stroke-[1.5]'} />
-                      <span className="text-[10px] tracking-tight font-bold">Tarefa</span>
+                      <img 
+                        src={tarefaIcon} 
+                        alt="Tarefa" 
+                        className={`w-[24px] h-[24px] object-contain transition-all duration-300 ${activeTab === 'tarefa' ? 'drop-shadow-[0_0_8px_rgba(220,38,38,0.3)]' : 'opacity-70'}`} 
+                      />
+                      <span className="text-[10px] tracking-tight">Tarefa</span>
                     </button>
 
                     {/* Tab 4: gravar */}
                     <button
                       id="btn-nav-gravar"
                       onClick={() => setActiveTab('gravar')}
-                      className={`flex-1 flex flex-col items-center gap-1 transition-all duration-300 cursor-pointer hover-lift ${activeTab === 'gravar' ? 'text-red-600 font-bold scale-110' : 'text-slate-500 hover:text-slate-700'}`}
+                      className={`flex-1 flex flex-col items-center gap-1 transition-all duration-300 cursor-pointer hover-lift ${activeTab === 'gravar' ? 'text-red-600 scale-110' : 'text-slate-500 hover:text-slate-700'}`}
                     >
-                      <ClipboardCheck size={20} className={activeTab === 'gravar' ? 'stroke-[2.5] drop-shadow-[0_0_8px_rgba(220,38,38,0.3)]' : 'stroke-[1.5]'} />
+                      <img 
+                        src={gravarIcon} 
+                        alt="Gravar" 
+                        className={`w-[24px] h-[24px] object-contain transition-all duration-300 ${activeTab === 'gravar' ? 'drop-shadow-[0_0_8px_rgba(220,38,38,0.3)]' : 'opacity-70'}`} 
+                      />
                       <span className="text-[10px] tracking-tight">Gravar</span>
                     </button>
                     {/* Tab 5: meu */}
                     <button
                       id="btn-nav-meu"
                       onClick={() => setActiveTab('meu')}
-                      className={`flex-1 flex flex-col items-center gap-1 transition-all duration-300 cursor-pointer hover-lift ${activeTab === 'meu' ? 'text-red-600 font-bold scale-110' : 'text-slate-500 hover:text-slate-700'}`}
+                      className={`flex-1 flex flex-col items-center gap-1 transition-all duration-300 cursor-pointer hover-lift ${activeTab === 'meu' ? 'text-red-600 scale-110' : 'text-slate-500 hover:text-slate-700'}`}
                     >
-                      <User size={20} className={activeTab === 'meu' ? 'stroke-[2.5] drop-shadow-[0_0_8px_rgba(220,38,38,0.3)]' : 'stroke-[1.5]'} />
+                      <img 
+                        src={abaMeuIcon} 
+                        alt="Meu" 
+                        className={`w-[24px] h-[24px] object-contain transition-all duration-300 ${activeTab === 'meu' ? 'drop-shadow-[0_0_8px_rgba(220,38,38,0.3)]' : 'opacity-70'}`} 
+                      />
                       <span className="text-[10px] tracking-tight">Meu</span>
                     </button>
  
