@@ -48,6 +48,35 @@ export const GravarTab: React.FC = () => {
   const [completedTasks, setCompletedTasks] = useState<any[]>([]);
   const [failedTasks, setFailedTasks] = useState<any[]>([]);
 
+  // State for summary counts & remaining tasks
+  const [counts, setCounts] = useState({
+    count_transformacao: 0,
+    count_terminado: 0,
+    count_falhado: 0,
+    tarefas_restantes: 0
+  });
+
+  // Load counters & remaining tasks via OP 607
+  const loadSummary = async () => {
+    if (isSessionExpired) return;
+    try {
+      const token = await getAccessToken();
+      if (!token) return;
+      const resp = await fetch(GATEWAY_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ op: 607, data: {} })
+      });
+      if (resp.status === 401) return;
+      const res = await resp.json();
+      if (res.success && res.result) {
+        setCounts(res.result);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   // Load Active Tasks (Transformacao) via OP 604
   const loadAgdTasks = async () => {
     if (isSessionExpired) return;
@@ -124,6 +153,10 @@ export const GravarTab: React.FC = () => {
   };
 
   useEffect(() => {
+    loadSummary();
+  }, [isSessionExpired]);
+
+  useEffect(() => {
     if (activeSegment === 'andamento') loadAgdTasks();
     if (activeSegment === 'concluido') loadCompletedTasks();
     if (activeSegment === 'falhado') loadFailedTasks();
@@ -136,9 +169,9 @@ export const GravarTab: React.FC = () => {
   ];
 
   // Counters
-  const countTransformacao = agdTasks.length;
-  const countTerminado = completedTasks.length;
-  const countFalhou = failedTasks.length;
+  const countTransformacao = counts.count_transformacao;
+  const countTerminado = counts.count_terminado;
+  const countFalhou = counts.count_falhado;
 
   const toggleExpand = (id: number) => {
     if (expandedId === id) {
@@ -183,6 +216,7 @@ export const GravarTab: React.FC = () => {
         // refreshUserProfile reads profiles.balance which complete_daily_task now updates correctly
         refreshUserProfile(false);
         loadAgdTasks(); // reload active tasks
+        loadSummary(); // reload summary counts (remaining tasks, etc.)
       } else {
         window.dispatchEvent(new CustomEvent('show-toast', { detail: { message: res.error || 'Erro ao concluir tarefa', type: 'error' } }));
       }
@@ -298,7 +332,7 @@ export const GravarTab: React.FC = () => {
           </div>
         </div>
         <div className="text-right flex flex-col items-end justify-center pr-2">
-          <div className="text-[20px] font-semibold text-neutral-800 font-mono leading-none">0</div>
+          <div className="text-[20px] font-semibold text-neutral-800 font-mono leading-none">{counts.tarefas_restantes}</div>
           <div className="text-[9px] text-[#9ea3a9] mt-0.5 tracking-tight font-semibold uppercase text-right">
             Tarefas restantes
           </div>

@@ -36,6 +36,7 @@ const OP_RULES: Record<number, OperationRule> = {
   803: { name: "get_bonus_history", roles: ["user"] },
   901: { name: "get_support", roles: ["user"] },
   103: { name: "get_minha_financa", roles: ["user"] },
+  607: { name: "get_gravar_summary", roles: ["user"] },
 };
 
 const MAX_BODY_BYTES = 5242880; // 5MB para suportar imagens em base64
@@ -484,6 +485,13 @@ serve(async (req) => {
           .eq("user_id", user.id)
           .eq("status", "falhado")
           .order("data_atribuicao", { ascending: false });
+        if (error) throw error;
+        result = data;
+        break;
+      }
+
+      case 607: {
+        const { data, error } = await supabase.rpc("get_gravar_summary");
         if (error) throw error;
         result = data;
         break;
