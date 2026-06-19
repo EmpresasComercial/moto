@@ -154,7 +154,7 @@ serve(async (req) => {
           }
         },
         db: {
-          schema: 'api'
+          schema: 'public, api'
         }
       }
     );
