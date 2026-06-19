@@ -52,8 +52,9 @@ export const PurchaseDetailsPage: React.FC = () => {
           level: product.name,
           dbId: product.id,
           price: Number(product.price),
-          dailyTasks: Number(product.tarefa_por_dia) || 0,
-          payPerTask: Number(product.daily_income) || 0
+          dailyTasks: Number(product.tarefa_por_dia) || 1,
+          payPerTask: Number(product.daily_income) || 0,
+          durationDays: Number(product.duration_days) || 30
         });
       } catch (err) {
         console.error(err);
@@ -122,7 +123,7 @@ export const PurchaseDetailsPage: React.FC = () => {
   }
 
   const startDate = new Date();
-  const durationDays = 30;
+  const durationDays = tier?.durationDays || 30;
   const endDate = new Date(startDate.getTime());
   endDate.setDate(endDate.getDate() + durationDays);
 

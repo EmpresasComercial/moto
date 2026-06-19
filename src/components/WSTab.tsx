@@ -111,6 +111,7 @@ export const WSTab: React.FC = () => {
       price: Number(dbP.price),
       dailyTasks: Number(dbP.tarefa_por_dia) || vis.dailyTasks,
       payPerTask: Number(dbP.daily_income),
+      durationDays: Number(dbP.duration_days) || 30,
       bgStyle: vis.bgStyle,
       btnColor: vis.btnColor
     };
