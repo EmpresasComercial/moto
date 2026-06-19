@@ -271,6 +271,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isSessionExpired, setIsSessionExpired] = useState<boolean>(false);
   const [sessionExpiredMessage, setSessionExpiredMessage] = useState<string>('');
   const sessionExpiredRef = React.useRef(false);
+  // Throttle: prevents duplicate fetches within 3 seconds
+  const lastFetchRef = React.useRef<number>(0);
+  // Debounce: collapses rapid Realtime events into one fetch
+  const realtimeDebounceRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const handleOnline = () => {
@@ -442,6 +446,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, []);
 
   // Load real-time financial stats from Database via Gateway (OP: 102)
+  // NOTE: Does NOT update balance/balanceUSDT — those are exclusively owned by
+  // refreshUserProfile to avoid the double-render flicker where both functions
+  // race to set the balance causing it to flash on screen.
   const fetchFinancialStats = async (showLoader: boolean = false) => {
     try {
       const gw = await gatewayFetch(102, {}, showLoader ? 'Carregando estatísticas...' : false);
@@ -458,7 +465,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           };
           setStats(prev => ({
             ...prev,
-            balance: r.balance !== undefined && r.balance !== null ? parseNum(r.balance, prev.balance) : prev.balance,
+            // balance and balanceUSDT intentionally omitted — refreshUserProfile
+            // is the single source of truth to prevent cascading re-renders.
             incomeYesterday: parseNum(r.income_yesterday, 0),
             incomeToday: parseNum(r.income_today, 0),
             incomeThisWeek: parseNum(r.income_this_week, 0),
@@ -478,21 +486,43 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     if (!isLoggedIn || isSessionExpired) return;
 
-    refreshUserProfile(false);
-    fetchFinancialStats(false);
-    
-    // Opcional: Atualiza a cada 30 segundos como fallback secundário
+    // Coordinated fetch with throttle to prevent rapid double-fetching
+    const fetchAllData = async (force: boolean = false) => {
+      if (sessionExpiredRef.current) return;
+      const now = Date.now();
+      // Skip if last fetch was less than 3 seconds ago (unless forced by a real event)
+      if (!force && now - lastFetchRef.current < 3000) return;
+      lastFetchRef.current = now;
+      // Sequential: profile first (sets balance + balanceUSDT), then stats (income only)
+      await refreshUserProfile(false);
+      await fetchFinancialStats(false);
+    };
+
+    fetchAllData(true); // force on initial login
+
+    // Realtime covers live changes; 60s polling is just a safety net fallback
     const interval = setInterval(() => {
-      if (sessionExpiredRef.current) return; // Stop polling when expired
-      refreshUserProfile(false);
-      fetchFinancialStats(false);
-    }, 30000);
+      fetchAllData(false);
+    }, 60000);
     return () => clearInterval(interval);
   }, [isLoggedIn, isSessionExpired]);
 
   // Setup Supabase Realtime subscriptions for profiles and tarefas_diarias
   useEffect(() => {
     if (!isLoggedIn || !user?.id || isSessionExpired) return;
+
+    // Debounced handler: collapses bursts of Realtime events into a single fetch
+    const handleRealtimeChange = (source: string, payload: any) => {
+      if (sessionExpiredRef.current) return;
+      console.log(`Realtime ${source} change:`, payload);
+      // Cancel any pending call and schedule a fresh one after 500ms quiet period
+      if (realtimeDebounceRef.current) clearTimeout(realtimeDebounceRef.current);
+      realtimeDebounceRef.current = setTimeout(async () => {
+        lastFetchRef.current = 0; // reset throttle so forced fetch goes through
+        await refreshUserProfile(false);
+        await fetchFinancialStats(false);
+      }, 500);
+    };
 
     const channel = supabase
       .channel(`realtime_db_changes_${user.id}`)
@@ -504,12 +534,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           table: 'profiles',
           filter: `id=eq.${user.id}`,
         },
-        (payload) => {
-          if (sessionExpiredRef.current) return;
-          console.log('Realtime profile change:', payload);
-          refreshUserProfile();
-          fetchFinancialStats();
-        }
+        (payload) => handleRealtimeChange('profile', payload)
       )
       .on(
         'postgres_changes',
@@ -519,18 +544,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           table: 'tarefas_diarias',
           filter: `user_id=eq.${user.id}`,
         },
-        (payload) => {
-          if (sessionExpiredRef.current) return;
-          console.log('Realtime tarefa change:', payload);
-          refreshUserProfile();
-          fetchFinancialStats();
-        }
+        (payload) => handleRealtimeChange('tarefa', payload)
       )
       .subscribe((status) => {
         console.log('Realtime subscription status:', status);
       });
 
     return () => {
+      if (realtimeDebounceRef.current) clearTimeout(realtimeDebounceRef.current);
       supabase.removeChannel(channel);
     };
   }, [isLoggedIn, user?.id, isSessionExpired]);
