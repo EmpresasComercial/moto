@@ -47,6 +47,8 @@ function MainAppLayout() {
     if (pathname === '/tarefa') return 'tarefa';
     if (pathname === '/gravar') return 'gravar';
     if (pathname === '/meu') return 'meu';
+    // /home is the canonical home route
+    if (pathname === '/home' || pathname === '/') return 'inicial';
     return 'inicial';
   };
 
@@ -65,8 +67,19 @@ function MainAppLayout() {
     else if (key === 'tarefa') navigate('/tarefa');
     else if (key === 'gravar') navigate('/gravar');
     else if (key === 'meu') navigate('/meu');
-    else navigate('/');
+    else navigate('/home');
   };
+
+  // Redirect to /home whenever the user becomes authenticated
+  useEffect(() => {
+    if (isLoggedIn) {
+      const current = location.pathname;
+      // Only redirect if on an auth page or the root
+      if (current === '/login' || current === '/register' || current === '/') {
+        navigate('/home', { replace: true });
+      }
+    }
+  }, [isLoggedIn]);
 
   const [selectedTaskCategory, setSelectedTaskCategory] = useState<TaskType>('Amazon');
   const [isTeamReportOpen, setIsTeamReportOpen] = useState(false);
@@ -279,14 +292,16 @@ function MainAppLayout() {
   return (
     <div className="min-h-screen bg-transparent font-sans">
       <Routes>
-        <Route path="/login" element={!isLoggedIn ? <LoginScreen /> : <Navigate to="/" replace />} />
-        <Route path="/register" element={!isLoggedIn ? <LoginScreen /> : <Navigate to="/" replace />} />
+        <Route path="/login" element={!isLoggedIn ? <LoginScreen /> : <Navigate to="/home" replace />} />
+        <Route path="/register" element={!isLoggedIn ? <LoginScreen /> : <Navigate to="/home" replace />} />
         <Route path="/reg/smid/:inviteCode" element={<LoginScreen />} />
         <Route path="/retirar" element={isLoggedIn ? <RetirarPage /> : <Navigate to="/login" replace />} />
         <Route path="/ws/compra/:tierLevel" element={isLoggedIn ? <PurchaseDetailsPage /> : <Navigate to="/login" replace />} />
         <Route path="/support" element={isLoggedIn ? <SupportScreen /> : <Navigate to="/login" replace />} />
-        <Route 
-          path="/*" 
+
+        {/* Main authenticated shell — handles /home, /ws, /tarefa, /gravar, /meu etc. */}
+        <Route
+          path="*"
           element={
             isLoggedIn ? (
               <div className="h-[100dvh] overflow-hidden bg-transparent flex flex-col max-w-md mx-auto relative border-x border-slate-200 backdrop-blur-sm">
@@ -438,7 +453,7 @@ function MainAppLayout() {
  
               </div>
             ) : (
-              <Navigate to="/register" replace />
+              <Navigate to="/login" replace />
             )
           } 
         />
