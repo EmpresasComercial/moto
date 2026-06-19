@@ -186,8 +186,7 @@ serve(async (req) => {
 
     switch (op) {
       case 101: {
-        // Query the RPC function located in the 'api' schema
-        const { data, error } = await supabase.schema('api').rpc("get_user_profile_v2");
+        const { data, error } = await supabase.rpc("get_user_profile_v2");
         if (error) throw error;
         result = data;
         break;
