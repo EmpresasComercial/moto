@@ -1,30 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { gatewayCall } from '../lib/supabase';
+import { useApp } from '../context/AppContext';
 
 export const SupportScreen: React.FC = () => {
   const navigate = useNavigate();
+  const { showAlert } = useApp();
   const [gerenteUrl, setGerenteUrl] = useState<string | null>(null);
   const [grupoUrl, setGrupoUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchSupportLinks = async () => {
       try {
-        const { data, error } = await supabase
-          .from('support_link')
-          .select('whatsapp_gerente_url, whatsapp_grupo')
-          .limit(1)
-          .single();
-
-        if (error) {
-          console.error('Error fetching support links:', error);
-          return;
-        }
-
-        if (data) {
-          setGerenteUrl(data.whatsapp_gerente_url);
-          setGrupoUrl(data.whatsapp_grupo);
+        const response = await gatewayCall(901);
+        if (response && response.success && response.result) {
+          setGerenteUrl(response.result.whatsapp_gerente_url);
+          setGrupoUrl(response.result.whatsapp_grupo);
         }
       } catch (err) {
         console.error('Error in fetchSupportLinks:', err);
@@ -40,6 +32,23 @@ export const SupportScreen: React.FC = () => {
     } else {
       navigate('/meu');
     }
+  };
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour >= 0 && hour < 12) return 'bom dia';
+    if (hour >= 12 && hour < 18) return 'boa tarde';
+    return 'boa noite';
+  };
+
+  const handleLinkClick = (e: React.MouseEvent, url: string | null) => {
+    e.preventDefault();
+    if (!url || url.trim() === '') {
+      const saudacao = getGreeting();
+      showAlert(`Olá, ${saudacao}. Lamentamos que no momento não seja possível entrar em contacto conosco. Por favor, volte novamente mais tarde.`, undefined, 'warning');
+      return;
+    }
+    window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   return (
@@ -70,37 +79,35 @@ export const SupportScreen: React.FC = () => {
 
         <div className="px-4 py-2 flex flex-col">
           
-          {/* Link 1 */}
+          {/* Link 1: Grupo */}
           <div className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
             <a 
-              href={gerenteUrl || '#'} 
-              target={gerenteUrl ? "_blank" : undefined} 
-              rel="noreferrer" 
+              href="#" 
+              onClick={(e) => handleLinkClick(e, grupoUrl)}
               className="text-[#2563eb] text-[14px] leading-snug flex-1 pr-4"
             >
-              Centro de suporte e atendimento ao cliente
+              Grupo de venda Asiaray
             </a>
             <span 
               className="text-[#059669] font-bold text-[12px] underline whitespace-nowrap cursor-pointer active:opacity-70"
-              onClick={() => gerenteUrl && window.open(gerenteUrl, '_blank')}
+              onClick={(e) => handleLinkClick(e, grupoUrl)}
             >
               Abrir
             </span>
           </div>
 
-          {/* Link 2 */}
+          {/* Link 2: Gerente */}
           <div className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
             <a 
-              href={grupoUrl || '#'} 
-              target={grupoUrl ? "_blank" : undefined} 
-              rel="noreferrer" 
+              href="#" 
+              onClick={(e) => handleLinkClick(e, gerenteUrl)}
               className="text-[#2563eb] text-[14px] leading-snug flex-1 pr-4"
             >
-              Falar com suporte técnico especializado
+              Gerente Regional
             </a>
             <span 
               className="text-[#059669] font-bold text-[12px] underline whitespace-nowrap cursor-pointer active:opacity-70"
-              onClick={() => grupoUrl && window.open(grupoUrl, '_blank')}
+              onClick={(e) => handleLinkClick(e, gerenteUrl)}
             >
               Abrir
             </span>
@@ -112,4 +119,5 @@ export const SupportScreen: React.FC = () => {
     </div>
   );
 };
+
 
