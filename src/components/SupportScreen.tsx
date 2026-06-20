@@ -9,6 +9,7 @@ export const SupportScreen: React.FC = () => {
   const { showAlert } = useApp();
   const [gerenteUrl, setGerenteUrl] = useState<string | null>(null);
   const [grupoUrl, setGrupoUrl] = useState<string | null>(null);
+  const [mensagemIndisponibilidade, setMensagemIndisponibilidade] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchSupportLinks = async () => {
@@ -17,6 +18,7 @@ export const SupportScreen: React.FC = () => {
         if (response && response.success && response.result) {
           setGerenteUrl(response.result.whatsapp_gerente_url);
           setGrupoUrl(response.result.whatsapp_grupo);
+          setMensagemIndisponibilidade(response.result.mensagem_indisponibilidade);
         }
       } catch (err) {
         console.error('Error in fetchSupportLinks:', err);
@@ -45,7 +47,8 @@ export const SupportScreen: React.FC = () => {
     e.preventDefault();
     if (!url || url.trim() === '') {
       const saudacao = getGreeting();
-      showAlert(`Olá, ${saudacao}. Lamentamos que no momento não seja possível entrar em contacto conosco. Por favor, volte novamente mais tarde.`, undefined, 'warning');
+      const msgBase = mensagemIndisponibilidade || 'Lamentamos que no momento não seja possível entrar em contacto conosco. Por favor, volte novamente mais tarde.';
+      showAlert(`Olá, ${saudacao}. ${msgBase}`, undefined, 'warning');
       return;
     }
     window.open(url, '_blank', 'noopener,noreferrer');
