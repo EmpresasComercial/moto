@@ -257,11 +257,11 @@ export const TaskTab: React.FC<TaskTabProps> = ({ selectedCategory, setSelectedC
         setClaimedTasks(updatedClaimedTasks);
         saveClaimedTasks(updatedClaimedTasks);
       } else {
-        addToast(res?.error || res?.message || 'Erro ao reivindicar tarefa', 'error');
+        addToast(res?.error || res?.message || `Erro no servidor (Status ${resp.status})`, 'error');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error claiming task:', err);
-      addToast('Erro de conexão ao reivindicar tarefa.', 'error');
+      addToast(err?.message || String(err), 'error');
     } finally {
       hideLoading();
       setClaimingId(null);
