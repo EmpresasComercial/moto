@@ -238,6 +238,36 @@ export const TaskTab: React.FC<TaskTabProps> = ({ selectedCategory, setSelectedC
 
       if (resp.status === 401) {
         const errData = await resp.json().catch(() => ({}));
+        window.dispatchEvent(new CustomEvent('force-logout', { detail: { message: errData?.error || 'Sessão inválida.' } }));
+        hideLoading();
+        setClaimingId(null);
+        return;
+      }
+
+      let res;
+      try {
+        res = await resp.json();
+      } catch (e) {
+        res = {};
+      }
+
+      if (resp.ok && res?.success) {
+        addToast('Tarefa reivindicada com sucesso!', 'success');
+        const updatedClaimedTasks = { ...claimedTasks, [shopId]: Date.now() };
+        setClaimedTasks(updatedClaimedTasks);
+        saveClaimedTasks(updatedClaimedTasks);
+      } else {
+        addToast(res?.error || res?.message || 'Erro ao reivindicar tarefa', 'error');
+      }
+    } catch (err) {
+      console.error('Error claiming task:', err);
+      addToast('Erro de conexão ao reivindicar tarefa.', 'error');
+    } finally {
+      hideLoading();
+      setClaimingId(null);
+    }
+  };
+
   // All 3 tabs show the same shop data
   const displayItems = shopItems;
 
