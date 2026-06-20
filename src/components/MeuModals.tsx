@@ -1326,6 +1326,7 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
   const { logs: contextLogs, user, setIsFullScreenActive, fetchWithdrawalRecords, showLoading, hideLoading, ensureInternetConnectivity } = useApp();
   const [withdrawalLogs, setWithdrawalLogs] = useState<LogRecord[]>([]);
   const [completedTasks, setCompletedTasks] = useState<any[]>([]);
+  const [depositLogs, setDepositLogs] = useState<LogRecord[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
   // Fetch withdrawal records when modal opens for retirada
@@ -1378,7 +1379,7 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
           const res = await fetch(GATEWAY_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-            body: JSON.stringify({ op: 803, data: {} })
+            body: JSON.stringify({ op: 605, data: {} })
           });
           const data = await res.json();
           if (data.success) {
@@ -1396,10 +1397,63 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
     }
   }, [isOpen, type]);
 
+  // Fetch deposit records when modal opens for recarga
+  useEffect(() => {
+    if (isOpen && type === 'recarga') {
+      showLoading('Carregando histórico de recargas...');
+      setLoading(true);
+
+      const loadRecargaData = async () => {
+        if (!(await ensureInternetConnectivity())) {
+          setLoading(false);
+          hideLoading();
+          return;
+        }
+
+        const token = await getAccessToken();
+        if (!token) {
+          setLoading(false);
+          hideLoading();
+          return;
+        }
+
+        try {
+          const res = await fetch(GATEWAY_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ op: 208, data: {} })
+          });
+          const data = await res.json();
+          if (data.success) {
+            const rawDeposits = data.result || [];
+            const mappedLogs = rawDeposits.map((rec: any) => ({
+              id: rec.id || 'rec_' + String(Math.floor(10000 + Math.random() * 90000)),
+              type: 'recarga',
+              amount: Number(rec.valor_deposito || 0),
+              date: rec.created_at ? new Date(rec.created_at).toISOString().replace('T', ' ').slice(0, 16) : new Date().toISOString().replace('T', ' ').slice(0, 16),
+              status: rec.estado_de_pagamento?.toLowerCase().includes('processando') || rec.estado_de_pagamento?.toLowerCase().includes('pendente') ? 'pendente' : (rec.estado_de_pagamento?.toLowerCase() === 'rejeitado' ? 'rejeitado' : 'aprovado'),
+              details: rec.nome_do_banco ? `Banco ${rec.nome_do_banco}` : 'Depósito Bancário'
+            }));
+            setDepositLogs(mappedLogs);
+          }
+        } catch (error) {
+          console.error(error);
+        } finally {
+          setLoading(false);
+          hideLoading();
+        }
+      };
+
+      loadRecargaData();
+    }
+  }, [isOpen, type]);
+
   // Use fetched data if available, otherwise fallback to context logs
   let filtered: any[] = [];
   if (type === 'retirada') {
     filtered = withdrawalLogs.length ? withdrawalLogs : [];
+  } else if (type === 'recarga') {
+    filtered = depositLogs.length ? depositLogs : [];
   } else if (type === 'receita') {
     filtered = completedTasks.map(task => {
       let formattedDate = 'N/A';
@@ -1646,29 +1700,95 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
   return (
     <ModalBase isOpen={isOpen} onClose={onClose} title={type === 'receita' ? 'Registo de receitas' : type === 'recarga' ? 'Registo de recargas' : 'Registo de retirada'}>
       <div className="space-y-3">
-        {filtered.length === 0 ? (
-          <EmptyState
-            className="py-10"
-            message="Sem dados"
-            description={`Nenhum registo de ${type === 'receita' ? 'receitas' : type === 'recarga' ? 'recargas' : 'retiradas'} registrado sob este separador.`}
-          />
-        ) : (
-          <div className="space-y-3 max-h-[300px] overflow-y-auto no-scrollbar-y">
-            {filtered.map((log) => (
-              <div key={log.id} className="bg-[#f8f9fa] px-4 py-3.5 rounded-xl flex items-center justify-between text-xs shadow-sm shadow-neutral-100/50">
-                <div className="space-y-1">
-                  <div className="font-bold text-neutral-900 text-[13px]">{log.details || 'Transação Asiaray'}</div>
-                  <div className="text-[11px] text-neutral-400 font-mono tracking-wider">{log.date}</div>
-                </div>
-                <div className="text-right space-y-1.5 shrink-0 ml-3">
-                  <div className="font-mono font-bold text-neutral-900 text-[13px]">
-                    {log.type === 'retirada' ? '-' : '+'}KZ {log.amount.toLocaleString('pt-AO').replace(',', ' ')}
+        {type === 'receita' ? (
+          completedTasks.length === 0 ? (
+            <EmptyState
+              className="py-10"
+              message="Sem dados"
+              description="Nenhum registo de receitas registrado sob este separador."
+            />
+          ) : (
+            <div className="space-y-0 max-h-[70vh] overflow-y-auto no-scrollbar-y bg-[#f4f6f9] -mx-4 -mb-4 pt-2">
+              {completedTasks.map((task: any) => {
+                const dataRow = new Date(task.data_atribuicao).toLocaleString('pt-AO');
+                const rewardAmount = Number(task.renda_coletada).toFixed(2);
+                
+                return (
+                  <div 
+                    key={task.id}
+                    className="bg-white flex flex-col relative w-full border-b-[10px] border-[#f4f6f9]"
+                  >
+                    <div className="bg-[#dbe4f0] px-3.5 py-1.5 flex items-center justify-between border-b border-neutral-200 select-none w-full">
+                      <span className="text-[11.5px] text-[#4a5568] font-medium tracking-wide">outros</span>
+                      <span className="text-[11.5px] text-[#a0aec0] select-none hover:text-[#4a5568] font-semibold">X</span>
+                    </div>
+
+                    <div className="p-4 text-[#4a5568] text-[11.5px] font-sans relative pr-[84px] bg-white flex flex-col gap-1 w-full">
+                      <div className="flex items-start leading-tight">
+                        <span className="text-gray-400 font-medium min-w-[124px] select-none">Objectivo da tarefa:</span>
+                        <span className="text-neutral-850 font-medium">Rendimento Produto</span>
+                      </div>
+                      
+                      <div className="flex items-start leading-tight mt-0.5">
+                        <span className="text-gray-400 font-medium min-w-[124px] select-none">Criar:</span>
+                        <span className="text-gray-600 font-mono ml-0.5 select-all">{dataRow}</span>
+                      </div>
+
+                      <div className="flex items-start leading-tight mt-0.5">
+                        <span className="text-gray-400 font-medium min-w-[124px] select-none">revisão:</span>
+                        <span className="text-neutral-850 font-medium select-none">Terminado</span>
+                      </div>
+
+                      <div className="pt-2">
+                        <span className="bg-emerald-50 text-emerald-700 text-[9.5px] py-0.5 px-2 rounded inline-block border border-emerald-100 font-medium">
+                          Tarefa Confirmada e Liquidada
+                        </span>
+                      </div>
+
+                      <div className="absolute right-4 top-[50%] -translate-y-1/2 flex items-center select-none">
+                        <div className="relative">
+                          <div 
+                            className="h-[62px] w-[62px] rounded-full border border-white/80 shadow-xs flex flex-col items-center justify-center shrink-0" 
+                            style={{ backgroundColor: '#9aaec4' }}
+                          >
+                            <span className="text-white text-[10px] font-bold tracking-tight select-all text-center flex flex-col leading-none gap-1">
+                              <span>{rewardAmount}</span>
+                              <span className="text-[8px] font-medium opacity-85">KZ</span>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div>{getStatusBadge(log.status)}</div>
+                );
+              })}
+            </div>
+          )
+        ) : (
+          filtered.length === 0 ? (
+            <EmptyState
+              className="py-10"
+              message="Sem dados"
+              description={`Nenhum registo de ${type === 'recarga' ? 'recargas' : 'retiradas'} registrado sob este separador.`}
+            />
+          ) : (
+            <div className="space-y-3 max-h-[300px] overflow-y-auto no-scrollbar-y">
+              {filtered.map((log) => (
+                <div key={log.id} className="bg-[#f8f9fa] px-4 py-3.5 rounded-xl flex items-center justify-between text-xs shadow-sm shadow-neutral-100/50">
+                  <div className="space-y-1">
+                    <div className="font-bold text-neutral-900 text-[13px]">{log.details || 'Transação Asiaray'}</div>
+                    <div className="text-[11px] text-neutral-400 font-mono tracking-wider">{log.date}</div>
+                  </div>
+                  <div className="text-right space-y-1.5 shrink-0 ml-3">
+                    <div className="font-mono font-bold text-neutral-900 text-[13px]">
+                      {log.type === 'retirada' ? '-' : '+'}KZ {log.amount.toLocaleString('pt-AO').replace(',', ' ')}
+                    </div>
+                    <div>{getStatusBadge(log.status)}</div>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )
         )}
       </div>
     </ModalBase>
