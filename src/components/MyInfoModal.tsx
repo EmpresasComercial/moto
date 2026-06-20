@@ -71,22 +71,21 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
 
     if (type === 'login') {
       if (!oldPassword || !newPassword || !confirmPassword) {
-        alert('Por favor preencha todos os campos.');
+        addToast('Por favor preencha todos os campos.', 'error');
         return;
       }
       if (newPassword !== confirmPassword) {
-        alert('A nova senha e a confirmação não coincidem.');
+        addToast('A nova senha e a confirmação não coincidem.', 'error');
         return;
       }
 
-      addToast('A processar segurança de chaves AES-256...', 'info');
       updateUserLoginPassword(oldPassword, newPassword).then(res => {
         if (res.success) {
           addToast(res.message, 'success');
           resetPasswordInputs();
           setActiveSubPage('none');
         } else {
-          alert(res.message);
+          addToast(res.message, 'error');
         }
       });
       return;
@@ -94,19 +93,18 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
 
     if (type === 'paymentCreate') {
       if (!newPassword || !confirmPassword) {
-        alert('Por favor preencha todos os campos.');
+        addToast('Por favor preencha todos os campos.', 'error');
         return;
       }
       if (!isValidPin(newPassword)) {
-        alert('O PIN deve conter exatamente 4 dígitos numéricos.');
+        addToast('O PIN deve conter exatamente 4 dígitos numéricos.', 'error');
         return;
       }
       if (newPassword !== confirmPassword) {
-        alert('O PIN e a confirmação não coincidem.');
+        addToast('O PIN e a confirmação não coincidem.', 'error');
         return;
       }
 
-      addToast('A processar segurança de chaves AES-256...', 'info');
       updateUserPaymentPin(newPassword)
         .then((res) => {
           if (res.success) {
@@ -114,40 +112,39 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
             resetPasswordInputs();
             setActiveSubPage('none');
           } else {
-            alert(res.message);
+            addToast(res.message, 'error');
           }
         })
         .catch((err) => {
-          alert(err.message || 'Erro ao processar.');
+          addToast(err.message || 'Erro ao processar.', 'error');
         });
       return;
     }
 
     if (type === 'paymentChange') {
       if (!oldPassword || !newPassword || !confirmPassword) {
-        alert('Por favor preencha todos os campos.');
+        addToast('Por favor preencha todos os campos.', 'error');
         return;
       }
       if (!user.paymentPin) {
-        alert('Nenhuma senha de pagamento cadastrada. Use Gravar senha de pagamento.');
+        addToast('Nenhuma senha de pagamento cadastrada. Use Gravar senha de pagamento.', 'error');
         setActiveSubPage('payPasswordCreate');
         resetPasswordInputs();
         return;
       }
       if (!isValidPin(oldPassword)) {
-        alert('O PIN antigo deve conter exatamente 4 dígitos numéricos.');
+        addToast('O PIN antigo deve conter exatamente 4 dígitos numéricos.', 'error');
         return;
       }
       if (!isValidPin(newPassword)) {
-        alert('O novo PIN deve conter exatamente 4 dígitos numéricos.');
+        addToast('O novo PIN deve conter exatamente 4 dígitos numéricos.', 'error');
         return;
       }
       if (newPassword !== confirmPassword) {
-        alert('O novo PIN e a confirmação não coincidem.');
+        addToast('O novo PIN e a confirmação não coincidem.', 'error');
         return;
       }
 
-      addToast('A processar segurança de chaves AES-256...', 'info');
       updateUserPaymentPin(newPassword, oldPassword)
         .then((res) => {
           if (res.success) {
@@ -155,18 +152,18 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
             resetPasswordInputs();
             setActiveSubPage('none');
           } else {
-            alert(res.message);
+            addToast(res.message, 'error');
           }
         })
         .catch((err) => {
-          alert(err.message || 'Erro ao processar.');
+          addToast(err.message || 'Erro ao processar.', 'error');
         });
     }
   };
 
   const handleSavePersonalInfo = () => {
     if (!realName) {
-      alert('Deve preencher o Nome do Titular.');
+      addToast('Deve preencher o Nome do Titular.', 'error');
       return;
     }
     addToast('Informações pessoais atualizadas!', 'success');
@@ -175,7 +172,7 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
 
   const handleSaveBank = async () => {
     if (!account || !holder) {
-      alert('Erro: Titular e IBAN são campos obrigatórios.');
+      addToast('Erro: Titular e IBAN são campos obrigatórios.', 'error');
       return;
     }
     showLoading('A processar e gravar os dados bancários...');
@@ -195,7 +192,7 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
       'ALERTA DE SEGURANÇA:\nTem a certeza que deseja apagar a sua conta permanentemente do protocolo WS2?'
     );
     if (doubleCheck) {
-      alert('Conta apagada na rede local. Redirecionando para inscrição...');
+      addToast('Conta apagada na rede local. Redirecionando para inscrição...', 'success');
       resetAll();
       logout();
       onClose();
@@ -604,7 +601,7 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
         
         {/* Row 1: Informação: (Mobile Number) */}
         <div 
-          onClick={() => alert(`Número verificado com o código do país: +${user.phone}`)}
+          onClick={() => addToast(`Número verificado com o código do país: +${user.phone}`, 'success')}
           className="flex items-center justify-between py-4.5 px-4 cursor-pointer hover:bg-neutral-50 border-b border-slate-100"
           id="row-info-num"
         >

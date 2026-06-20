@@ -12,6 +12,7 @@ import {
   RulesModal, DailyDeclarationModal, LedgerLogsModal, CurrencyConverterModal
 } from './MeuModals';
 import { MyInfoModal } from './MyInfoModal';
+import { CuponsPage } from './CuponsPage';
 
 import inviteIcon from '../../assets/icons8-invite-48.png';
 import teamIcon from '../../assets/icons8-relatorio-equipet-48.png';
@@ -26,6 +27,7 @@ import terminarSessaoIcon from '../../assets/icons8-terminar-sessao-64.png';
 import dailyDeclarationIcon from '../../assets/icons8-tether-64.png';
 import settingsIcon from '../../assets/icons8-settings-48.png';
 import financasIcon from '../../assets/icons8-financas-48.png';
+import couponIcon from '../../assets/icons8-couper-le-coupon-46.png';
 
 export const MeuTab: React.FC = () => {
   const { user, stats, logout, resetAll, refreshUserProfile } = useApp();
@@ -64,6 +66,7 @@ export const MeuTab: React.FC = () => {
   const [isMyInfoOpen, setIsMyInfoOpen] = useState(false);
   const [isConverterOpen, setIsConverterOpen] = useState(false);
   const [isFinancaOpen, setIsFinancaOpen] = useState(false);
+  const [isCuponsOpen, setIsCuponsOpen] = useState(false);
   const [ledgerType, setLedgerType] = useState<'receita' | 'recarga' | 'retirada'>('receita');
 
   const copyInviteCode = () => {
@@ -119,6 +122,9 @@ export const MeuTab: React.FC = () => {
         break;
       case 'financa':
         setIsFinancaOpen(true);
+        break;
+      case 'cupons':
+        setIsCuponsOpen(true);
         break;
       case 'reset':
         resetAll();
@@ -466,6 +472,17 @@ export const MeuTab: React.FC = () => {
             <span className="text-[11px] font-normal text-neutral-500">Minha Finança</span>
           </div>
 
+          {/* Tile 13: Cupons */}
+          <div 
+            onClick={() => handleGridOption('cupons')}
+            className="py-5 px-1 text-center cursor-pointer flex flex-col justify-center items-center gap-2 h-[100px] select-none"
+          >
+            <div className="h-[30px] flex items-center justify-center">
+              <img src={couponIcon} alt="Cupons" className="w-[26px] h-[26px] object-contain" />
+            </div>
+            <span className="text-[11px] font-normal text-amber-500 font-medium">Cupons</span>
+          </div>
+
         </div>
       </div>
 
@@ -481,6 +498,7 @@ export const MeuTab: React.FC = () => {
       {isMyInfoOpen && <MyInfoModal isOpen={isMyInfoOpen} onClose={() => setIsMyInfoOpen(false)} onOpenBank={() => setIsBankOpen(true)} />}
       {isConverterOpen && <CurrencyConverterModal isOpen={isConverterOpen} onClose={() => setIsConverterOpen(false)} />}
       {isFinancaOpen && <MinhasFinancasModal isOpen={isFinancaOpen} onClose={() => setIsFinancaOpen(false)} />}
+      {isCuponsOpen && <CuponsPage isOpen={isCuponsOpen} onClose={() => setIsCuponsOpen(false)} />}
 
     </div>
   );

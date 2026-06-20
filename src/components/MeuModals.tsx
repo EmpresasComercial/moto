@@ -1748,7 +1748,7 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
               description="Nenhum registo de receitas registrado sob este separador."
             />
           ) : (
-            <div className="space-y-0 max-h-[70vh] overflow-y-auto no-scrollbar-y bg-[#f4f6f9] -mx-4 -mb-4 pt-2">
+            <div className="space-y-0 max-h-[70vh] overflow-y-auto no-scrollbar bg-[#f4f6f9] -mx-4 -mb-4 pt-2">
               {completedTasks.map((task: any) => {
                 const dataRow = new Date(task.data_atribuicao).toLocaleString('pt-AO');
                 const rewardAmount = Number(task.renda_coletada).toFixed(2);
@@ -1812,15 +1812,15 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
               description={`Nenhum registo de ${type === 'recarga' ? 'recargas' : 'retiradas'} registrado sob este separador.`}
             />
           ) : (
-            <div className="divide-y divide-gray-100 max-h-[300px] overflow-y-auto no-scrollbar-y">
+            <div className="divide-y divide-gray-150">
               {filtered.map((log) => (
-                <div key={log.id} className="py-3 flex items-center justify-between text-xs">
+                <div key={log.id} className="py-4 flex items-center justify-between text-xs">
                   <div className="space-y-1">
-                    <div className="font-bold text-neutral-900 text-[13px]">{log.details || 'Transação Asiaray'}</div>
-                    <div className="text-[11px] text-neutral-400 font-mono tracking-wider">{log.date}</div>
+                    <div className="font-bold text-neutral-900 text-[14px]">{log.details || 'Transação Asiaray'}</div>
+                    <div className="text-[11.5px] text-neutral-400 font-mono tracking-wider">{log.date}</div>
                   </div>
                   <div className="text-right space-y-1.5 shrink-0 ml-3">
-                    <div className="font-mono font-bold text-neutral-900 text-[13px]">
+                    <div className="font-mono font-bold text-neutral-900 text-[14px]">
                       {log.type === 'retirada' ? '-' : '+'}
                       {log.currency === 'USDT' ? 'USDT ' : 'KZ '}
                       {log.amount.toLocaleString('pt-AO').replace(',', ' ')}
