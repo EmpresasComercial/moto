@@ -75,7 +75,13 @@ function MainAppLayout() {
     if (isLoggedIn) {
       const current = location.pathname;
       // Only redirect if on an auth page or the root
-      if (current === '/login' || current === '/register' || current === '/') {
+      if (
+        current === '/login' ||
+        current === '/register' ||
+        current === '/' ||
+        current.startsWith('/reg/smid/') ||
+        current.startsWith('/Public/reg/smid/')
+      ) {
         navigate('/home', { replace: true });
       }
     }
@@ -292,9 +298,10 @@ function MainAppLayout() {
   return (
     <div className="min-h-screen bg-transparent font-sans">
       <Routes>
-        <Route path="/login" element={!isLoggedIn ? <LoginScreen /> : <Navigate to="/home" replace />} />
+  <Route path="/login" element={!isLoggedIn ? <LoginScreen /> : <Navigate to="/home" replace />} />
         <Route path="/register" element={!isLoggedIn ? <LoginScreen /> : <Navigate to="/home" replace />} />
-        <Route path="/reg/smid/:inviteCode" element={<LoginScreen />} />
+        <Route path="/reg/smid/:inviteCode" element={!isLoggedIn ? <LoginScreen /> : <Navigate to="/home" replace />} />
+        <Route path="/Public/reg/smid/:inviteCode" element={!isLoggedIn ? <LoginScreen /> : <Navigate to="/home" replace />} />
         <Route path="/retirar" element={isLoggedIn ? <RetirarPage /> : <Navigate to="/login" replace />} />
         <Route path="/ws/compra/:tierLevel" element={isLoggedIn ? <PurchaseDetailsPage /> : <Navigate to="/login" replace />} />
         <Route path="/support" element={isLoggedIn ? <SupportScreen /> : <Navigate to="/login" replace />} />

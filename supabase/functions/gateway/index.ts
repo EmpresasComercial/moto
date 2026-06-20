@@ -259,13 +259,24 @@ serve(async (req) => {
       }
 
       case 208: {
-        const { data, error } = await supabase
+        const { data: kzsData, error: kzsError } = await supabase
           .from("rg_kzs")
           .select("*")
           .eq("user_id", user.id)
           .order("created_at", { ascending: false });
-        if (error) throw error;
-        result = data;
+        if (kzsError) throw kzsError;
+
+        const { data: usdtData, error: usdtError } = await supabase
+          .from("rg_usdt")
+          .select("*")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false });
+        if (usdtError) throw usdtError;
+
+        result = {
+          kzs: kzsData || [],
+          usdt: usdtData || []
+        };
         break;
       }
 

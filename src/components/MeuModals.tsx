@@ -3,7 +3,7 @@ import { useApp } from '../context/AppContext';
 import { X, Copy, Check, QrCode, ClipboardList, Wallet, Sparkles, Building, Landmark, Users, ArrowUpRight, ArrowDownLeft, ShieldCheck, Heart } from 'lucide-react';
 import { LogRecord } from '../types';
 import { EmptyState } from './EmptyState';
-import { GATEWAY_URL, getAccessToken } from '../lib/supabase';
+import { GATEWAY_URL, getAccessToken, supabase } from '../lib/supabase';
 
 interface ModalProps {
   isOpen: boolean;
@@ -783,6 +783,28 @@ export const InviteModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const downloadQrCode = async () => {
+    if (!inviteUrl) return;
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(inviteUrl)}`;
+    try {
+      const response = await fetch(qrUrl);
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = `asiaray-qr-${user?.inviteCode || 'code'}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error('Error downloading QR code:', error);
+      // Fallback: open in new window
+      window.open(qrUrl, '_blank');
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -828,8 +850,9 @@ export const InviteModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
           </button>
           
           <button
-            onClick={() => alert('Imagem de convite guardada com sucesso na galeria do seu dispositivo!')}
-            className="w-full bg-[#ff0000] hover:bg-[#cc0000] text-white text-[13px] font-bold py-2.5 rounded-[5px] active:scale-95 transition-all cursor-pointer border-none outline-none shadow-sm block text-center"
+            onClick={downloadQrCode}
+            disabled={!inviteUrl}
+            className={`w-full text-white text-[13px] font-bold py-2.5 rounded-[5px] transition-all block text-center border-none outline-none shadow-sm ${inviteUrl ? 'bg-[#ff0000] hover:bg-[#cc0000] active:scale-95 cursor-pointer' : 'bg-neutral-300 cursor-not-allowed'}`}
           >
             Gravar a imagem
           </button>
@@ -1326,7 +1349,7 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
   const { logs: contextLogs, user, setIsFullScreenActive, fetchWithdrawalRecords, showLoading, hideLoading, ensureInternetConnectivity } = useApp();
   const [withdrawalLogs, setWithdrawalLogs] = useState<LogRecord[]>([]);
   const [completedTasks, setCompletedTasks] = useState<any[]>([]);
-  const [depositLogs, setDepositLogs] = useState<LogRecord[]>([]);
+  const [depositLogs, setDepositLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
   // Fetch withdrawal records when modal opens for retirada
@@ -1424,17 +1447,34 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
             body: JSON.stringify({ op: 208, data: {} })
           });
           const data = await res.json();
-          if (data.success) {
-            const rawDeposits = data.result || [];
-            const mappedLogs = rawDeposits.map((rec: any) => ({
-              id: rec.id || 'rec_' + String(Math.floor(10000 + Math.random() * 90000)),
+          if (data.success && data.result) {
+            const rawKzs = data.result.kzs || [];
+            const rawUsdt = data.result.usdt || [];
+
+            const kzsLogs = rawKzs.map((rec: any) => ({
+              id: rec.id || 'rec_kz_' + String(Math.floor(10000 + Math.random() * 90000)),
               type: 'recarga',
+              currency: 'KZ',
               amount: Number(rec.valor_deposito || 0),
               date: rec.created_at ? new Date(rec.created_at).toISOString().replace('T', ' ').slice(0, 16) : new Date().toISOString().replace('T', ' ').slice(0, 16),
               status: rec.estado_de_pagamento?.toLowerCase().includes('processando') || rec.estado_de_pagamento?.toLowerCase().includes('pendente') ? 'pendente' : (rec.estado_de_pagamento?.toLowerCase() === 'rejeitado' ? 'rejeitado' : 'aprovado'),
               details: rec.nome_do_banco ? `Banco ${rec.nome_do_banco}` : 'Depósito Bancário'
             }));
-            setDepositLogs(mappedLogs);
+
+            const usdtLogs = rawUsdt.map((rec: any) => ({
+              id: rec.id || 'rec_usdt_' + String(Math.floor(10000 + Math.random() * 90000)),
+              type: 'recarga',
+              currency: 'USDT',
+              amount: Number(rec.amount || rec.amount_usdt || 0),
+              date: rec.created_at ? new Date(rec.created_at).toISOString().replace('T', ' ').slice(0, 16) : new Date().toISOString().replace('T', ' ').slice(0, 16),
+              status: rec.status?.toLowerCase().includes('processando') || rec.status?.toLowerCase().includes('pendente') ? 'pendente' : (rec.status?.toLowerCase() === 'rejeitado' ? 'rejeitado' : 'aprovado'),
+              details: 'Depósito USDT'
+            }));
+
+            // Merge and sort by date descending
+            const mergedLogs = [...kzsLogs, ...usdtLogs].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+            
+            setDepositLogs(mergedLogs);
           }
         } catch (error) {
           console.error(error);
@@ -1772,16 +1812,18 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
               description={`Nenhum registo de ${type === 'recarga' ? 'recargas' : 'retiradas'} registrado sob este separador.`}
             />
           ) : (
-            <div className="space-y-3 max-h-[300px] overflow-y-auto no-scrollbar-y">
+            <div className="divide-y divide-gray-100 max-h-[300px] overflow-y-auto no-scrollbar-y">
               {filtered.map((log) => (
-                <div key={log.id} className="bg-[#f8f9fa] px-4 py-3.5 rounded-xl flex items-center justify-between text-xs shadow-sm shadow-neutral-100/50">
+                <div key={log.id} className="py-3 flex items-center justify-between text-xs">
                   <div className="space-y-1">
                     <div className="font-bold text-neutral-900 text-[13px]">{log.details || 'Transação Asiaray'}</div>
                     <div className="text-[11px] text-neutral-400 font-mono tracking-wider">{log.date}</div>
                   </div>
                   <div className="text-right space-y-1.5 shrink-0 ml-3">
                     <div className="font-mono font-bold text-neutral-900 text-[13px]">
-                      {log.type === 'retirada' ? '-' : '+'}KZ {log.amount.toLocaleString('pt-AO').replace(',', ' ')}
+                      {log.type === 'retirada' ? '-' : '+'}
+                      {log.currency === 'USDT' ? 'USDT ' : 'KZ '}
+                      {log.amount.toLocaleString('pt-AO').replace(',', ' ')}
                     </div>
                     <div>{getStatusBadge(log.status)}</div>
                   </div>

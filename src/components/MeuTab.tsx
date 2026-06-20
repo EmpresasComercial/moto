@@ -13,7 +13,7 @@ import {
 } from './MeuModals';
 import { MyInfoModal } from './MyInfoModal';
 
-import inviteIcon from '../../assets/icons8-invite team48.png';
+import inviteIcon from '../../assets/icons8-invite-48.png';
 import teamIcon from '../../assets/icons8-relatorio-equipet-48.png';
 import bankIcon from '../../assets/icons8-adicionar-banco-58.png';
 import rechargeIcon from '../../assets/icons8-registro-de-deposito-48.png';

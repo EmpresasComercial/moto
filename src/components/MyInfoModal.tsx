@@ -14,7 +14,7 @@ interface MyInfoModalProps {
 }
 
 export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => {
-  const { user, logout, resetAll, addToast, updateBankInfo, updateUserPaymentPin, updateUserLoginPassword, showLoading, hideLoading, setIsFullScreenActive } = useApp();
+  const { user, logout, resetAll, addToast, updateBankInfo, updateUserPaymentPin, updateUserLoginPassword, showLoading, hideLoading, setIsFullScreenActive, isLoading } = useApp();
   
   // Sub-page state: 'none' (main menu), 'withdrawInfo', 'personalInfo', 'loginPassword', 'payPasswordCreate', 'payPasswordChange'
   const [activeSubPage, setActiveSubPage] = useState<'none' | 'withdrawInfo' | 'personalInfo' | 'loginPassword' | 'payPasswordCreate' | 'payPasswordChange'>('none');
@@ -565,10 +565,11 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
           <div className="flex flex-col items-center justify-center pt-2 select-none">
             <button
               type="button"
+              disabled={isLoading}
               onClick={() => handlePasswordReset(isCreateMode ? 'paymentCreate' : 'paymentChange')}
-              className="bg-[#60a5fa] hover:bg-[#3b82f6] text-white font-bold text-[12px] py-2 px-6 rounded-sm cursor-pointer transition-colors w-full text-center uppercase tracking-wide"
+              className={`text-white font-bold text-[12px] py-2 px-6 rounded-sm transition-colors w-full text-center uppercase tracking-wide ${isLoading ? 'bg-neutral-300 cursor-not-allowed' : 'bg-[#60a5fa] hover:bg-[#3b82f6] cursor-pointer'}`}
             >
-              Gravar pin
+              {isLoading ? 'A processar...' : 'Gravar pin'}
             </button>
           </div>
         </div>
