@@ -131,35 +131,30 @@ export const WSTab: React.FC = () => {
     <div id="member-tab-container" className="pb-24 bg-neutral-50 min-h-screen">
       
       {/* 1. Yellow convex dome header background */}
-      <div className="relative w-full h-[150px] bg-gradient-to-b from-[#ffea30] to-[#f5cb14] flex flex-col items-center">
-        {/* The arched white wave clipping of the yellow area */}
-        <div className="absolute bottom-0 left-0 right-0 h-10 bg-neutral-50 rounded-t-[140%]" />
-      </div>
-
-      {/* 2. User dynamic avatar card layout overlapping the arch perfectly */}
-      <div className="relative -mt-16 px-4 flex flex-col items-center text-center pb-6">
-        {/* Grey Circular user silhouette avatar icon */}
-        <div className="w-[52px] h-[52px] bg-neutral-300 border-[1.5px] border-white rounded-full flex items-center justify-center relative shadow-none">
-          <User className="text-slate-800 h-7 w-7" />
-        </div>
-
-        {/* Dynamic metadata layout styled down to human labels */}
-        <div className="mt-2 text-center text-neutral-800 space-y-0.5">
-          <div className="text-[13px] font-black tracking-widest text-[#1c1c1a]/95 select-all uppercase">
+      <div className="relative w-full h-[160px] bg-gradient-to-b from-[#ffea30] to-[#f5cb14] flex flex-col items-center justify-center pt-2">
+        
+        {/* User Info positioned inside the yellow zone */}
+        <div className="text-center space-y-1.5 z-10 -mt-4">
+          <div className="text-[16px] font-black tracking-widest text-[#1c1c1a]/95 select-all uppercase drop-shadow-sm">
             {user.level}
           </div>
 
-          <div className="inline-block bg-[#2962ff]/10 text-[#0039cb] text-xs font-extrabold px-3 py-0.5 rounded-sm select-none">
+          <div className="inline-block bg-black/10 text-slate-800 text-xs font-extrabold px-3 py-0.5 rounded-sm select-none shadow-sm">
             {currentTier.dailyTasks} tarefas por dia
           </div>
 
-          <div className="text-[10px] text-neutral-500 font-medium select-all mt-1">
+          <div className="text-[11px] text-slate-800/80 font-bold select-all mt-1">
             Código de convite: {user.inviteCode || '931242'}
           </div>
         </div>
 
-        {/* Motivational Headings block */}
-        <div className="mt-5 select-none space-y-1">
+        {/* The arched white wave clipping of the yellow area */}
+        <div className="absolute bottom-0 left-0 right-0 h-10 bg-neutral-50 rounded-t-[140%]" />
+      </div>
+
+      {/* 2. Motivational Headings block */}
+      <div className="relative px-4 flex flex-col items-center text-center pb-6">
+        <div className="mt-2 select-none space-y-1">
           <h2 className="text-lg font-black text-neutral-800 tracking-wide">
             Junte-se a nós
           </h2>
@@ -171,7 +166,7 @@ export const WSTab: React.FC = () => {
 
       {/* 3. Horizontal wavy reflection list of tiers (WS1, WS2, WS3...) */}
       <div className="px-4 space-y-4" id="member-tiers-list">
-        {tiers.filter(t => t.level !== 'WS0').map((tier) => {
+        {tiers.map((tier) => {
           const isPurchased = purchasedNames.has(tier.level.toUpperCase());
           return (
             <div 

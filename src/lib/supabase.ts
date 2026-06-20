@@ -66,7 +66,7 @@ export const gatewayCall = async (op: number, payload: any = {}) => {
   }
 
   if (!resp.ok) {
-    throw new Error(data.error || 'Erro na requisição');
+    throw new Error(data.error || data.message || 'Erro na requisição');
   }
 
   return data;
