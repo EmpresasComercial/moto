@@ -143,7 +143,7 @@ function getPurgedClaimedTasks(): Record<number, number> {
 }
 
 export const TaskTab: React.FC<TaskTabProps> = ({ selectedCategory, setSelectedCategory, setActiveTab }) => {
-  const { user, isSessionExpired, showLoading, hideLoading, ensureInternetConnectivity } = useApp();
+  const { user, isSessionExpired, showLoading, hideLoading, ensureInternetConnectivity, addToast } = useApp();
 
   // Shop items fetched from the database (op 601)
   const [shopItems, setShopItems] = useState<ShopItem[]>([]);
@@ -238,33 +238,6 @@ export const TaskTab: React.FC<TaskTabProps> = ({ selectedCategory, setSelectedC
 
       if (resp.status === 401) {
         const errData = await resp.json().catch(() => ({}));
-        window.dispatchEvent(new CustomEvent('force-logout', { detail: { message: errData?.error || 'Sessão inválida' } }));
-        setClaimingId(null);
-        return;
-      }
-
-      const res = await resp.json();
-      if (res.success) {
-        // ── Mark as claimed globally (persists across all 3 tabs) ──
-        const updated = getPurgedClaimedTasks();
-        updated[shopId] = Date.now();
-        saveClaimedTasks(updated);
-        setClaimedTasks({ ...updated });
-
-        window.dispatchEvent(new CustomEvent('show-toast', { detail: { message: 'Tarefa recebida com sucesso!', type: 'success' } }));
-        setActiveTab('Gravar');
-      } else {
-        window.dispatchEvent(new CustomEvent('show-toast', { detail: { message: res.error || 'Erro ao obter tarefa', type: 'error' } }));
-      }
-    } catch (err) {
-      console.error(err);
-      window.dispatchEvent(new CustomEvent('show-toast', { detail: { message: 'Erro na conexão', type: 'error' } }));
-    } finally {
-      hideLoading();
-      setClaimingId(null);
-    }
-  };
-
   // All 3 tabs show the same shop data
   const displayItems = shopItems;
 
