@@ -9,7 +9,11 @@ export const LoginScreen: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { inviteCode } = useParams();
-  const currentView = location.pathname === '/login' ? 'login' : 'cadastro';
+  
+  // Força o modo 'cadastro' sempre que houver código de convite na URL,
+  // ou se o caminho não for estritamente '/login'
+  const isLoginRoute = location.pathname.toLowerCase() === '/login';
+  const currentView = (isLoginRoute && !inviteCode) ? 'login' : 'cadastro';
   
   const [phone, setPhone] = useState<string>('');
   const [senha, setSenha] = useState<string>('');
