@@ -298,14 +298,15 @@ function MainAppLayout() {
   return (
     <div className="min-h-screen bg-transparent font-sans">
       <Routes>
-  <Route path="/login" element={!isLoggedIn ? <LoginScreen /> : <Navigate to="/home" replace />} />
+        <Route path="/" element={<Navigate to={isLoggedIn ? "/home" : "/register"} replace />} />
+        <Route path="/login" element={!isLoggedIn ? <LoginScreen /> : <Navigate to="/home" replace />} />
         <Route path="/register" element={!isLoggedIn ? <LoginScreen /> : <Navigate to="/home" replace />} />
         <Route path="/reg/smid/:inviteCode" element={!isLoggedIn ? <LoginScreen /> : <Navigate to="/home" replace />} />
         <Route path="/Public/reg/smid/:inviteCode" element={!isLoggedIn ? <LoginScreen /> : <Navigate to="/home" replace />} />
         <Route path="/public/reg/smid/:inviteCode" element={!isLoggedIn ? <LoginScreen /> : <Navigate to="/home" replace />} />
-        <Route path="/retirar" element={isLoggedIn ? <RetirarPage /> : <Navigate to="/login" replace />} />
-        <Route path="/ws/compra/:tierLevel" element={isLoggedIn ? <PurchaseDetailsPage /> : <Navigate to="/login" replace />} />
-        <Route path="/support" element={isLoggedIn ? <SupportScreen /> : <Navigate to="/login" replace />} />
+        <Route path="/retirar" element={isLoggedIn ? <RetirarPage /> : <Navigate to="/register" replace />} />
+        <Route path="/ws/compra/:tierLevel" element={isLoggedIn ? <PurchaseDetailsPage /> : <Navigate to="/register" replace />} />
+        <Route path="/support" element={isLoggedIn ? <SupportScreen /> : <Navigate to="/register" replace />} />
 
         {/* Main authenticated shell — handles /home, /ws, /tarefa, /gravar, /meu etc. */}
         <Route
@@ -461,7 +462,7 @@ function MainAppLayout() {
  
               </div>
             ) : (
-              <Navigate to="/login" replace />
+              <Navigate to="/register" replace />
             )
           } 
         />

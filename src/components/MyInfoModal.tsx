@@ -92,6 +92,12 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
     }
 
     if (type === 'paymentCreate') {
+      if (user.paymentPin) {
+        addToast('Você já possui um PIN de retirada cadastrado. Use a opção Alterar PIN', 'error');
+        setActiveSubPage('payPasswordChange');
+        resetPasswordInputs();
+        return;
+      }
       if (!newPassword || !confirmPassword) {
         addToast('Por favor preencha todos os campos.', 'error');
         return;
@@ -122,14 +128,14 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
     }
 
     if (type === 'paymentChange') {
-      if (!oldPassword || !newPassword || !confirmPassword) {
-        addToast('Por favor preencha todos os campos.', 'error');
-        return;
-      }
       if (!user.paymentPin) {
-        addToast('Nenhuma senha de pagamento cadastrada. Use Gravar senha de pagamento.', 'error');
+        addToast('Você ainda não possui um PIN de retirada cadastrado. Por favor, cadastre primeiro na opção Gravar PIN', 'error');
         setActiveSubPage('payPasswordCreate');
         resetPasswordInputs();
+        return;
+      }
+      if (!oldPassword || !newPassword || !confirmPassword) {
+        addToast('Por favor preencha todos os campos.', 'error');
         return;
       }
       if (!isValidPin(oldPassword)) {
@@ -657,6 +663,12 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
         {/* Row 5: Gravar senha de pagamento */}
         <div 
           onClick={() => {
+            if (user.paymentPin) {
+              addToast('Você já possui um PIN de retirada cadastrado. Use a opção Alterar PIN', 'error');
+              resetPasswordInputs();
+              setActiveSubPage('payPasswordChange');
+              return;
+            }
             resetPasswordInputs();
             setActiveSubPage('payPasswordCreate');
           }}
@@ -679,6 +691,12 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
         {/* Row 6: Alterar senha de pagamento */}
         <div 
           onClick={() => {
+            if (!user.paymentPin) {
+              addToast('Você ainda não possui um PIN de retirada cadastrado. Por favor, cadastre primeiro na opção Gravar PIN', 'error');
+              resetPasswordInputs();
+              setActiveSubPage('payPasswordCreate');
+              return;
+            }
             resetPasswordInputs();
             setActiveSubPage('payPasswordChange');
           }}

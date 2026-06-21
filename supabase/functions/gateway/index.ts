@@ -10,7 +10,7 @@ type OperationRule = {
 
 const OP_RULES: Record<number, OperationRule> = {
   101: { name: "get_user_profile", roles: ["user"] },
-  102: { name: "get_home_financial_stats", roles: ["user"] },
+  102: { name: "get_home_financial_stats_v2", roles: ["user"] },
   205: { name: "create_deposit_request", roles: ["user"] },
   206: { name: "create_usdt_deposit", roles: ["user"] },
   309: { name: "request_withdrawal", roles: ["user"] },

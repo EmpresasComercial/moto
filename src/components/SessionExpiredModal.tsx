@@ -45,7 +45,7 @@ export const SessionExpiredModal: React.FC<SessionExpiredModalProps> = ({ isOpen
     } catch (error) {
       console.error('Error in session cleanup:', error);
     } finally {
-      window.location.href = '/login';
+      window.location.href = '/register';
     }
   };
 
