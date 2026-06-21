@@ -663,21 +663,44 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const cleanPhone = phone.replace(/[^0-9]/g, '');
     const email = `${cleanPhone}@user.com`;
 
+    // Obter IP do dispositivo
+    let ipAddress = 'unknown';
+    try {
+      const res = await fetch('https://api.ipify.org?format=json');
+      const ipData = await res.json();
+      ipAddress = ipData.ip;
+      
+      // Verificar se o IP já atingiu o limite
+      if (ipAddress && ipAddress !== 'unknown') {
+        const { data: checkData } = await supabase.rpc('check_ip_availability', { p_ip: ipAddress });
+        if (checkData?.blocked) {
+          addToast('Aviso: IP excedido (Já registrou uma conta neste dispositivo)', 'error');
+          throw new Error('IP excedido');
+        }
+      }
+    } catch (err: any) {
+      if (err.message === 'IP excedido') throw err;
+      console.warn("Aviso ao obter/verificar IP:", err);
+    }
+
     // 1. Cadastro no Supabase Auth (signUp)
-    // Os triggers do banco (handle_new_user, credita_bonus_cadastro_limitado, generate_invite_code)
-    // são acionados automaticamente após a criação em auth.users
     const { data, error } = await supabase.auth.signUp({
       email,
       password: pin,
       options: {
         data: {
           phone: cleanPhone,
-          referred_by: inviteCode || ''
+          referred_by: inviteCode || '',
+          ip_address: ipAddress
         }
       }
     });
 
     if (error) {
+      if (error.message.includes('IP excedido')) {
+        addToast('Aviso: IP excedido (Já registrou uma conta neste dispositivo)', 'error');
+        throw new Error('IP excedido');
+      }
       addToast(error.message, 'error');
       throw new Error(error.message);
     }
