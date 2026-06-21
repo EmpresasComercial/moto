@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
+import { getAccessToken, GATEWAY_URL } from '../lib/supabase';
 import { 
   Bell, Settings, User, Copy, ClipboardList, Wallet, Sparkles, 
   Gift, Layers, HelpCircle, UserCheck, Receipt, 
@@ -28,6 +29,8 @@ import dailyDeclarationIcon from '../../assets/icons8-tether-64.png';
 import settingsIcon from '../../assets/icons8-settings-48.png';
 import financasIcon from '../../assets/icons8-financas-48.png';
 import couponIcon from '../../assets/icons8-couper-le-coupon-46.png';
+import termosIcon from '../../assets/icons8-politique-de-confidentialité-48.png';
+import politicasIcon from '../../assets/icons8-sécurité-vérifiée-48.png';
 
 export const MeuTab: React.FC = () => {
   const { user, stats, logout, resetAll, refreshUserProfile } = useApp();
@@ -68,6 +71,139 @@ export const MeuTab: React.FC = () => {
   const [isFinancaOpen, setIsFinancaOpen] = useState(false);
   const [isCuponsOpen, setIsCuponsOpen] = useState(false);
   const [ledgerType, setLedgerType] = useState<'receita' | 'recarga' | 'retirada'>('receita');
+
+  // Bell and Credit Rating States
+  const [teamStats, setTeamStats] = useState({ total: 0, investors: 0 });
+  const [creditLevel, setCreditLevel] = useState<'titulo' | 'limite' | 'bom' | 'excelente'>('titulo');
+  const [creditMsg, setCreditMsg] = useState('');
+  const [bellPopupMsg, setBellPopupMsg] = useState('');
+  const [showBellDot, setShowBellDot] = useState(false);
+
+  const [dbNotificacoes, setDbNotificacoes] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchTeamAndNotif = async () => {
+      const token = await getAccessToken();
+      if (!token) return;
+      try {
+        // Fetch Team Stats
+        const respTeam = await fetch(GATEWAY_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ op: 801, data: {} })
+        });
+        const resTeam = await respTeam.json();
+        if (resTeam.success) {
+          const rawTeam = Array.isArray(resTeam.result) 
+            ? resTeam.result 
+            : (resTeam.result?.team && Array.isArray(resTeam.result.team) ? resTeam.result.team : []);
+            
+          const total = rawTeam.length;
+          const investors = rawTeam.filter((m: any) => Number(m.reloaded_amount || 0) > 0).length;
+          setTeamStats({ total, investors });
+        }
+
+        // Fetch Notifications Content
+        const respNotif = await fetch(GATEWAY_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ op: 804, data: {} })
+        });
+        const resNotif = await respNotif.json();
+        if (resNotif.success && Array.isArray(resNotif.result)) {
+          setDbNotificacoes(resNotif.result);
+        }
+      } catch (err) {
+        console.error('Error fetching team or notifications', err);
+      }
+    };
+    fetchTeamAndNotif();
+  }, []);
+
+  useEffect(() => {
+    const createdDate = user.createdAt ? new Date(user.createdAt) : new Date();
+    const daysOld = Math.max(0, Math.floor((Date.now() - createdDate.getTime()) / (1000 * 60 * 60 * 24)));
+
+    const total = teamStats.total;
+    const inv = teamStats.investors;
+    const noInv = total - inv;
+    const missingInvBom = Math.max(0, 5 - inv);
+    const missingInvExc = Math.max(0, 50 - inv);
+    const missingDays = Math.max(0, 180 - daysOld);
+
+    let level: 'titulo' | 'limite' | 'bom' | 'excelente' = 'titulo';
+    let showDot = false;
+
+    if (inv >= 50 && daysOld >= 180) {
+      level = 'excelente';
+      showDot = true;
+    } else if (inv >= 5) {
+      level = 'bom';
+      showDot = true;
+    } else if (noInv >= 50 && inv < 5) {
+      level = 'limite';
+      showDot = true;
+    } else {
+      level = 'titulo';
+      showDot = false;
+    }
+
+    // Get notification from DB based on level
+    const dbEntry = dbNotificacoes.find(n => n.nivel === level);
+    
+    // Default messages just in case DB fetch fails
+    let msg = '';
+    let popup = '';
+    if (dbEntry) {
+      msg = dbEntry.mensagem_popup
+        .replace('{total}', String(total))
+        .replace('{no_inv}', String(noInv))
+        .replace('{inv}', String(inv))
+        .replace('{missing_inv}', String(level === 'bom' ? missingInvExc : missingInvBom))
+        .replace('{missing_days}', String(missingDays))
+        .replace('{days}', String(daysOld));
+        
+      popup = `${dbEntry.titulo_popup}\\n\\n${msg}`;
+    } else {
+      // Fallback text
+      if (level === 'excelente') {
+        msg = `Excelente: 50+ investidores. Conta com ${daysOld} dias.`;
+        popup = 'Parabéns! Atingiu o nível Excelente de notação de crédito.';
+      } else if (level === 'bom') {
+        msg = `Bom: ${inv} investidores. Faltam ${missingInvExc} investidores para Excelente + ${missingDays} dias de conta.`;
+        popup = 'Parabéns! Atingiu o nível Bom com 5+ investidores na sua equipa.';
+      } else if (level === 'limite') {
+        msg = `Limite: ${noInv} membros sem investimento. Precisa de 5 investidores para subir a Bom.`;
+        popup = 'Aviso: Tem muitos membros inativos. Convide investidores para melhorar a sua notação!';
+      } else {
+        msg = `Conta Nova: ${total} membros. Para alertas, atinja 50 membros sem investimento ou 5 investidores.`;
+      }
+    }
+
+    setCreditLevel(level);
+    setCreditMsg(msg);
+    setBellPopupMsg(popup);
+    
+    // Check if the user already saw the bell for this exact state
+    const lastSeenLevel = localStorage.getItem('asiaray_bell_seen_level');
+    if (showDot && lastSeenLevel !== level) {
+      setShowBellDot(true);
+    } else {
+      setShowBellDot(false);
+    }
+  }, [teamStats, user.createdAt]);
+
+  const handleBellClick = () => {
+    if (showBellDot) {
+      alert(bellPopupMsg);
+      setShowBellDot(false);
+      localStorage.setItem('asiaray_bell_seen_level', creditLevel);
+    } else if (bellPopupMsg) {
+      alert(bellPopupMsg);
+    } else {
+      alert('Sino de Notificações: Nenhuma novidade no momento.');
+    }
+  };
 
   const copyInviteCode = () => {
     navigator.clipboard.writeText(user.inviteCode);
@@ -159,7 +295,7 @@ export const MeuTab: React.FC = () => {
         <div className="w-full max-w-lg flex justify-between items-center px-2 mb-2 z-10" id="meu-top-bar">
           <button 
             id="notif-btn"
-            onClick={() => alert('Segurança: Protocolo de encriptação WS2 verificado e ativo.')}
+            onClick={handleBellClick}
             className="text-neutral-500 p-2 cursor-pointer"
           >
             {/* Outline Bell icon with a notification dot */}
@@ -167,6 +303,9 @@ export const MeuTab: React.FC = () => {
               <svg xmlns="http://www.w3.org/2000/svg" className="h-[21px] w-[21px] text-neutral-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
               </svg>
+              {showBellDot && (
+                <div className="absolute top-[2px] right-[2px] h-[7px] w-[7px] bg-red-500 rounded-full border border-white"></div>
+              )}
             </div>
           </button>
           
@@ -308,31 +447,47 @@ export const MeuTab: React.FC = () => {
           {/* Labels & Nodes */}
           <div className="flex justify-between items-start relative z-1 font-sans text-[10px] text-neutral-500">
             {/* titulo node */}
-            <div className="flex flex-col items-center w-12 -ml-2">
-              <span className="mb-1 text-[10px] tracking-tight">titulo</span>
-              <div className="h-[3px] w-[3px] rounded-full bg-[#4ade80]"></div>
+            <div className={`flex flex-col items-center w-12 -ml-2 ${creditLevel === 'titulo' ? 'text-[#4ade80]' : ''}`}>
+              <span className={`mb-1 text-[10px] tracking-tight ${creditLevel === 'titulo' ? 'font-bold' : ''}`}>titulo</span>
+              {creditLevel === 'titulo' ? (
+                <div className="h-3 w-3 bg-[#4ade80] rounded-full text-white font-bold text-[8px] flex items-center justify-center">✔</div>
+              ) : (
+                <div className="h-[3px] w-[3px] rounded-full bg-[#4ade80]"></div>
+              )}
             </div>
 
             {/* limite node */}
-            <div className="flex flex-col items-center w-12">
-              <span className="mb-1 text-[10px] tracking-tight">limite</span>
-              <div className="h-[3px] w-[3px] rounded-full bg-[#4ade80]"></div>
+            <div className={`flex flex-col items-center w-12 ${creditLevel === 'limite' ? 'text-[#4ade80]' : ''}`}>
+              <span className={`mb-1 text-[10px] tracking-tight ${creditLevel === 'limite' ? 'font-bold' : ''}`}>limite</span>
+              {creditLevel === 'limite' ? (
+                <div className="h-3 w-3 bg-[#4ade80] rounded-full text-white font-bold text-[8px] flex items-center justify-center">✔</div>
+              ) : (
+                <div className="h-[3px] w-[3px] rounded-full bg-[#4ade80]"></div>
+              )}
             </div>
 
             {/* bom node with checking badge */}
-            <div className="flex flex-col items-center w-12 text-[#4ade80]">
-              <span className="font-bold mb-1 text-[10px] tracking-tight">bom</span>
-              <div className="h-3 w-3 bg-[#4ade80] rounded-full text-white font-bold text-[8px] flex items-center justify-center">
-                ✔
-              </div>
+            <div className={`flex flex-col items-center w-12 ${creditLevel === 'bom' ? 'text-[#4ade80]' : ''}`}>
+              <span className={`mb-1 text-[10px] tracking-tight ${creditLevel === 'bom' ? 'font-bold' : ''}`}>bom</span>
+              {creditLevel === 'bom' ? (
+                <div className="h-3 w-3 bg-[#4ade80] rounded-full text-white font-bold text-[8px] flex items-center justify-center">✔</div>
+              ) : (
+                <div className="h-[3px] w-[3px] rounded-full bg-[#4ade80]"></div>
+              )}
             </div>
 
             {/* excelente node */}
-            <div className="flex flex-col items-center w-14 text-right">
-              <span className="mb-1 text-[10px] text-amber-500 tracking-tight ml-2">excelen...</span>
-              <div className="h-[3px] w-[3px] rounded-full bg-[#4ade80] mr-2"></div>
+            <div className={`flex flex-col items-center w-14 text-right ${creditLevel === 'excelente' ? 'text-[#4ade80]' : 'text-amber-500'}`}>
+              <span className={`mb-1 text-[10px] tracking-tight ml-2 ${creditLevel === 'excelente' ? 'font-bold' : ''}`}>excelen...</span>
+              {creditLevel === 'excelente' ? (
+                <div className="h-3 w-3 bg-[#4ade80] rounded-full text-white font-bold text-[8px] flex items-center justify-center mr-2">✔</div>
+              ) : (
+                <div className="h-[3px] w-[3px] rounded-full bg-[#4ade80] mr-2"></div>
+              )}
             </div>
           </div>
+          
+
         </div>
       </div>
 
@@ -481,6 +636,28 @@ export const MeuTab: React.FC = () => {
               <img src={couponIcon} alt="Cupons" className="w-[26px] h-[26px] object-contain" />
             </div>
             <span className="text-[11px] font-normal text-amber-500 font-medium">Cupons</span>
+          </div>
+
+          {/* Tile 14: Termos e Privacidade */}
+          <div 
+            onClick={() => alert('Página de Termos e Privacidade em desenvolvimento.')}
+            className="py-5 px-1 text-center cursor-pointer flex flex-col justify-center items-center gap-2 h-[100px] select-none"
+          >
+            <div className="h-[30px] flex items-center justify-center">
+              <img src={termosIcon} alt="Termos e Privacidade" className="w-[26px] h-[26px] object-contain" />
+            </div>
+            <span className="text-[11px] font-normal text-neutral-500">Termos e Privacidade</span>
+          </div>
+
+          {/* Tile 15: Políticas da Empresa */}
+          <div 
+            onClick={() => alert('Página de Políticas da Empresa em desenvolvimento.')}
+            className="py-5 px-1 text-center cursor-pointer flex flex-col justify-center items-center gap-2 h-[100px] select-none"
+          >
+            <div className="h-[30px] flex items-center justify-center">
+              <img src={politicasIcon} alt="Políticas da Empresa" className="w-[26px] h-[26px] object-contain" />
+            </div>
+            <span className="text-[11px] font-normal text-neutral-500">Políticas da Empresa</span>
           </div>
 
         </div>

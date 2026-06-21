@@ -548,6 +548,15 @@ serve(async (req) => {
         break;
       }
 
+      case 804: {
+        const { data, error } = await supabase
+          .from("notificacoes_nivel")
+          .select("*");
+        if (error) throw error;
+        result = data;
+        break;
+      }
+
       case 901: {
         const { data, error } = await supabase.rpc("get_support");
         if (error) throw error;

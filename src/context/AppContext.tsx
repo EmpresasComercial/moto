@@ -626,7 +626,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         holderName: profileData?.holder_name || '',
         paymentPin: profileData?.payment_pin ?? undefined,
         idChaveUnica: profileData?.id_chave_unica ?? undefined,
-        bankId: profileData?.bank_id || undefined
+        bankId: profileData?.bank_id || undefined,
+        createdAt: profileData?.created_at || new Date().toISOString()
       };
       setUser(loggedUser);
       // Set real balances from profile
@@ -1037,6 +1038,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           bankAccount: p.bank_account ?? '',
           holderName: p.holder_name ?? '',
           bankId: p.bank_id ?? undefined,
+          createdAt: p.created_at || new Date().toISOString(),
           level: p.level || prev.level,
           paymentPin: p.payment_pin || prev.paymentPin,
         }));

@@ -28,6 +28,7 @@ export interface UserProfile {
   name?: string; // Real name of the user
   idChaveUnica?: number; // Unique 4-digit identifier
   bankId?: string;
+  createdAt?: string;
 }
 
 export interface FinancialStats {
