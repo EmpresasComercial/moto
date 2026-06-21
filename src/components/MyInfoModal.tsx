@@ -607,7 +607,7 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
         
         {/* Row 1: Informação: (Mobile Number) */}
         <div 
-          onClick={() => addToast(`Número verificado com o código do país: +${user.phone}`, 'success')}
+          onClick={() => addToast(`Número verificado com o código do país: +244${user.phone}`, 'success')}
           className="flex items-center justify-between py-4.5 px-4 cursor-pointer hover:bg-neutral-50 border-b border-slate-100"
           id="row-info-num"
         >

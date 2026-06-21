@@ -253,9 +253,6 @@ export const MeuTab: React.FC = () => {
       case 'download':
         alert('PWA: Instale o aplicativo móvel a partir do menu do seu navegador.');
         break;
-      case 'cupons':
-        navigate('/cupons');
-        break;
       case 'termos':
         setIsPrivacyOpen(true);
         break;
@@ -518,40 +515,7 @@ export const MeuTab: React.FC = () => {
             <span className="text-[11px] font-normal text-red-500">convidar amigos</span>
           </div>
 
-          {/* Tile 2: relatório da equipa */}
-          <div 
-            onClick={() => handleGridOption('team')}
-            className="py-5 px-1 text-center cursor-pointer flex flex-col justify-center items-center gap-2 h-[100px] select-none"
-          >
-            <div className="h-[30px] flex items-center justify-center">
-              <img src={teamIcon} alt="relatório da equipa" className="w-[26px] h-[26px] object-contain" />
-            </div>
-            <span className="text-[11px] font-normal text-neutral-500">relatório da equipa</span>
-          </div>
-
-          {/* Tile 3: deve ler */}
-          <div 
-            onClick={() => handleGridOption('rules')}
-            className="py-5 px-1 text-center cursor-pointer flex flex-col justify-center items-center gap-2 h-[100px] select-none"
-          >
-            <div className="h-[30px] flex items-center justify-center">
-              <img src={deveLerIcon} alt="deve ler" className="w-[26px] h-[26px] object-contain" />
-            </div>
-            <span className="text-[11px] font-normal text-neutral-500">deve ler</span>
-          </div>
-
-          {/* Tile 4: configurações */}
-          <div 
-            onClick={() => handleGridOption('info')}
-            className="py-5 px-1 text-center cursor-pointer flex flex-col justify-center items-center gap-2 h-[100px] select-none"
-          >
-            <div className="h-[30px] flex items-center justify-center">
-              <img src={settingsIcon} alt="configurações" className="w-[26px] h-[26px] object-contain" />
-            </div>
-            <span className="text-[11px] font-normal text-neutral-500">configurações</span>
-          </div>
-
-          {/* Tile 5: declaração diária */}
+          {/* Tile 2: declaração diária */}
           <div 
             onClick={() => handleGridOption('daily')}
             className="py-5 px-1 text-center cursor-pointer flex flex-col justify-center items-center gap-2 h-[100px] select-none"
@@ -562,73 +526,7 @@ export const MeuTab: React.FC = () => {
             <span className="text-[11px] font-normal text-neutral-500">declaração diária</span>
           </div>
 
-          {/* Tile 6: registo de receitas */}
-          <div 
-            onClick={() => handleGridOption('receipts')}
-            className="py-5 px-1 text-center cursor-pointer flex flex-col justify-center items-center gap-2 h-[100px] select-none"
-          >
-            <div className="h-[30px] flex items-center justify-center">
-              <img src={receiptsIcon} alt="registo de receitas" className="w-[26px] h-[26px] object-contain" />
-            </div>
-            <span className="text-[11px] font-normal text-neutral-500">registo de receitas</span>
-          </div>
-
-          {/* Tile 7: recarregar o registo */}
-          <div 
-            onClick={() => handleGridOption('recharge_log')}
-            className="py-5 px-1 text-center cursor-pointer flex flex-col justify-center items-center gap-2 h-[100px] select-none"
-          >
-            <div className="h-[30px] flex items-center justify-center">
-              <img src={rechargeIcon} alt="recarregar o registo" className="w-[26px] h-[26px] object-contain" />
-            </div>
-            <span className="text-[11px] font-normal text-neutral-500">recarregar o registo</span>
-          </div>
-
-          {/* Tile 8: registo de retirada */}
-          <div 
-            onClick={() => handleGridOption('withdraw_log')}
-            className="py-5 px-1 text-center cursor-pointer flex flex-col justify-center items-center gap-2 h-[100px] select-none"
-          >
-            <div className="h-[30px] flex items-center justify-center">
-              <img src={withdrawIcon} alt="registo de retirada" className="w-[26px] h-[26px] object-contain" />
-            </div>
-            <span className="text-[11px] font-normal text-neutral-500">registo de retirada</span>
-          </div>
-
-          {/* Tile 9: download da aplicação */}
-          <div 
-            onClick={() => handleGridOption('download')}
-            className="py-5 px-1 text-center cursor-pointer flex flex-col justify-center items-center gap-2 h-[100px] select-none"
-          >
-            <div className="h-[30px] flex items-center justify-center">
-              <img src={downloadAppIcon} alt="download da aplicação" className="w-[26px] h-[26px] object-contain" />
-            </div>
-            <span className="text-[11px] font-normal text-neutral-500">download da aplicação</span>
-          </div>
-
-          {/* Tile 10: Gravar cartão (Adicionar conta / Associar conta) */}
-          <div 
-            onClick={() => handleGridOption('bank')}
-            className="py-5 px-1 text-center cursor-pointer flex flex-col justify-center items-center gap-2 h-[100px] select-none"
-          >
-            <div className="h-[30px] flex items-center justify-center">
-              <img src={bankIcon} alt="Associar conta" className="w-[26px] h-[26px] object-contain" />
-            </div>
-            <span className="text-[11px] font-normal text-neutral-500">Associar conta</span>
-          </div>
-
-          {/* Tile 11: Terminar sessão */}
-          <div 
-            onClick={() => handleGridOption('logout')}
-            className="py-5 px-1 text-center cursor-pointer flex flex-col justify-center items-center gap-2 h-[100px] select-none"
-          >
-            <div className="h-[30px] flex items-center justify-center">
-              <img src={terminarSessaoIcon} alt="Terminar sessão" className="w-[26px] h-[26px] object-contain" />
-            </div>
-            <span className="text-[11px] font-normal text-neutral-500">Terminar sessão</span>
-          </div>
-
-          {/* Tile 12: Minha Finança */}
+          {/* Tile 3: Minha Finança */}
           <div 
             onClick={() => handleGridOption('financa')}
             className="py-5 px-1 text-center cursor-pointer flex flex-col justify-center items-center gap-2 h-[100px] select-none"
@@ -639,7 +537,84 @@ export const MeuTab: React.FC = () => {
             <span className="text-[11px] font-normal text-neutral-500">Minha Finança</span>
           </div>
 
-          {/* Tile 13: Cupons */}
+          {/* Tile 4: registo de receitas */}
+          <div 
+            onClick={() => handleGridOption('receipts')}
+            className="py-5 px-1 text-center cursor-pointer flex flex-col justify-center items-center gap-2 h-[100px] select-none"
+          >
+            <div className="h-[30px] flex items-center justify-center">
+              <img src={receiptsIcon} alt="registo de receitas" className="w-[26px] h-[26px] object-contain" />
+            </div>
+            <span className="text-[11px] font-normal text-neutral-500">registo de receitas</span>
+          </div>
+
+          {/* Tile 5: registo de retirada */}
+          <div 
+            onClick={() => handleGridOption('withdraw_log')}
+            className="py-5 px-1 text-center cursor-pointer flex flex-col justify-center items-center gap-2 h-[100px] select-none"
+          >
+            <div className="h-[30px] flex items-center justify-center">
+              <img src={withdrawIcon} alt="registo de retirada" className="w-[26px] h-[26px] object-contain" />
+            </div>
+            <span className="text-[11px] font-normal text-neutral-500">registo de retirada</span>
+          </div>
+
+          {/* Tile 6: recarregar o registo */}
+          <div 
+            onClick={() => handleGridOption('recharge_log')}
+            className="py-5 px-1 text-center cursor-pointer flex flex-col justify-center items-center gap-2 h-[100px] select-none"
+          >
+            <div className="h-[30px] flex items-center justify-center">
+              <img src={rechargeIcon} alt="recarregar o registo" className="w-[26px] h-[26px] object-contain" />
+            </div>
+            <span className="text-[11px] font-normal text-neutral-500">recarregar o registo</span>
+          </div>
+
+          {/* Tile 7: relatório da equipa */}
+          <div 
+            onClick={() => handleGridOption('team')}
+            className="py-5 px-1 text-center cursor-pointer flex flex-col justify-center items-center gap-2 h-[100px] select-none"
+          >
+            <div className="h-[30px] flex items-center justify-center">
+              <img src={teamIcon} alt="relatório da equipa" className="w-[26px] h-[26px] object-contain" />
+            </div>
+            <span className="text-[11px] font-normal text-neutral-500">relatório da equipa</span>
+          </div>
+
+          {/* Tile 8: download da aplicação */}
+          <div 
+            onClick={() => handleGridOption('download')}
+            className="py-5 px-1 text-center cursor-pointer flex flex-col justify-center items-center gap-2 h-[100px] select-none"
+          >
+            <div className="h-[30px] flex items-center justify-center">
+              <img src={downloadAppIcon} alt="download da aplicação" className="w-[26px] h-[26px] object-contain" />
+            </div>
+            <span className="text-[11px] font-normal text-neutral-500">download da aplicação</span>
+          </div>
+
+          {/* Tile 9: deve ler */}
+          <div 
+            onClick={() => handleGridOption('rules')}
+            className="py-5 px-1 text-center cursor-pointer flex flex-col justify-center items-center gap-2 h-[100px] select-none"
+          >
+            <div className="h-[30px] flex items-center justify-center">
+              <img src={deveLerIcon} alt="deve ler" className="w-[26px] h-[26px] object-contain" />
+            </div>
+            <span className="text-[11px] font-normal text-neutral-500">deve ler</span>
+          </div>
+
+          {/* Tile 10: Associar conta */}
+          <div 
+            onClick={() => handleGridOption('bank')}
+            className="py-5 px-1 text-center cursor-pointer flex flex-col justify-center items-center gap-2 h-[100px] select-none"
+          >
+            <div className="h-[30px] flex items-center justify-center">
+              <img src={bankIcon} alt="Associar conta" className="w-[26px] h-[26px] object-contain" />
+            </div>
+            <span className="text-[11px] font-normal text-neutral-500">Associar conta</span>
+          </div>
+
+          {/* Tile 11: Cupons */}
           <div 
             onClick={() => handleGridOption('cupons')}
             className="py-5 px-1 text-center cursor-pointer flex flex-col justify-center items-center gap-2 h-[100px] select-none"
@@ -650,7 +625,18 @@ export const MeuTab: React.FC = () => {
             <span className="text-[11px] font-normal text-amber-500 font-medium">Cupons</span>
           </div>
 
-          {/* Tile 14: Termos e Privacidade */}
+          {/* Tile 12: Configurações */}
+          <div 
+            onClick={() => handleGridOption('info')}
+            className="py-5 px-1 text-center cursor-pointer flex flex-col justify-center items-center gap-2 h-[100px] select-none"
+          >
+            <div className="h-[30px] flex items-center justify-center">
+              <img src={settingsIcon} alt="configurações" className="w-[26px] h-[26px] object-contain" />
+            </div>
+            <span className="text-[11px] font-normal text-neutral-500">configurações</span>
+          </div>
+
+          {/* Tile 13: Termos e Privacidade */}
           <div 
             onClick={() => handleGridOption('termos')}
             className="py-5 px-1 text-center cursor-pointer flex flex-col justify-center items-center gap-2 h-[100px] select-none"
@@ -661,7 +647,7 @@ export const MeuTab: React.FC = () => {
             <span className="text-[11px] font-normal text-neutral-500">Termos e Privacidade</span>
           </div>
 
-          {/* Tile 15: Políticas da Empresa */}
+          {/* Tile 14: Políticas da Empresa */}
           <div 
             onClick={() => handleGridOption('politicas')}
             className="py-5 px-1 text-center cursor-pointer flex flex-col justify-center items-center gap-2 h-[100px] select-none"
@@ -671,6 +657,18 @@ export const MeuTab: React.FC = () => {
             </div>
             <span className="text-[11px] font-normal text-neutral-500">Políticas da Empresa</span>
           </div>
+
+          {/* Tile 15: Terminar sessão */}
+          <div 
+            onClick={() => handleGridOption('logout')}
+            className="py-5 px-1 text-center cursor-pointer flex flex-col justify-center items-center gap-2 h-[100px] select-none"
+          >
+            <div className="h-[30px] flex items-center justify-center">
+              <img src={terminarSessaoIcon} alt="Terminar sessão" className="w-[26px] h-[26px] object-contain" />
+            </div>
+            <span className="text-[11px] font-normal text-neutral-500">Terminar sessão</span>
+          </div>
+
 
         </div>
       </div>
