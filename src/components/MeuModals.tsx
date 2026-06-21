@@ -1193,18 +1193,19 @@ export const RulesModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
 
 // 7. DECLARAÇÃO DIÁRIA MODAL (Real data from get_weekly_income via gateway op 802)
 export const DailyDeclarationModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
-  const { stats, showLoading, hideLoading, ensureInternetConnectivity } = useApp();
+  const { stats, showLoading, hideLoading, ensureInternetConnectivity, user } = useApp();
 
   type WeekDay = { dia: string; day_date: string; total: number };
   const [weekData, setWeekData] = useState<WeekDay[]>([]);
   const [loading, setLoading] = useState(false);
+  const [products, setProducts] = useState<any[]>([]);
 
   useEffect(() => {
     if (!isOpen) return;
-    showLoading('Carregando declaração diária...');
+    showLoading('Carregando estatísticas...');
     setLoading(true);
 
-    const loadDeclaration = async () => {
+    const loadAll = async () => {
       if (!(await ensureInternetConnectivity())) {
         setLoading(false);
         hideLoading();
@@ -1219,18 +1220,31 @@ export const DailyDeclarationModal: React.FC<ModalProps> = ({ isOpen, onClose })
       }
 
       try {
-        const res = await fetch(GATEWAY_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-          body: JSON.stringify({ op: 802, data: {} })
-        });
-        const data = await res.json();
-        if (data.success && Array.isArray(data.result)) {
-          setWeekData(data.result.map((r: any) => ({
+        const [weekRes, prodRes] = await Promise.all([
+          fetch(GATEWAY_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ op: 802, data: {} })
+          }),
+          fetch(GATEWAY_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ op: 512, data: {} })
+          })
+        ]);
+
+        const weekJson = await weekRes.json();
+        if (weekJson.success && Array.isArray(weekJson.result)) {
+          setWeekData(weekJson.result.map((r: any) => ({
             dia: r.dia,
             day_date: r.day_date,
             total: Number(r.total) || 0
           })));
+        }
+
+        const prodJson = await prodRes.json();
+        if (prodJson.success && Array.isArray(prodJson.result)) {
+          setProducts(prodJson.result);
         }
       } catch (err) {
         console.error('DailyDeclaration fetch error:', err);
@@ -1240,7 +1254,7 @@ export const DailyDeclarationModal: React.FC<ModalProps> = ({ isOpen, onClose })
       }
     };
 
-    loadDeclaration();
+    loadAll();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
@@ -1251,93 +1265,249 @@ export const DailyDeclarationModal: React.FC<ModalProps> = ({ isOpen, onClose })
 
   const maxVal = Math.max(...dataPoints.map(d => d.total), 1);
 
-  // Real stats from context
-  const previsaoAcumulada = stats.incomeThisMonth * 1.25;
-  const mediaDiaria = weekData.length
-    ? weekData.reduce((s, d) => s + d.total, 0) / 7
-    : stats.incomeToday;
+  // Real calculations based on actual data
   const totalSemana = weekData.reduce((s, d) => s + d.total, 0);
+  const mediaDiaria = weekData.length > 0 ? totalSemana / 7 : 0;
+  const daysWithIncome = weekData.filter(d => d.total > 0).length;
+
+  // Find current WS product for the user
+  const currentProduct = products.find((p: any) => p.name === user.level);
+  const dailyIncomeCapacity = currentProduct ? Number(currentProduct.daily_income) : 0;
+  const weeklyCapacity = dailyIncomeCapacity * 7;
+  const realizationRate = weeklyCapacity > 0 ? Math.min(100, (totalSemana / weeklyCapacity) * 100) : 0;
+
+  // Monthly projection based on actual daily average
+  const projecaoMensal = mediaDiaria * 30;
+
+  // Today's date for highlighting
+  const todayStr = new Date().toISOString().split('T')[0];
+
+  // SVG chart dimensions
+  const chartWidth = 300;
+  const chartHeight = 100;
+  const barWidth = 28;
+  const barGap = 14;
+  const totalBarsWidth = dataPoints.length * barWidth + (dataPoints.length - 1) * barGap;
+  const startX = (chartWidth - totalBarsWidth) / 2;
 
   return (
     <ModalBase isOpen={isOpen} onClose={onClose} title="Declaração Diária">
       <div className="space-y-4">
-        {/* Previsão Acumulada */}
-        <div className="text-center bg-neutral-50 p-4 border border-neutral-100 rounded-2xl relative overflow-hidden">
-          <span className="text-[10px] uppercase font-bold text-neutral-400">Previsão Acumulada</span>
-          <h3 className="text-xl font-mono font-extrabold text-green-600 mt-1">
-            KZ {previsaoAcumulada.toLocaleString('pt-AO', { minimumFractionDigits: 2 })}
-          </h3>
-          <p className="text-[10px] text-neutral-500 mt-1">Simulação matemática de rendimento semanal residual baseada na sua associação.</p>
-        </div>
 
-        {/* Gráfico de barras — dados reais dos últimos 7 dias */}
-        <div className="space-y-1.5 p-2 bg-neutral-50 rounded-xl border border-neutral-150">
-          <div className="flex justify-between items-center px-1">
-            <h4 className="text-[10px] font-bold text-neutral-400 uppercase tracking-wide">Curva de Ganhos Semanais (KZ)</h4>
-            {loading && <span className="text-[9px] text-green-500 animate-pulse">A carregar...</span>}
+        {/* === HEADER: Rendimento Semanal Real === */}
+        <div className="relative bg-gradient-to-br from-[#0f4c35] to-[#1a7a56] rounded-2xl p-4 overflow-hidden">
+          {/* Background grid pattern */}
+          <div className="absolute inset-0 opacity-10">
+            <svg width="100%" height="100%" viewBox="0 0 200 80">
+              <defs>
+                <pattern id="bgGrid" width="20" height="20" patternUnits="userSpaceOnUse">
+                  <path d="M 20 0 L 0 0 0 20" fill="none" stroke="white" strokeWidth="0.5"/>
+                </pattern>
+              </defs>
+              <rect width="200" height="80" fill="url(#bgGrid)" />
+            </svg>
           </div>
 
-          <div className="flex justify-between items-end h-32 pt-4 px-1" id="svg-graph-box">
-            {dataPoints.map((dp, idx) => {
-              const heightPct = Math.max(4, Math.min(100, (dp.total / maxVal) * 100));
-              const isToday = dp.day_date === new Date().toISOString().split('T')[0];
-              return (
-                <div key={idx} className="flex flex-col items-center flex-1 space-y-1.5 h-full justify-end group">
-                  {/* Tooltip com valor real */}
-                  <div className="text-[8px] font-mono text-green-700 bg-green-50 px-1 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity">
-                    KZ {Math.round(dp.total).toLocaleString()}
-                  </div>
-                  <div
-                    style={{ height: `${heightPct}%` }}
-                    className={`w-5 rounded-t-sm transition-all duration-500 ease-out cursor-pointer
-                      ${isToday
-                        ? 'bg-gradient-to-t from-green-600 to-emerald-400 ring-1 ring-green-400'
-                        : 'bg-gradient-to-t from-[#0d7377] to-[#14ffec] hover:opacity-80'
-                      }`}
-                  />
-                  <span className={`text-[10px] font-bold ${isToday ? 'text-green-600' : 'text-neutral-400'}`}>
-                    {dp.dia}
-                  </span>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[10px] uppercase font-bold text-green-300 tracking-widest">Rendimento Semanal Real</span>
+              {loading && <span className="text-[9px] text-green-300 animate-pulse">A carregar...</span>}
+            </div>
+            <h3 className="text-2xl font-mono font-extrabold text-white mt-1">
+              KZ {Math.round(totalSemana).toLocaleString('pt-AO')}
+            </h3>
+            <p className="text-[10px] text-green-200 mt-1">
+              Estatística real dos últimos 7 dias • Nível {user.level}
+            </p>
+
+            {/* Progress bar: realização vs capacidade */}
+            {weeklyCapacity > 0 && (
+              <div className="mt-3">
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-[9px] text-green-300">Taxa de realização</span>
+                  <span className="text-[10px] font-bold text-white">{realizationRate.toFixed(1)}%</span>
                 </div>
-              );
-            })}
+                <div className="w-full bg-white/20 rounded-full h-1.5">
+                  <div
+                    className="bg-gradient-to-r from-green-300 to-emerald-400 h-1.5 rounded-full transition-all duration-700"
+                    style={{ width: `${realizationRate}%` }}
+                  />
+                </div>
+                <div className="flex justify-between items-center mt-0.5">
+                  <span className="text-[8px] text-green-300/70">KZ 0</span>
+                  <span className="text-[8px] text-green-300/70">Cap. semanal: KZ {Math.round(weeklyCapacity).toLocaleString('pt-AO')}</span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Resumo de operação */}
-        <div className="space-y-2 text-xs text-neutral-600 leading-normal">
-          <p className="font-bold text-neutral-700">📌 Resumo de Operação:</p>
-          <div className="grid grid-cols-2 gap-2 text-center text-[11px]">
-            <div className="bg-neutral-50 p-2 rounded-xl">
-              <span className="text-[9px] text-neutral-400 block uppercase">Média Diária</span>
-              <strong className="font-mono text-neutral-700 text-xs">
-                KZ {Math.round(mediaDiaria).toLocaleString()}
-              </strong>
+        {/* === GRÁFICO SVG REAL === */}
+        <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-3">
+          <div className="flex justify-between items-center mb-3">
+            <h4 className="text-[10px] font-bold text-neutral-500 uppercase tracking-wide">Curva de Ganhos Semanais (KZ)</h4>
+            <span className="text-[9px] text-neutral-400 font-mono">últimos 7 dias</span>
+          </div>
+
+          <div style={{ width: '100%', overflowX: 'hidden' }}>
+            <svg
+              viewBox={`0 0 ${chartWidth} ${chartHeight + 24}`}
+              width="100%"
+              preserveAspectRatio="xMidYMid meet"
+              className="select-none"
+            >
+              {/* Horizontal grid lines */}
+              {[0, 25, 50, 75, 100].map(pct => {
+                const y = chartHeight - (pct / 100) * chartHeight;
+                return (
+                  <line
+                    key={pct}
+                    x1={0} y1={y}
+                    x2={chartWidth} y2={y}
+                    stroke="#e5e7eb"
+                    strokeWidth="0.5"
+                    strokeDasharray={pct === 0 ? 'none' : '3,3'}
+                  />
+                );
+              })}
+
+              {/* Y-axis max label */}
+              {maxVal > 1 && (
+                <text x="2" y="8" fontSize="6" fill="#9ca3af" fontFamily="monospace">
+                  {maxVal >= 1000 ? `${(maxVal / 1000).toFixed(1)}k` : Math.round(maxVal)}
+                </text>
+              )}
+
+              {/* Bars */}
+              {dataPoints.map((dp, idx) => {
+                const heightPct = Math.max(3, Math.min(100, (dp.total / maxVal) * 100));
+                const barH = (heightPct / 100) * chartHeight;
+                const x = startX + idx * (barWidth + barGap);
+                const y = chartHeight - barH;
+                const isToday = dp.day_date === todayStr;
+                const hasValue = dp.total > 0;
+
+                return (
+                  <g key={idx}>
+                    <rect
+                      x={x}
+                      y={y}
+                      width={barWidth}
+                      height={barH}
+                      rx="4"
+                      ry="4"
+                      fill={isToday ? 'url(#todayGrad)' : hasValue ? 'url(#barGrad)' : '#e5e7eb'}
+                      opacity={hasValue ? 1 : 0.5}
+                    />
+                    {hasValue && (
+                      <text
+                        x={x + barWidth / 2}
+                        y={y - 2}
+                        textAnchor="middle"
+                        fontSize="5.5"
+                        fill={isToday ? '#059669' : '#6b7280'}
+                        fontFamily="monospace"
+                        fontWeight={isToday ? '700' : '400'}
+                      >
+                        {dp.total >= 1000 ? `${(dp.total / 1000).toFixed(1)}k` : Math.round(dp.total)}
+                      </text>
+                    )}
+                    <text
+                      x={x + barWidth / 2}
+                      y={chartHeight + 14}
+                      textAnchor="middle"
+                      fontSize="7"
+                      fill={isToday ? '#059669' : '#9ca3af'}
+                      fontFamily="sans-serif"
+                      fontWeight={isToday ? '700' : '400'}
+                    >
+                      {dp.dia}
+                    </text>
+                    {isToday && (
+                      <circle cx={x + barWidth / 2} cy={chartHeight + 21} r="2" fill="#059669" />
+                    )}
+                  </g>
+                );
+              })}
+
+              <defs>
+                <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#10b981" />
+                  <stop offset="100%" stopColor="#0d7377" />
+                </linearGradient>
+                <linearGradient id="todayGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#34d399" />
+                  <stop offset="100%" stopColor="#059669" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+
+          {/* Legend */}
+          <div className="flex items-center gap-3 mt-1 px-1">
+            <div className="flex items-center gap-1">
+              <div className="w-2.5 h-2.5 rounded-sm bg-gradient-to-b from-[#10b981] to-[#0d7377]" />
+              <span className="text-[8px] text-neutral-400">Ganho do dia</span>
             </div>
-            <div className="bg-neutral-50 p-2 rounded-xl">
-              <span className="text-[9px] text-neutral-400 block uppercase">Total Semana</span>
-              <strong className="font-mono text-neutral-700 text-xs">
-                KZ {Math.round(totalSemana).toLocaleString()}
-              </strong>
+            <div className="flex items-center gap-1">
+              <div className="w-2.5 h-2.5 rounded-sm bg-gradient-to-b from-[#34d399] to-[#059669]" />
+              <span className="text-[8px] text-neutral-400">Hoje</span>
             </div>
-            <div className="bg-neutral-50 p-2 rounded-xl">
-              <span className="text-[9px] text-neutral-400 block uppercase">Este Mês</span>
-              <strong className="font-mono text-neutral-700 text-xs">
-                KZ {Math.round(stats.incomeThisMonth).toLocaleString()}
-              </strong>
-            </div>
-            <div className="bg-neutral-50 p-2 rounded-xl">
-              <span className="text-[9px] text-neutral-400 block uppercase">Total Acumulado</span>
-              <strong className="font-mono text-neutral-700 text-xs">
-                KZ {Math.round(stats.incomeTotal).toLocaleString()}
-              </strong>
+            <div className="flex items-center gap-1">
+              <div className="w-2.5 h-2.5 rounded-sm bg-neutral-200" />
+              <span className="text-[8px] text-neutral-400">Sem registo</span>
             </div>
           </div>
         </div>
+
+        {/* === ESTATÍSTICAS REAIS === */}
+        <div className="space-y-2">
+          <p className="font-bold text-neutral-700 text-xs">Estatísticas Reais de Rendimento:</p>
+          <div className="grid grid-cols-2 gap-2 text-center text-[11px]">
+            <div className="bg-neutral-50 border border-neutral-100 p-2.5 rounded-xl">
+              <span className="text-[9px] text-neutral-400 block uppercase tracking-wide mb-1">Média Diária</span>
+              <strong className="font-mono text-neutral-800 text-xs block">
+                KZ {Math.round(mediaDiaria).toLocaleString('pt-AO')}
+              </strong>
+              {daysWithIncome > 0 && (
+                <span className="text-[8px] text-neutral-400">{daysWithIncome} dia{daysWithIncome > 1 ? 's' : ''} activo{daysWithIncome > 1 ? 's' : ''}</span>
+              )}
+            </div>
+
+            <div className="bg-neutral-50 border border-neutral-100 p-2.5 rounded-xl">
+              <span className="text-[9px] text-neutral-400 block uppercase tracking-wide mb-1">Total Semana</span>
+              <strong className="font-mono text-neutral-800 text-xs block">
+                KZ {Math.round(totalSemana).toLocaleString('pt-AO')}
+              </strong>
+              {weeklyCapacity > 0 && (
+                <span className="text-[8px] text-neutral-400">{realizationRate.toFixed(0)}% realizado</span>
+              )}
+            </div>
+
+            <div className="bg-neutral-50 border border-neutral-100 p-2.5 rounded-xl">
+              <span className="text-[9px] text-neutral-400 block uppercase tracking-wide mb-1">Este Mês</span>
+              <strong className="font-mono text-neutral-800 text-xs block">
+                KZ {Math.round(stats.incomeThisMonth).toLocaleString('pt-AO')}
+              </strong>
+              <span className="text-[8px] text-neutral-400">acumulado real</span>
+            </div>
+
+            <div className="bg-neutral-50 border border-neutral-100 p-2.5 rounded-xl">
+              <span className="text-[9px] text-neutral-400 block uppercase tracking-wide mb-1">Projecção Mensal</span>
+              <strong className="font-mono text-emerald-700 text-xs block">
+                KZ {Math.round(projecaoMensal).toLocaleString('pt-AO')}
+              </strong>
+              <span className="text-[8px] text-neutral-400">média diária × 30</span>
+            </div>
+          </div>
+        </div>
+
+
       </div>
     </ModalBase>
   );
 };
+
 
 // 8. GENERAL DATA LIST MODALS (Receitas / Depósitos / Retiradas)
 interface ListModalProps extends ModalProps {
