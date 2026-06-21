@@ -30,8 +30,11 @@ export const HomeTab: React.FC<HomeTabProps> = ({ setActiveTab, setSelectedTaskC
           body: JSON.stringify({ op: 801, data: {} })
         });
         const res = await resp.json();
-        if (res.success && Array.isArray(res.result)) {
-          setTeamList(res.result);
+        if (res.success) {
+          const arr = Array.isArray(res.result) 
+            ? res.result 
+            : (res.result?.team && Array.isArray(res.result.team) ? res.result.team : []);
+          setTeamList(arr);
         }
       } catch (err) {
         console.error('Erro ao buscar equipa para a Home:', err);

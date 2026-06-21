@@ -930,7 +930,9 @@ export const TeamReportModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   // Process the raw array from get_my_team
-  const rawTeam = Array.isArray(teamData) ? teamData : [];
+  const rawTeam = Array.isArray(teamData) 
+    ? teamData 
+    : (teamData?.team && Array.isArray(teamData.team) ? teamData.team : []);
   
   const levelUm = rawTeam.filter((m: any) => m.level === 1).map((m: any) => ({
     phone: m.phone,
