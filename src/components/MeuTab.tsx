@@ -10,7 +10,8 @@ import {
 import { MinhasFinancasModal } from './MinhasFinancasTab';
 import { 
   BankModal, WalletModal, InviteModal, TeamReportModal, 
-  RulesModal, DailyDeclarationModal, LedgerLogsModal, CurrencyConverterModal
+  RulesModal, DailyDeclarationModal, LedgerLogsModal, CurrencyConverterModal,
+  PrivacyModal, CompanyPoliciesModal
 } from './MeuModals';
 import { MyInfoModal } from './MyInfoModal';
 import { CuponsPage } from './CuponsPage';
@@ -70,6 +71,8 @@ export const MeuTab: React.FC = () => {
   const [isConverterOpen, setIsConverterOpen] = useState(false);
   const [isFinancaOpen, setIsFinancaOpen] = useState(false);
   const [isCuponsOpen, setIsCuponsOpen] = useState(false);
+  const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
+  const [isPoliciesOpen, setIsPoliciesOpen] = useState(false);
   const [ledgerType, setLedgerType] = useState<'receita' | 'recarga' | 'retirada'>('receita');
 
   // Bell and Credit Rating States
@@ -249,6 +252,15 @@ export const MeuTab: React.FC = () => {
         break;
       case 'download':
         alert('PWA: Instale o aplicativo móvel a partir do menu do seu navegador.');
+        break;
+      case 'cupons':
+        navigate('/cupons');
+        break;
+      case 'termos':
+        setIsPrivacyOpen(true);
+        break;
+      case 'politicas':
+        setIsPoliciesOpen(true);
         break;
       case 'bank':
         setIsBankOpen(true);
@@ -640,7 +652,7 @@ export const MeuTab: React.FC = () => {
 
           {/* Tile 14: Termos e Privacidade */}
           <div 
-            onClick={() => alert('Página de Termos e Privacidade em desenvolvimento.')}
+            onClick={() => handleGridOption('termos')}
             className="py-5 px-1 text-center cursor-pointer flex flex-col justify-center items-center gap-2 h-[100px] select-none"
           >
             <div className="h-[30px] flex items-center justify-center">
@@ -651,7 +663,7 @@ export const MeuTab: React.FC = () => {
 
           {/* Tile 15: Políticas da Empresa */}
           <div 
-            onClick={() => alert('Página de Políticas da Empresa em desenvolvimento.')}
+            onClick={() => handleGridOption('politicas')}
             className="py-5 px-1 text-center cursor-pointer flex flex-col justify-center items-center gap-2 h-[100px] select-none"
           >
             <div className="h-[30px] flex items-center justify-center">
@@ -670,6 +682,8 @@ export const MeuTab: React.FC = () => {
       {isInviteOpen && <InviteModal isOpen={isInviteOpen} onClose={() => setIsInviteOpen(false)} />}
       {isTeamOpen && <TeamReportModal isOpen={isTeamOpen} onClose={() => setIsTeamOpen(false)} fill-current="currentColor" />}
       {isRulesOpen && <RulesModal isOpen={isRulesOpen} onClose={() => setIsRulesOpen(false)} />}
+      {isPrivacyOpen && <PrivacyModal isOpen={isPrivacyOpen} onClose={() => setIsPrivacyOpen(false)} />}
+      {isPoliciesOpen && <CompanyPoliciesModal isOpen={isPoliciesOpen} onClose={() => setIsPoliciesOpen(false)} />}
       {isChartOpen && <DailyDeclarationModal isOpen={isChartOpen} onClose={() => setIsChartOpen(false)} />}
       {isLedgerOpen && <LedgerLogsModal isOpen={isLedgerOpen} onClose={() => setIsLedgerOpen(false)} type={ledgerType} />}
       {isMyInfoOpen && <MyInfoModal isOpen={isMyInfoOpen} onClose={() => setIsMyInfoOpen(false)} onOpenBank={() => setIsBankOpen(true)} />}

@@ -336,39 +336,45 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
 
   const [dbBanks, setDbBanks] = useState<{ id: string; nome_do_banco: string; iban: string; nome_favorecido: string }[]>([]);
   const [banksLoaded, setBanksLoaded] = useState(false);
+  const [policies, setPolicies] = useState<any>(null);
 
   React.useEffect(() => {
     if (isOpen) {
       setIsFullScreenActive(true);
       
-      const fetchDbBanks = async () => {
+      const fetchDbBanksAndPolicies = async () => {
         try {
+          // Fetch banks
           const token = await getAccessToken();
-          if (!token) {
-            setBanksLoaded(true);
-            return;
+          if (token) {
+            const resp = await fetch(GATEWAY_URL, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify({ op: 207, data: {} })
+            });
+            const res = await resp.json();
+            if (res.success && Array.isArray(res.result)) {
+              setDbBanks(res.result);
+            }
           }
-          const resp = await fetch(GATEWAY_URL, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ op: 207, data: {} })
-          });
-          const res = await resp.json();
-          if (res.success && Array.isArray(res.result)) {
-            setDbBanks(res.result);
+          
+          // Fetch policies
+          const { data, error } = await supabase.rpc('get_company_policies');
+          if (!error && data) {
+            setPolicies(data);
           }
         } catch (error) {
-          console.error("Erro ao obter bancos de depósito:", error);
+          console.error("Erro ao obter dados iniciais:", error);
         } finally {
           setBanksLoaded(true);
         }
       };
       
       setBanksLoaded(false);
-      fetchDbBanks();
+      fetchDbBanksAndPolicies();
     }
     return () => {
       setIsFullScreenActive(false);
@@ -528,7 +534,7 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
               </div>
 
               <div className="grid grid-cols-3 gap-2">
-                {[10000, 20000, 50000, 100000, 150000, 300000].map(val => (
+                {(policies?.suggested_recharge_kz || [10000, 20000, 50000, 100000, 150000, 300000]).map((val: number) => (
                   <button
                     key={val}
                     type="button"
@@ -544,8 +550,18 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
                 <button
                   type="button"
                   onClick={() => {
+                    const minKz = policies?.min_recharge_kz || 8000;
+                    const maxKz = policies?.max_recharge_kz || 3000000;
                     if (rechargeAmt <= 0) {
                       alert('Por favor, introduza um valor de recarga válido.');
+                      return;
+                    }
+                    if (rechargeAmt < minKz) {
+                      alert(`O valor mínimo de depósito é ${minKz.toLocaleString('pt-AO')} KZ.`);
+                      return;
+                    }
+                    if (rechargeAmt > maxKz) {
+                      alert(`O valor máximo permitido é ${maxKz.toLocaleString('pt-AO')} KZ.`);
                       return;
                     }
                     setRechargeStep('method');
@@ -1194,6 +1210,291 @@ export const RulesModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
 };
 
 // 7. DECLARAÇÃO DIÁRIA MODAL (Real data from get_weekly_income via gateway op 802)
+// 7. PRIVACY MODAL
+export const PrivacyModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
+  return (
+    <ModalBase isOpen={isOpen} onClose={onClose} title="Termos e Privacidade">
+      <div className="space-y-4 text-xs text-neutral-600 leading-relaxed font-sans pb-4">
+        
+        <h2 className="font-extrabold text-neutral-800 text-sm">Proteção de Dados Pessoais</h2>
+        
+        <p>
+          Na Asiaray Media Group, levamos a sua privacidade e a segurança dos seus dados muito a sério. Todas as suas informações sensíveis, como o seu <strong>Telefone, Nome e IBAN</strong>, são rigorosamente protegidas.
+        </p>
+
+        <p className="italic pl-3 border-l-2 border-neutral-300 py-0.5 text-neutral-700">
+          “Nenhum dado pessoal é partilhado com terceiros e todas as informações financeiras e de contacto são encriptadas nos nossos servidores seguros.”
+        </p>
+
+        <h2 className="font-extrabold text-neutral-800 text-sm pt-2">A Sua Responsabilidade</h2>
+        
+        <p>
+          Apesar da nossa encriptação de ponta a ponta, a segurança também depende de si. Como proprietário da conta, <strong>não deve divulgar os seus dados pessoais</strong> em grupos públicos ou partilhar com pessoas que se apresentem como "técnicos".
+        </p>
+
+        <p>
+          Se precisar de enviar capturas de ecrã (screenshots) para o nosso suporte ou se for partilhar resultados num grupo de WhatsApp, <strong>por favor, esconda ou desfoque a parte onde os seus dados pessoais (Nome, Telefone, IBAN) aparecem</strong>.
+        </p>
+
+        <p>
+          Lembre-se: O Suporte Oficial da Asiaray <strong>nunca</strong> lhe pedirá a sua palavra-passe de acesso ou o seu PIN de levantamento. Mantenha os seus dados seguros!
+        </p>
+      </div>
+    </ModalBase>
+  );
+};
+
+// 8. COMPANY POLICIES MODAL
+export const CompanyPoliciesModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
+  const [policies, setPolicies] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchPolicies();
+    }
+  }, [isOpen]);
+
+  const fetchPolicies = async () => {
+    try {
+      const { data, error } = await supabase.rpc('get_company_policies');
+      if (error) throw error;
+      setPolicies(data);
+    } catch (error) {
+      console.error('Failed to load company policies:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <ModalBase isOpen={isOpen} onClose={onClose} title="Políticas da Empresa">
+        <div className="flex justify-center items-center h-40">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1e88e5]"></div>
+        </div>
+      </ModalBase>
+    );
+  }
+
+  const p = policies || {
+    min_recharge_kz: 8000,
+    min_recharge_usdt: 8,
+    max_recharge_kz: 3000000,
+    min_withdrawal_kz: 2000,
+    withdrawal_fee_pct: 50,
+    refund_days: 180,
+    refund_min_subordinates: 50,
+    products: []
+  };
+
+  return (
+    <ModalBase isOpen={isOpen} onClose={onClose} title="Políticas da Empresa">
+      <div className="space-y-6 text-xs text-neutral-600 leading-relaxed font-sans pb-4">
+        
+        <div>
+          <h1 className="font-extrabold text-neutral-800 text-sm mb-1">Nossas Diretrizes e Políticas</h1>
+          <p className="mt-2">
+            A Asiaray estabelece diretrizes operacionais com foco em segurança, estabilidade financeira, transparência administrativa e continuidade dos serviços disponibilizados pela empresa. As políticas abaixo definem os critérios aplicáveis às operações de depósitos, aquisição de produtos, retiradas, funcionamento das equipas e utilização dos serviços WS.
+          </p>
+        </div>
+
+        <hr className="border-neutral-200" />
+
+        <div>
+          <h1 className="font-extrabold text-neutral-800 text-sm mb-1">Produtos WS e Ativação de Serviços</h1>
+          <p className="mt-2">
+            A Asiaray disponibiliza diferentes categorias de produtos e serviços digitais identificados por níveis WS (WS1, WS2, WS3, entre outros). Cada nível corresponde a um plano operacional específico dentro da estrutura operacional da empresa.
+          </p>
+          <p className="mt-2">
+            Após a ativação de um produto WS, o utilizador passa a ter acesso às tarefas, funcionalidades e benefícios associados ao plano adquirido, podendo receber bonificações e comissões conforme as regras internas e o desempenho operacional da conta.
+          </p>
+          <p className="mt-2">
+            Os valores aplicados pelos utilizadores destinam-se à ativação dos serviços, manutenção operacional, processamento tecnológico, gestão administrativa, publicidade digital e sustentabilidade das operações da empresa.
+          </p>
+          
+          {p.products && p.products.length > 0 && (
+            <div className="mt-3 space-y-2">
+              <h3 className="font-bold text-neutral-700">Pacotes Disponíveis:</h3>
+              <div className="grid grid-cols-1 gap-2">
+                {p.products.sort((a: any, b: any) => Number(a.price) - Number(b.price)).map((prod: any) => (
+                  <div key={prod.id} className="bg-slate-50 border border-slate-200 p-2 rounded flex justify-between items-center">
+                    <span className="font-bold text-neutral-800">{prod.name}</span>
+                    <div className="text-right">
+                      <div className="text-[11px] font-bold text-[#1e88e5]">KZ {Number(prod.price).toLocaleString('pt-AO')}</div>
+                      <div className="text-[10px] text-neutral-500">Renda Diária: KZ {Number(prod.daily_income).toLocaleString('pt-AO')}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <hr className="border-neutral-200" />
+
+        <div>
+          <h1 className="font-extrabold text-neutral-800 text-sm mb-1">Política de Reembolso Programado</h1>
+          <p className="mt-2">
+            A Asiaray poderá disponibilizar programas internos de reembolso promocional ou retorno programado, sujeitos ao cumprimento integral das condições estabelecidas pela empresa.
+          </p>
+          <p className="mt-2">
+            O reembolso do valor investido poderá ocorrer após um período mínimo de até <strong>{p.refund_days} dias corridos</strong>, desde que:
+          </p>
+          <ul className="list-disc pl-5 mt-1 space-y-1">
+            <li>a conta permaneça ativa e regular;</li>
+            <li>não existam violações das políticas internas;</li>
+            <li>o utilizador mantenha os requisitos operacionais definidos pela empresa;</li>
+            <li>a equipa vinculada atinja os critérios mínimos de atividade exigidos, incluindo o número mínimo de investidores ativos.</li>
+          </ul>
+          <p className="mt-2">
+            A empresa reserva-se o direito de analisar, validar ou recusar qualquer solicitação de reembolso caso identifique irregularidades operacionais, inconsistências cadastrais ou incumprimento das diretrizes internas.
+          </p>
+        </div>
+
+        <hr className="border-neutral-200" />
+
+        <div>
+          <h1 className="font-extrabold text-neutral-800 text-sm mb-1">Políticas de Recarga e Depósito</h1>
+          <p className="mt-2">
+            Para ativação dos produtos e serviços WS, os utilizadores poderão efetuar depósitos através dos métodos oficialmente disponibilizados pela empresa.
+          </p>
+          <h2 className="font-bold text-neutral-700 mt-2 mb-1">Métodos Aceites</h2>
+          <ul className="list-disc pl-5 mt-1 space-y-1">
+            <li>Moeda Local (AOA/KZ);</li>
+            <li>USDT (Rede TRC20).</li>
+          </ul>
+          <h2 className="font-bold text-neutral-700 mt-2 mb-1">Limites Operacionais</h2>
+          <ul className="list-disc pl-5 mt-1 space-y-1">
+            <li><strong>Depósito mínimo:</strong> {p.min_recharge_kz.toLocaleString('pt-AO')} AOA (Kwanzas);</li>
+            <li><strong>Depósito máximo:</strong> {p.max_recharge_kz.toLocaleString('pt-AO')} AOA (Kwanzas).</li>
+          </ul>
+          <p className="mt-2">
+            Todos os depósitos estão sujeitos à verificação interna, validação de segurança e confirmação financeira antes da disponibilização do saldo na conta do utilizador.
+          </p>
+          <p className="mt-2">
+            A empresa poderá solicitar comprovativos adicionais sempre que necessário para fins de conformidade e segurança financeira.
+          </p>
+        </div>
+
+        <hr className="border-neutral-200" />
+
+        <div>
+          <h1 className="font-extrabold text-neutral-800 text-sm mb-1">Políticas de Retirada</h1>
+          <p className="mt-2">
+            A Asiaray processa retiradas através das informações bancárias registadas pelo utilizador junto da empresa.
+          </p>
+          <h2 className="font-bold text-neutral-700 mt-2 mb-1">Limites de Retirada</h2>
+          <ul className="list-disc pl-5 mt-1 space-y-1">
+            <li><strong>Valor mínimo por retirada:</strong> {p.min_withdrawal_kz.toLocaleString('pt-AO')} AOA (Kwanzas);</li>
+            <li><strong>Limite máximo por operação:</strong> 100.000 AOA (Kwanzas).</li>
+          </ul>
+          <p className="mt-2">
+            O prazo de processamento poderá variar conforme:
+          </p>
+          <ul className="list-disc pl-5 mt-1 space-y-1">
+            <li>validação de segurança;</li>
+            <li>horários bancários;</li>
+            <li>volume operacional;</li>
+            <li>processamento das instituições financeiras.</li>
+          </ul>
+          <p className="mt-2">
+            O crédito poderá ocorrer entre 24 e 72 horas úteis, dependendo das condições operacionais e bancárias.
+          </p>
+        </div>
+
+        <hr className="border-neutral-200" />
+
+        <div>
+          <h1 className="font-extrabold text-neutral-800 text-sm mb-1">Taxas Operacionais</h1>
+          <p className="mt-2">
+            A Asiaray aplica políticas de sustentabilidade financeira destinadas à manutenção da infraestrutura tecnológica, segurança operacional, processamento de pagamentos, gestão administrativa, publicidade digital e estabilidade contínua dos seus serviços.
+          </p>
+          <h2 className="font-bold text-neutral-700 mt-2 mb-1">Taxa de Retirada</h2>
+          <p className="mt-2">
+            As retiradas realizadas pelos utilizadores estão sujeitas a uma taxa operacional de <strong>{p.withdrawal_fee_pct}%</strong> sobre o valor solicitado.
+          </p>
+          <p className="mt-2">
+            As taxas operacionais cobradas sobre determinadas operações têm como objetivo:
+          </p>
+          <ul className="list-disc pl-5 mt-1 space-y-1">
+            <li>garantir a sustentabilidade financeira da empresa;</li>
+            <li>assegurar a continuidade dos serviços e operações digitais;</li>
+            <li>reforçar os sistemas internos de segurança e proteção financeira;</li>
+            <li>suportar custos administrativos, tecnológicos e operacionais;</li>
+            <li>manter a estabilidade do sistema de pagamentos e processamento;</li>
+            <li>fortalecer os programas de publicidade e expansão da empresa;</li>
+            <li>reduzir riscos operacionais e atividades irregulares;</li>
+            <li>contribuir para a manutenção e crescimento da estrutura empresarial a longo prazo.</li>
+          </ul>
+          <p className="mt-2">
+            A empresa declara que parte significativa da sua sustentabilidade provém das atividades publicitárias, serviços digitais e mecanismos operacionais internos.
+          </p>
+        </div>
+
+        <hr className="border-neutral-200" />
+
+        <div>
+          <h1 className="font-extrabold text-neutral-800 text-sm mb-1">Política de Equipas e Expansão de Rede</h1>
+          <p className="mt-2">
+            A Asiaray disponibiliza um sistema estruturado de expansão de equipa através de códigos de convite personalizados, permitindo aos utilizadores desenvolver a sua rede de forma organizada e transparente.
+          </p>
+          <p className="mt-2">
+            Sempre que um novo membro realiza o registo utilizando um código de convite válido e efetua a ativação de um produto WS, o sistema poderá gerar bonificações automáticas ao utilizador responsável pela indicação, de acordo com os níveis de comissão definidos pela empresa.
+          </p>
+          <h2 className="font-bold text-neutral-700 mt-2 mb-1">Estrutura de Bonificações por Nível</h2>
+          <ul className="list-disc pl-5 mt-1 space-y-1">
+            <li><strong>Nível 1 (Convidados Diretos):</strong> 10% de bonificação;</li>
+            <li><strong>Nível 2:</strong> 5% de bonificação;</li>
+            <li><strong>Nível 3:</strong> 2% de bonificação.</li>
+          </ul>
+          <p className="mt-2">
+            As bonificações são calculadas conforme as operações elegíveis realizadas pelos membros da rede e estão sujeitas às regras internas, validações de segurança e conformidade operacional da empresa.
+          </p>
+          <p className="mt-2">
+            O crescimento e desempenho da equipa poderão influenciar:
+          </p>
+          <ul className="list-disc pl-5 mt-1 space-y-1">
+            <li>níveis de recompensa;</li>
+            <li>bonificações residuais;</li>
+            <li>classificação interna da conta;</li>
+            <li>acesso a campanhas promocionais;</li>
+            <li>benefícios operacionais e programas internos de incentivo.</li>
+          </ul>
+          <p className="mt-2">
+            A empresa reserva-se o direito de limitar, suspender ou cancelar bonificações em casos de atividades suspeitas, manipulação de rede, fraude, utilização de múltiplas contas ou qualquer violação das políticas internas.
+          </p>
+        </div>
+
+        <hr className="border-neutral-200" />
+
+        <div>
+          <h1 className="font-extrabold text-neutral-800 text-sm mb-1">Conformidade e Segurança</h1>
+          <p className="mt-2">
+            A Asiaray mantém políticas internas rigorosas de conformidade, segurança digital e monitorização operacional, com o objetivo de proteger os utilizadores e garantir estabilidade contínua dos seus serviços.
+          </p>
+          <p className="mt-2">
+            A empresa reserva-se o direito de:
+          </p>
+          <ul className="list-disc pl-5 mt-1 space-y-1">
+            <li>analisar atividades suspeitas;</li>
+            <li>solicitar verificação adicional de identidade;</li>
+            <li>bloquear operações consideradas irregulares;</li>
+            <li>suspender ou encerrar contas que violem os termos internos;</li>
+            <li>alterar limites operacionais, políticas financeiras ou critérios de elegibilidade sempre que necessário para garantir segurança e sustentabilidade dos serviços.</li>
+          </ul>
+          <div className="mt-4 p-3 bg-slate-100 border-l-4 border-[#1e88e5] rounded-lg">
+            <p className="text-[11px] font-semibold text-slate-700 italic">
+              Ao utilizar os serviços da Asiaray, o utilizador declara concordar integralmente com todas as políticas, diretrizes e termos operacionais estabelecidos pela empresa.
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </ModalBase>
+  );
+};
+
 export const DailyDeclarationModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
   const { stats, showLoading, hideLoading, ensureInternetConnectivity, user } = useApp();
 
