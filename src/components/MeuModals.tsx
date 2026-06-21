@@ -344,30 +344,41 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
       
       const fetchDbBanksAndPolicies = async () => {
         try {
-          // Fetch banks
-          const token = await getAccessToken();
-          if (token) {
-            const resp = await fetch(GATEWAY_URL, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-              },
-              body: JSON.stringify({ op: 207, data: {} })
-            });
-            const res = await resp.json();
-            if (res.success && Array.isArray(res.result)) {
-              setDbBanks(res.result);
+          // Fire both fetches at the same time
+          const policiesPromise = (async () => {
+            try {
+              const { data, error } = await supabase.rpc('get_company_policies');
+              if (!error && data) {
+                setPolicies(data);
+              } else {
+                console.error("Erro policies:", error);
+                setPolicies({ suggested_recharge_kz: [8000, 25000, 150000, 500000, 1500000] });
+              }
+            } catch (err) {
+              console.error("Erro promise policies:", err);
+              setPolicies({ suggested_recharge_kz: [8000, 25000, 150000, 500000, 1500000] });
             }
-          }
-          
-          // Fetch policies
-          const { data, error } = await supabase.rpc('get_company_policies');
-          if (!error && data) {
-            setPolicies(data);
-          }
+          })();
+
+          const banksPromise = (async () => {
+            const token = await getAccessToken();
+            if (token) {
+              const resp = await fetch(GATEWAY_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ op: 207, data: {} })
+              });
+              const res = await resp.json();
+              if (res.success && Array.isArray(res.result)) {
+                setDbBanks(res.result);
+              }
+            }
+          })();
+
+          await Promise.all([policiesPromise, banksPromise]);
         } catch (error) {
-          console.error("Erro ao obter dados iniciais:", error);
+          console.error("Erro geral inicial:", error);
+          if (!policies) setPolicies({ suggested_recharge_kz: [8000, 25000, 150000, 500000, 1500000] });
         } finally {
           setBanksLoaded(true);
         }
@@ -405,7 +416,10 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
   const currentFavorecido = selectedBankInfo ? selectedBankInfo.nome_favorecido : (selectedMethod === 'USDT-TRC20' ? 'USDT Wallet' : 'Asiarays grupo mídia lda');
   const tipoValue = selectedMethod === 'USDT-TRC20' ? 'USDT' : 'BANCO';
   const walletLabel = selectedMethod === 'USDT-TRC20' ? 'Número da carteira' : 'Número do IBAN';
-  const requisitoValue = selectedMethod === 'USDT-TRC20' ? (rechargeAmt / 430).toFixed(2) : `${rechargeAmt.toLocaleString('pt-AO')} KZ`;
+  const exchangeRate = (policies?.min_recharge_kz && policies?.min_recharge_usdt) 
+    ? (policies.min_recharge_kz / policies.min_recharge_usdt) 
+    : 1000;
+  const requisitoValue = selectedMethod === 'USDT-TRC20' ? (rechargeAmt / exchangeRate).toFixed(2) : `${rechargeAmt.toLocaleString('pt-AO')} KZ`;
 
   const copyCurrentAddress = () => {
     navigator.clipboard.writeText(currentAddress);
@@ -458,7 +472,7 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
 
       const opCode = isUSDT ? 206 : 205;
       const payload = isUSDT
-        ? { amount_usdt: parseFloat((rechargeAmt / 430).toFixed(2)), exchange_rate: 430 }
+        ? { amount_usdt: parseFloat((rechargeAmt / exchangeRate).toFixed(2)), exchange_rate: exchangeRate }
         : { amount: rechargeAmt, bank_name: selectedMethod, iban: currentAddress, comprovante_url: base64Image };
 
       const resp = await fetch(GATEWAY_URL, {
@@ -534,16 +548,20 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
               </div>
 
               <div className="grid grid-cols-3 gap-2">
-                {(policies?.suggested_recharge_kz || [10000, 20000, 50000, 100000, 150000, 300000]).map((val: number) => (
-                  <button
-                    key={val}
-                    type="button"
-                    onClick={() => setRechargeAmt(val)}
-                    className={`py-2.5 px-1 text-center font-bold rounded-sm border text-[11px] cursor-pointer transition-all ${rechargeAmt === val ? 'bg-[#1e88e5] border-[#1e88e5] text-white' : 'bg-white border-neutral-200 text-neutral-600 hover:bg-neutral-50'}`}
-                  >
-                    {val.toLocaleString('pt-AO')}
-                  </button>
-                ))}
+                {!policies ? (
+                  <div className="col-span-3 text-center text-xs text-gray-500 py-4">A carregar valores...</div>
+                ) : (
+                  (policies.suggested_recharge_kz || []).map((val: number) => (
+                    <button
+                      key={val}
+                      type="button"
+                      onClick={() => setRechargeAmt(val)}
+                      className={`py-2.5 px-1 text-center font-bold rounded-sm border text-[11px] cursor-pointer transition-all ${rechargeAmt === val ? 'bg-[#1e88e5] border-[#1e88e5] text-white' : 'bg-white border-neutral-200 text-neutral-600 hover:bg-neutral-50'}`}
+                    >
+                      {val.toLocaleString('pt-AO')}
+                    </button>
+                  ))
+                )}
               </div>
 
               <div className="flex flex-col items-center justify-center pt-2 select-none">
