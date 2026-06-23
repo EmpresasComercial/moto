@@ -964,25 +964,20 @@ export const TeamReportModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   // Process the raw array from get_my_team
-  const rawTeam = Array.isArray(teamData) 
-    ? teamData 
+  // Note: Use Number() for level comparison - Supabase RPC may return level as string or number
+  const rawTeam: any[] = Array.isArray(teamData)
+    ? teamData
     : (teamData?.team && Array.isArray(teamData.team) ? teamData.team : []);
-  
-  const levelUm = rawTeam.filter((m: any) => m.level === 1).map((m: any) => ({
+
+  const mapMember = (m: any) => ({
     phone: m.phone,
     date: m.created_at ? new Date(m.created_at).toISOString().split('T')[0] : '',
     amount: Number(m.reloaded_amount || 0).toFixed(2)
-  }));
-  const secundario = rawTeam.filter((m: any) => m.level === 2).map((m: any) => ({
-    phone: m.phone,
-    date: m.created_at ? new Date(m.created_at).toISOString().split('T')[0] : '',
-    amount: Number(m.reloaded_amount || 0).toFixed(2)
-  }));
-  const nivelTres = rawTeam.filter((m: any) => m.level === 3).map((m: any) => ({
-    phone: m.phone,
-    date: m.created_at ? new Date(m.created_at).toISOString().split('T')[0] : '',
-    amount: Number(m.reloaded_amount || 0).toFixed(2)
-  }));
+  });
+
+  const levelUm   = rawTeam.filter((m: any) => Number(m.level) === 1).map(mapMember);
+  const secundario = rawTeam.filter((m: any) => Number(m.level) === 2).map(mapMember);
+  const nivelTres  = rawTeam.filter((m: any) => Number(m.level) === 3).map(mapMember);
 
   const getMemberList = () => {
     switch (activeTab) {
