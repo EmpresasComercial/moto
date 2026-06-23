@@ -206,7 +206,7 @@ const GoldCoinIcon: React.FC = () => (
 
 // 3-A. CURRENCY CONVERTER MODAL (USD → KZ at fixed rate 805 KZ/USD)
 export const CurrencyConverterModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, onClose }) => {
-  const { stats, convertUsdToKz, setIsFullScreenActive } = useApp();
+  const { stats, user, convertUsdToKz, setIsFullScreenActive } = useApp();
   const [usdInput, setUsdInput] = useState<string>('');
 
   React.useEffect(() => {
@@ -225,6 +225,37 @@ export const CurrencyConverterModal: React.FC<{ isOpen: boolean; onClose: () => 
 
   const handleConvert = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (usdVal < 1 || stats.balanceUSDT < 1 || stats.balanceUSDT < usdVal) {
+      alert("Balance insufiente, mínimo 1usdt");
+      return;
+    }
+
+    if (usdVal > 50) {
+      alert("Balance, máximo para conversão 50usdt");
+      return;
+    }
+
+    // Days and Hours validation in Luanda timezone (UTC+1)
+    const nowLuanda = new Date(new Date().toLocaleString("en-US", { timeZone: "Africa/Luanda" }));
+    const dow = nowLuanda.getDay(); // 0=Domingo, 1=Segunda, ..., 6=Sábado
+    if (dow === 0 || dow === 5 || dow === 6) {
+      alert("Sem câmbio aos fins de semana");
+      return;
+    }
+
+    const hour = nowLuanda.getHours();
+    if (hour < 10 || hour >= 16) {
+      alert("as conversões só são permitidas entre as 10:00 e 16:00 (horário de Luanda)");
+      return;
+    }
+
+    // Purchase check (VIP level must be >= WS1)
+    if (!user.level || user.level === 'WS0') {
+      alert("Necessita de um produto ativo de no mínimo 8.000 KZ para converter.");
+      return;
+    }
+
     const result = await convertUsdToKz(usdVal);
     alert(result.message);
     if (result.success) {
