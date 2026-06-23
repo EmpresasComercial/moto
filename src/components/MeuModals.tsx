@@ -258,7 +258,7 @@ export const CurrencyConverterModal: React.FC<{ isOpen: boolean; onClose: () => 
             <div className="border-b border-gray-200">
               <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">Saldo disponível (USDT)</div>
               <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] border-t border-gray-200 font-bold font-mono">
-                {(stats.balanceUSDT / 1000).toFixed(2)} USD
+                {stats.balanceUSDT.toFixed(2)} USD
               </div>
             </div>
 

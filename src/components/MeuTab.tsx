@@ -391,7 +391,7 @@ export const MeuTab: React.FC = () => {
             <div className="pl-2">
               <span className="text-[11px] font-bold text-[#ff3b30]">USDT_TRC</span>
               <div className="text-[18px] font-bold text-[#ff3b30] mt-1">
-                {Math.max(0, stats.balanceUSDT / 1000).toFixed(2)}
+                {Math.max(0, stats.balanceUSDT).toFixed(2)}
               </div>
             </div>
           </div>
