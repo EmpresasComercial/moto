@@ -76,7 +76,7 @@ function roleAllowed(userRole: string, op: number): boolean {
 function decodeJwtPayload(token: string): Record<string, unknown> {
   const parts = token.split(".");
   if (parts.length !== 3) {
-    throw new Error("JWT inválido");
+    throw new Error("Sessão inválida. Por favor, inicie sessão novamente.");
   }
 
   const payload = parts[1]
@@ -96,11 +96,11 @@ function assertTokenFresh(token: string) {
   const exp = payload.exp;
 
   if (typeof iat !== "number" || typeof exp !== "number") {
-    throw new Error("JWT sem iat/exp");
+    throw new Error("Sessão inválida. Por favor, inicie sessão novamente.");
   }
 
   if (now >= exp) {
-    throw new Error("SESSION_EXPIRED: Token expirado.");
+    throw new Error("SESSION_EXPIRED: A sua sessão expirou. Por favor, inicie sessão novamente.");
   }
 
   if (now - iat > MAX_TOKEN_AGE_SECONDS) {
@@ -136,7 +136,7 @@ serve(async (req) => {
 
     const { data: userData, error: userError } = await supabaseAdmin.auth.getUser(token);
     if (userError || !userData?.user) {
-      return json(401, { success: false, error: "Token inválido" });
+      return json(401, { success: false, error: "Sessão inválida. Por favor, inicie sessão novamente." });
     }
 
     const user = userData.user;
@@ -144,7 +144,6 @@ serve(async (req) => {
       user.app_metadata?.role ?? user.user_metadata?.role ?? "user",
     ).toLowerCase();
 
-    // Create a user-scoped client so that auth.uid() evaluates correctly in Postgres!
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_ANON_KEY")!,
@@ -162,21 +161,21 @@ serve(async (req) => {
 
     const raw = await req.text();
     if (!raw || raw.length > MAX_BODY_BYTES) {
-      return json(413, { success: false, error: "Payload inválido" });
+      return json(413, { success: false, error: "Pedido inválido. Tente novamente." });
     }
 
     let body: any;
     try {
       body = JSON.parse(raw);
     } catch {
-      return json(400, { success: false, error: "JSON inválido" });
+      return json(400, { success: false, error: "Pedido inválido. Tente novamente." });
     }
 
     const op = Number(body?.op);
     const payload = body?.data ?? {};
 
     if (!Number.isInteger(op)) {
-      return json(400, { success: false, error: "OP inválido" });
+      return json(400, { success: false, error: "Pedido inválido. Tente novamente." });
     }
 
     if (!roleAllowed(userRole, op)) {
@@ -364,7 +363,7 @@ serve(async (req) => {
 
       case 414: {
         if (!mustBeNonEmptyString(payload.id)) {
-          return json(400, { success: false, error: "ID inválido" });
+          return json(400, { success: false, error: "Conta bancária não encontrada." });
         }
 
         const { data, error } = await supabase.rpc("delete_client_bank", {
@@ -378,7 +377,7 @@ serve(async (req) => {
 
       case 415: {
         if (!mustBeNonEmptyString(payload.new_pin)) {
-          return json(400, { success: false, error: "Novo PIN inválido" });
+          return json(400, { success: false, error: "O novo código de pagamento é inválido. Tente novamente." });
         }
 
         const { data, error } = await supabase.rpc("update_payment_pin", {
@@ -402,7 +401,6 @@ serve(async (req) => {
           return json(400, { success: false, error: "Produto inválido" });
         }
 
-        // Executar a compra de forma transacional e segura diretamente na RPC
         const { data, error } = await supabase.rpc("purchase_product", {
           p_product_id: productId,
         });
@@ -434,7 +432,7 @@ serve(async (req) => {
 
       case 701: {
         if (!mustBeNonEmptyString(payload.code)) {
-          return json(400, { success: false, error: "Código inválido" });
+          return json(400, { success: false, error: "Código de oferta inválido. Verifique e tente novamente." });
         }
 
         const { data, error } = await supabase.rpc("redeem_gift_code", {
@@ -454,7 +452,7 @@ serve(async (req) => {
       }
 
       case 602: {
-        if (!payload.shop_id) return json(400, { success: false, error: "Missing shop_id" });
+        if (!payload.shop_id) return json(400, { success: false, error: "Artigo não encontrado. Tente novamente." });
         const { data, error } = await supabase.rpc("claim_daily_task", { p_shop_id: payload.shop_id });
         if (error) throw error;
         if (!data?.success) return json(400, data);
@@ -463,7 +461,7 @@ serve(async (req) => {
       }
 
       case 603: {
-        if (!payload.tarefa_agd_id) return json(400, { success: false, error: "Missing tarefa_agd_id" });
+        if (!payload.tarefa_agd_id) return json(400, { success: false, error: "Tarefa não encontrada. Tente novamente." });
         const { data, error } = await supabase.rpc("complete_daily_task", { p_tarefa_agd_id: payload.tarefa_agd_id });
         if (error) throw error;
         if (!data?.success) return json(400, data);
@@ -556,7 +554,7 @@ serve(async (req) => {
       }
 
       default:
-        return json(400, { success: false, error: "Operação inválida" });
+        return json(400, { success: false, error: "Pedido inválido. Tente novamente." });
     }
 
     return json(200, {

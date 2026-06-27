@@ -438,10 +438,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
   }, []);
 
-  // Load real-time financial stats from Database via Gateway (OP: 102)
-  // NOTE: Does NOT update balance/balanceUSDT — those are exclusively owned by
-  // refreshUserProfile to avoid the double-render flicker where both functions
-  // race to set the balance causing it to flash on screen.
   const fetchFinancialStats = async (showLoader: boolean = false) => {
     try {
       const gw = await gatewayFetch(102, {}, showLoader ? 'Carregando estatísticas...' : false);
@@ -500,7 +496,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return () => clearInterval(interval);
   }, [isLoggedIn, isSessionExpired]);
 
-  // Setup Supabase Realtime subscriptions for profiles and tarefas_diarias
   useEffect(() => {
     if (!isLoggedIn || !user?.id || isSessionExpired) return;
 
@@ -581,7 +576,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (error) throw new Error(error.message);
       if (!data.session || !data.user) throw new Error('Sessão não criada');
 
-      // Buscar perfil real do utilizador via gateway OP 101
       const token = data.session.access_token;
       let profileData: any = null;
       try {
@@ -645,7 +639,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setIsLoggedIn(false);
   };
 
-  // Registro real via Supabase Auth — triggers do banco fazem o resto
   const registerUser = async (phone: string, pin: string, inviteCode: string): Promise<void> => {
     if (!(await ensureInternetConnectivity())) {
       throw new Error('Sem conexão de internet. Verifique WiFi ou dados móveis.');
@@ -672,7 +665,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       // silent — ip fetch failed
     }
 
-    // 1. Cadastro no Supabase Auth (signUp)
     const { data, error } = await supabase.auth.signUp({
       email,
       password: pin,
@@ -699,9 +691,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       throw new Error('Erro ao criar conta.');
     }
 
-    // 2. Se retornou sessão, o utilizador já está autenticado
     if (data.session) {
-      // Buscar perfil criado pelo trigger via gateway OP 101
       const token = data.session.access_token;
       let profileData: any = null;
       try {
@@ -951,7 +941,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
-  // Convert USDT balance to KZ via Gateway OP 310 calling transfer_reproducao_to_balance
   const convertUsdToKz = async (usdAmount: number): Promise<{ success: boolean; message: string }> => {
     try {
       const gw = await gatewayFetch(310, { amount_usd: usdAmount });
@@ -980,8 +969,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
-  // Update bank
-  // Atualiza banco via gateway OP 412 (add_bank_account)
   const updateBankInfo = async (bankName: string, bankAccount: string, holderName: string): Promise<{success: boolean; message: string}> => {
     const gw = await gatewayFetch(412, {
       bank_name: bankName,
@@ -1000,7 +987,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const resultMsg = resData.result?.message || 'Operação concluída.';
     return { success: true, message: resultMsg };
   };
-  // Fetch withdrawal records from backend (gateway op 311)
   const fetchWithdrawalRecords = async () => {
     try {
       const gw = await gatewayFetch(311);
@@ -1020,8 +1006,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return [];
   };
 
-  // Refresh user profile from backend (gateway op 101 → get_user_profile)
-  // Returns: id, phone, balance, invite_code, balance_correte
   const refreshUserProfile = async (useLoading: boolean = true) => {
     try {
       const gw = await gatewayFetch(101, {}, useLoading ? 'Carregando perfil...' : false);

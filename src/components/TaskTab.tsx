@@ -10,7 +10,6 @@ interface TaskTabProps {
   setActiveTab: (tab: string) => void;
 }
 
-// ─── Shop item from the database ───
 interface ShopItem {
   id: number;
   user_id: string;
@@ -23,8 +22,6 @@ interface ShopItem {
   status: string;
   reivindicado?: boolean;
 }
-
-// ─── Inline SVGs for tab header icons ───
 
 const WhatsappWordmark: React.FC = () => (
   <div className="flex flex-col items-center select-none pt-0.5">
@@ -97,24 +94,20 @@ const CardLeftLogo: React.FC<{ type: TaskType }> = ({ type }) => {
   );
 };
 
-// ─── Calculate remaining profit for a shop item ───
 function calcLucroRestante(item: ShopItem): number {
   const hoje = new Date();
   hoje.setHours(0, 0, 0, 0);
   const dataCompra = new Date(item.data_compra);
   dataCompra.setHours(0, 0, 0, 0);
-
   const diffMs = hoje.getTime() - dataCompra.getTime();
   const diasPassados = Math.max(0, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
   const diasRestantes = Math.max(0, item.duracao_dias - diasPassados);
   return Number((item.rendimento_diario * diasRestantes).toFixed(2));
 }
 
-// ─── localStorage helpers for claimed tasks (global across all 3 tabs) ───
 const CLAIMED_TASKS_KEY = 'tasktab_claimed_tasks';
 const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
 
-// Record<shopId, claimedAtTimestamp>
 function loadClaimedTasks(): Record<number, number> {
   try {
     const raw = localStorage.getItem(CLAIMED_TASKS_KEY);
@@ -129,7 +122,6 @@ function saveClaimedTasks(data: Record<number, number>): void {
   localStorage.setItem(CLAIMED_TASKS_KEY, JSON.stringify(data));
 }
 
-// Purge entries older than 24h and return clean record
 function getPurgedClaimedTasks(): Record<number, number> {
   const now = Date.now();
   const data = loadClaimedTasks();
@@ -146,14 +138,10 @@ function getPurgedClaimedTasks(): Record<number, number> {
 export const TaskTab: React.FC<TaskTabProps> = ({ selectedCategory, setSelectedCategory, setActiveTab }) => {
   const { user, isSessionExpired, showLoading, hideLoading, ensureInternetConnectivity, addToast } = useApp();
 
-  // Shop items fetched from the database (op 601)
   const [shopItems, setShopItems] = useState<ShopItem[]>([]);
   const [loading, setLoading] = useState(true);
-
-  // Map of shopId -> claimedAt timestamp (persisted in localStorage, global across all tabs)
   const [claimedTasks, setClaimedTasks] = useState<Record<number, number>>(() => getPurgedClaimedTasks());
 
-  // Fetch user's active shop items from gateway
   useEffect(() => {
     if (isSessionExpired) return;
 
@@ -171,11 +159,9 @@ export const TaskTab: React.FC<TaskTabProps> = ({ selectedCategory, setSelectedC
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
           },
-
           body: JSON.stringify({ op: 601, data: {} })
         });
 
-        // Intercept 401/force_logout
         if (resp.status === 401) {
           const errData = await resp.json().catch(() => ({}));
           const msg = errData?.error || 'Sessão inválida. Faça login novamente.';
@@ -190,8 +176,8 @@ export const TaskTab: React.FC<TaskTabProps> = ({ selectedCategory, setSelectedC
             setShopItems(res.result);
           }
         }
-      } catch (err) {
-        console.error('Error loading shop items:', err);
+      } catch {
+        // silent
       } finally {
         hideLoading();
         setLoading(false);
@@ -200,7 +186,6 @@ export const TaskTab: React.FC<TaskTabProps> = ({ selectedCategory, setSelectedC
     loadShopItems();
   }, [isSessionExpired]);
 
-  // Re-sync claimed state from localStorage when window regains focus
   useEffect(() => {
     const onFocus = () => {
       setClaimedTasks(getPurgedClaimedTasks());
@@ -211,7 +196,6 @@ export const TaskTab: React.FC<TaskTabProps> = ({ selectedCategory, setSelectedC
 
   const [claimingId, setClaimingId] = useState<number | null>(null);
 
-  // Returns true if this shopId was claimed less than 24h ago or is marked claimed by DB
   const isClaimed = (item: ShopItem): boolean => {
     if (item.reivindicado) return true;
     const ts = claimedTasks[item.id];
@@ -222,11 +206,11 @@ export const TaskTab: React.FC<TaskTabProps> = ({ selectedCategory, setSelectedC
   const handleClaimTask = async (shopId: number) => {
     if (isSessionExpired || claimingId !== null) return;
     const targetItem = shopItems.find(i => i.id === shopId);
-    if (targetItem && isClaimed(targetItem)) return; // already claimed — guard
+    if (targetItem && isClaimed(targetItem)) return;
     if (!(await ensureInternetConnectivity())) { return; }
     setClaimingId(shopId);
     showLoading('Requisitando tarefa...');
-    
+
     try {
       const token = await getAccessToken();
       if (!token) { hideLoading(); setClaimingId(null); return; }
@@ -261,28 +245,24 @@ export const TaskTab: React.FC<TaskTabProps> = ({ selectedCategory, setSelectedC
         setClaimedTasks(updatedClaimedTasks);
         saveClaimedTasks(updatedClaimedTasks);
       } else {
-        addToast(res?.error || res?.message || `Erro no servidor (Status ${resp.status})`, 'error');
+        addToast(res?.error || res?.message || 'Não foi possível reivindicar a tarefa.', 'error');
       }
-    } catch (err: any) {
-      console.error('Error claiming task:', err);
-      addToast(err?.message || String(err), 'error');
+    } catch {
+      addToast('Erro de rede. Tente novamente.', 'error');
     } finally {
       hideLoading();
       setClaimingId(null);
     }
   };
 
-  // All 3 tabs show the same shop data
   const displayItems = shopItems;
 
   return (
     <div id="tasks-screen-wrapper" className="min-h-screen bg-stone-100/60 pb-20 relative font-sans">
-      
-      {/* 1. Header Channel Selector Category from Image */}
+
       <div className="bg-white grid grid-cols-3 border-b border-zinc-200 shadow-xs px-3 py-3 gap-2" id="tasks-filter-selection-grid">
-        
-        {/* Whatsapp Selector */}
-        <div 
+
+        <div
           onClick={() => setSelectedCategory('Whatsapp')}
           className={`cursor-pointer pb-2 flex flex-col items-center justify-center transition-all ${
             selectedCategory === 'Whatsapp' ? 'border-b-[3px] border-green-500 scale-[1.02]' : 'opacity-65 hover:opacity-100'
@@ -292,8 +272,7 @@ export const TaskTab: React.FC<TaskTabProps> = ({ selectedCategory, setSelectedC
           <WhatsappWordmark />
         </div>
 
-        {/* Tiktok Selector */}
-        <div 
+        <div
           onClick={() => setSelectedCategory('Tiktok')}
           className={`cursor-pointer pb-2 flex flex-col items-center justify-center transition-all ${
             selectedCategory === 'Tiktok' ? 'border-b-[3px] border-black scale-[1.02]' : 'opacity-65 hover:opacity-100'
@@ -303,8 +282,7 @@ export const TaskTab: React.FC<TaskTabProps> = ({ selectedCategory, setSelectedC
           <TiktokLogo />
         </div>
 
-        {/* Facebook Selector */}
-        <div 
+        <div
           onClick={() => setSelectedCategory('Facebook')}
           className={`cursor-pointer pb-2 flex flex-col items-center justify-center transition-all ${
             selectedCategory === 'Facebook' ? 'border-b-[3px] border-blue-600 scale-[1.02]' : 'opacity-65 hover:opacity-100'
@@ -316,7 +294,6 @@ export const TaskTab: React.FC<TaskTabProps> = ({ selectedCategory, setSelectedC
 
       </div>
 
-      {/* 2. Tasks Grid List — data from shop table */}
       <div className="p-3.5 space-y-3" id="tasks-list-cards-viewport">
         {loading ? (
           <div className="flex items-center justify-center py-20">
@@ -335,18 +312,15 @@ export const TaskTab: React.FC<TaskTabProps> = ({ selectedCategory, setSelectedC
             const isProcessing = claimingId === item.id;
 
             return (
-              <div 
+              <div
                 key={item.id}
                 className="bg-white rounded-sm border border-zinc-200/85 shadow-xs overflow-hidden flex min-h-[105px]"
                 id={`task-card-item-${item.id}`}
               >
-                {/* Left side logo column */}
                 <CardLeftLogo type={selectedCategory} />
 
-                {/* Central meta information column */}
                 <div className="flex-1 p-3 flex flex-col justify-between text-left select-none pr-1">
-                  
-                  {/* Row 1: demander = nome_produto + PAGO badge */}
+
                   <div className="text-[12.5px] text-zinc-500 font-sans tracking-tight leading-none">
                     demander: <span className="font-semibold text-zinc-700">{item.nome_produto}</span>{' '}
                     {item.status === 'ativo' && (
@@ -354,27 +328,22 @@ export const TaskTab: React.FC<TaskTabProps> = ({ selectedCategory, setSelectedC
                     )}
                   </div>
 
-                  {/* Row 2: preco from shop table */}
                   <div className="text-[13px] font-black text-[#27272a] font-sans tracking-wide leading-tight mt-1">
                     {Number(item.preco).toFixed(2)} KZ
                   </div>
 
-                  {/* Row 3: restante = lucro restante calculado */}
                   <div className="text-[11px] text-zinc-400 font-sans mt-0.5">
                     restante: <span className="text-zinc-900 font-extrabold text-[12px]">{lucroRestante}</span>
                   </div>
 
-                  {/* Row 4: Objectivo da tarefa = nome_produto */}
                   <div className="text-[11.5px] text-zinc-500 font-sans mt-1">
                     Objectivo da tarefa: <span className="text-zinc-700 font-medium">{item.nome_produto}</span>
                   </div>
 
                 </div>
 
-                {/* Right actions column */}
                 <div className="p-3 flex items-center justify-center shrink-0">
                   {claimed ? (
-                    /* ── CLAIMED STATE: neutral, disabled — same across all 3 tabs ── */
                     <button
                       disabled
                       id={`get-task-btn-${item.id}`}
@@ -383,7 +352,6 @@ export const TaskTab: React.FC<TaskTabProps> = ({ selectedCategory, setSelectedC
                       Reivindicado
                     </button>
                   ) : (
-                    /* ── AVAILABLE STATE: orange gradient ── */
                     <button
                       onClick={() => handleClaimTask(item.id)}
                       disabled={isProcessing}

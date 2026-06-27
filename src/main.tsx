@@ -4,7 +4,6 @@ import {BrowserRouter} from 'react-router-dom';
 import App from './App.tsx';
 import './index.css';
 
-// Global fetch interceptor to catch unauthorized/expired session API responses
 const originalFetch = window.fetch;
 window.fetch = async (...args) => {
   const response = await originalFetch(...args);

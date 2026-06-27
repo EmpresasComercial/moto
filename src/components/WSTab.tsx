@@ -4,7 +4,6 @@ import { useApp } from '../context/AppContext';
 import { Check, User } from 'lucide-react';
 import { GATEWAY_URL, getAccessToken } from '../lib/supabase';
 
-// Custom high-fidelity credit card SVG resembling a standard blue bank card with golden chip
 const BlueCardIcon: React.FC = () => (
   <svg className="w-[30px] h-[21px] rounded-[3px] shadow-xs select-none shrink-0" viewBox="0 0 30 21" fill="none" xmlns="http://www.w3.org/2000/svg">
     <rect width="30" height="21" rx="2.5" fill="#1b4d89" />
@@ -18,7 +17,6 @@ const BlueCardIcon: React.FC = () => (
   </svg>
 );
 
-// Custom high-fidelity Tether/USDT gold coin icon resembling the cryptocurrency symbol from the screenshot
 const GoldCoinIcon: React.FC = () => (
   <svg className="w-[26px] h-[26px] select-none shrink-0" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
     <circle cx="13" cy="13" r="11.5" fill="#fffbeb" stroke="#f59e0b" strokeWidth="2.2" />
@@ -34,7 +32,6 @@ export const WSTab: React.FC = () => {
   const { user, isSessionExpired, showLoading, hideLoading, ensureInternetConnectivity } = useApp();
 
   const [dbProducts, setDbProducts] = useState<any[]>([]);
-  // Set of WS names the user has already purchased and are active (e.g. "WS1", "WS2")
   const [purchasedNames, setPurchasedNames] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -47,7 +44,6 @@ export const WSTab: React.FC = () => {
         const token = await getAccessToken();
         if (!token) return;
 
-        // Fetch products catalog (op 512) and user's purchased items (op 601) in parallel
         const [respProducts, respShop] = await Promise.all([
           fetch(GATEWAY_URL, {
             method: 'POST',
@@ -77,13 +73,11 @@ export const WSTab: React.FC = () => {
         if (respShop.ok) {
           const shopRes = await respShop.json();
           if (shopRes?.success && Array.isArray(shopRes.result)) {
-            // Build a set of purchased product names (e.g. "WS1", "WS2")
             const names = new Set<string>(shopRes.result.map((s: any) => String(s.nome_produto || '').toUpperCase()));
             setPurchasedNames(names);
           }
         }
-      } catch (err) {
-        console.error('Erro ao buscar produtos:', err);
+      } catch {
       } finally {
         hideLoading();
       }
@@ -117,13 +111,9 @@ export const WSTab: React.FC = () => {
     };
   }).sort((a, b) => a.price - b.price);
 
-  // Get current user's VIP config details
   const currentTier = tiers.find(t => t.level === user.level) || tiers[0] || { dailyTasks: 0 };
 
-  // Handle standard level clicks -> now navigates to purchase details page
   const handleUpgradeClick = (tier: any) => {
-    // Permite a compra livre por saldo: qualquer usuário pode comprar qualquer WS em qualquer ordem.
-    // Navega para a tela de detalhes de compra passando o produto selecionado no botão.
     navigate(`/ws/compra/${tier.level}`, { state: { tier } });
   };
 
@@ -190,7 +180,6 @@ export const WSTab: React.FC = () => {
                 {/* Right side: check icon if purchased, buy button if not */}
                 <div className="pr-1 pt-1">
                   {isPurchased ? (
-                    // Green circle check — product already owned
                     <div
                       id={`buy-button-${tier.level}`}
                       className="h-[32px] w-[32px] rounded-full bg-green-500 flex items-center justify-center shadow-md border-2 border-white/80"
