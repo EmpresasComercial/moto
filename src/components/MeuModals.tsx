@@ -63,6 +63,34 @@ export const BankModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
   const [bank, setBank] = useState('Banco BAI');
   const [account, setAccount] = useState('');
   const [holder, setHolder] = useState('');
+  const accountInputRef = React.useRef<HTMLInputElement>(null);
+
+  const bankCodes: Record<string, string> = {
+    'Banco BAI': '0040',
+    'Banco BFA': '0006',
+    'Banco BIC': '0051',
+    'Banco BCI': '0005',
+    'Banco Sol': '0044',
+    'Banco ATL': '0055'
+  };
+
+  const handleBankChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedBank = e.target.value;
+    setBank(selectedBank);
+    const code = bankCodes[selectedBank] || '';
+    setAccount(code);
+    setTimeout(() => {
+      if (accountInputRef.current) {
+        accountInputRef.current.focus();
+        accountInputRef.current.setSelectionRange(code.length, code.length);
+      }
+    }, 0);
+  };
+
+  const handleAccountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value.replace(/\s/g, '').replace(/[^0-9]/g, '');
+    setAccount(val);
+  };
 
   const handleSave = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -86,8 +114,7 @@ export const BankModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
     'Banco BIC',
     'Banco BCI',
     'Banco Sol',
-    'Banco ATL',
-    'Standard Bank Angola'
+    'Banco ATL'
   ];
 
   if (!isOpen) return null;
@@ -117,7 +144,7 @@ export const BankModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
               <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] border-t border-gray-200">
                 <select 
                   value={bank} 
-                  onChange={(e) => setBank(e.target.value)}
+                  onChange={handleBankChange}
                   className="bg-transparent border-none outline-none w-full text-neutral-800 text-[12px] font-sans font-bold"
                 >
                   {banksList.map((b, idx) => (
@@ -132,10 +159,14 @@ export const BankModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
               <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">IBAN de Angola (AO06...)</div>
               <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] border-t border-gray-200">
                 <input 
+                  ref={accountInputRef}
                   type="text"
-                  placeholder="AO06 0000 0000 0000 0000 0000 0"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  maxLength={21}
+                  placeholder="0040 0000 0000 0000 0000 0"
                   value={account}
-                  onChange={(e) => setAccount(e.target.value)}
+                  onChange={handleAccountChange}
                   className="bg-transparent border-none outline-none w-full text-neutral-800 text-[12px] font-sans font-bold"
                 />
               </div>
@@ -252,7 +283,7 @@ export const CurrencyConverterModal: React.FC<{ isOpen: boolean; onClose: () => 
 
     // Purchase check (VIP level must be >= WS1)
     if (!user.level || user.level === 'WS0') {
-      alert("Necessita de um produto ativo de no mínimo 8.000 KZ para converter.");
+      alert("Recarregue para converter seus USDT");
       return;
     }
 
@@ -357,13 +388,12 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
   
   const [rechargeStep, setRechargeStep] = useState<'amount' | 'method' | 'instructions'>('amount');
   const [rechargeAmt, setRechargeAmt] = useState<number>(0);
-  const [selectedMethod, setSelectedMethod] = useState<'BIC' | 'BFA' | 'Atlântico' | 'BCI' | 'BAI' | 'USDT-TRC20'>('BFA');
+  const [selectedMethod, setSelectedMethod] = useState<string>('BFA');
   const [comprovativo, setComprovativo] = useState<string>('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [filePreview, setFilePreview] = useState<string>('');
   const [fileLabel, setFileLabel] = useState<string>('Nenhum arquivo escolhido');
   const [ibanCopied, setIbanCopied] = useState(false);
-  const [usdtCopied, setUsdtCopied] = useState(false);
 
   const [dbBanks, setDbBanks] = useState<{ id: string; nome_do_banco: string; iban: string; nome_favorecido: string }[]>([]);
   const [banksLoaded, setBanksLoaded] = useState(false);
@@ -377,17 +407,38 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
         try {
           // Fire both fetches at the same time
           const policiesPromise = (async () => {
-            try {
-              const { data, error } = await supabase.rpc('get_company_policies');
-              if (!error && data) {
-                setPolicies(data);
-              } else {
-                console.error("Erro policies:", error);
-                setPolicies({ suggested_recharge_kz: [8000, 25000, 150000, 500000, 1500000] });
+            const token = await getAccessToken();
+            if (token) {
+              try {
+                const resp = await fetch(GATEWAY_URL, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                  body: JSON.stringify({ op: 512, data: {} })
+                });
+                const res = await resp.json();
+                if (res.success && Array.isArray(res.result)) {
+                  const prods = res.result;
+                  const suggested = Array.from(new Set(prods.filter((p: any) => Number(p.price) > 0).map((p: any) => Number(p.price)))).sort((a: any, b: any) => a - b);
+                  setPolicies({
+                    min_recharge_kz: res.min_recharge_kz || 0,
+                    min_recharge_usdt: res.min_recharge_usdt || 0,
+                    max_recharge_kz: res.max_recharge_kz || 0,
+                    min_withdrawal_kz: res.min_withdrawal_kz || 0,
+                    withdrawal_fee_pct: res.withdrawal_fee_pct || 0,
+                    refund_days: res.refund_days || 0,
+                    refund_min_subordinates: res.refund_min_subordinates || 0,
+                    suggested_recharge_kz: suggested.length > 0 ? suggested : (res.suggested_recharge_kz || []),
+                    products: prods
+                  });
+                } else {
+                  // Gateway did not return products — silent fallback
+                  setPolicies({ suggested_recharge_kz: [] });
+                }
+              } catch {
+                setPolicies({ suggested_recharge_kz: [] });
               }
-            } catch (err) {
-              console.error("Erro promise policies:", err);
-              setPolicies({ suggested_recharge_kz: [8000, 25000, 150000, 500000, 1500000] });
+            } else {
+              setPolicies({ suggested_recharge_kz: [] });
             }
           })();
 
@@ -407,9 +458,8 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
           })();
 
           await Promise.all([policiesPromise, banksPromise]);
-        } catch (error) {
-          console.error("Erro geral inicial:", error);
-          if (!policies) setPolicies({ suggested_recharge_kz: [8000, 25000, 150000, 500000, 1500000] });
+        } catch {
+          if (!policies) setPolicies({ suggested_recharge_kz: [] });
         } finally {
           setBanksLoaded(true);
         }
@@ -423,8 +473,6 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
     };
   }, [isOpen, setIsFullScreenActive]);
 
-  const USDT_ADDR = 'TQdoJo3s13AtTPY1NZsnxrnLdLwJFSCqT1';
-
   React.useEffect(() => {
     return () => {
       if (filePreview) {
@@ -433,18 +481,10 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
     };
   }, [filePreview]);
 
-  const ibanMap: Record<string, string> = {
-    BIC: 'AO06 0005 0622 9312 4210 1785 4',
-    BFA: 'AO06 0006 1145 9312 4224 5013 7',
-    Atlântico: 'AO06 0055 3514 9312 4211 4058 9',
-    BCI: 'AO06 0009 0081 9312 4235 1251 2',
-    BAI: 'AO06 0005 0000 1579 1775 1010 5',
-  };
-
   const selectedBankInfo = dbBanks.find(b => b.nome_do_banco === selectedMethod);
 
-  const currentAddress = selectedBankInfo ? selectedBankInfo.iban : (selectedMethod === 'USDT-TRC20' ? USDT_ADDR : ibanMap[selectedMethod]);
-  const currentFavorecido = selectedBankInfo ? selectedBankInfo.nome_favorecido : (selectedMethod === 'USDT-TRC20' ? 'USDT Wallet' : 'Asiarays grupo mídia lda');
+  const currentAddress = selectedBankInfo?.iban || '';
+  const currentFavorecido = selectedBankInfo?.nome_favorecido || '';
   const tipoValue = selectedMethod === 'USDT-TRC20' ? 'USDT' : 'BANCO';
   const walletLabel = selectedMethod === 'USDT-TRC20' ? 'Número da carteira' : 'Número do IBAN';
   const exchangeRate = (policies?.min_recharge_kz && policies?.min_recharge_usdt) 
@@ -457,7 +497,6 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
     setIbanCopied(true);
     setTimeout(() => setIbanCopied(false), 2000);
   };
-  const copyUSDT = () => { navigator.clipboard.writeText(USDT_ADDR); setUsdtCopied(true); setTimeout(() => setUsdtCopied(false), 2000); };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -530,9 +569,8 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
       } else {
         alert(res.result?.message || res.error || 'Erro ao submeter pedido de depósito.');
       }
-    } catch (error) {
+    } catch {
       hideLoading();
-      console.error('Erro ao submeter depósito:', error);
       alert('Erro de rede. Tente novamente mais tarde.');
     }
   };
@@ -719,14 +757,19 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
                 <div className="border-b border-gray-200">
                   <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">Número do pedido</div>
                   <div className="bg-[#f5f5f5] text-gray-600 px-3 py-1.5 text-[11px] font-mono border-t border-gray-200 select-all">
-                    202308060508708470
+                    {(() => {
+                      const now = new Date();
+                      const pad = (n: number) => String(n).padStart(2, '0');
+                      const suffix = user.phone ? user.phone.slice(-4) : String(Math.floor(1000 + Math.random() * 9000));
+                      return `${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}${suffix}`;
+                    })()}
                   </div>
                 </div>
 
                 <div className="border-b border-gray-200">
                   <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">número da conta</div>
                   <div className="bg-[#f5f5f5] text-gray-600 px-3 py-1.5 text-[11px] font-mono border-t border-gray-200 select-all font-bold">
-                    {user.phone || '244922342885'}
+                    {user.phone || 'N/A'}
                   </div>
                 </div>
 
@@ -858,8 +901,7 @@ export const InviteModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(blobUrl);
-    } catch (error) {
-      console.error('Error downloading QR code:', error);
+    } catch {
       // Fallback: open in new window
       window.open(qrUrl, '_blank');
     }
@@ -972,8 +1014,8 @@ export const TeamReportModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
           if (data.success) {
             setTeamData(data.result || {});
           }
-        } catch (error) {
-          console.error(error);
+        } catch {
+          // silent — team data unavailable
         } finally {
           setLoading(false);
           hideLoading();
@@ -1296,11 +1338,33 @@ export const CompanyPoliciesModal: React.FC<ModalProps> = ({ isOpen, onClose }) 
 
   const fetchPolicies = async () => {
     try {
-      const { data, error } = await supabase.rpc('get_company_policies');
-      if (error) throw error;
-      setPolicies(data);
-    } catch (error) {
-      console.error('Failed to load company policies:', error);
+      const token = await getAccessToken();
+      if (!token) throw new Error("No token");
+      const resp = await fetch(GATEWAY_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ op: 512, data: {} })
+      });
+      const res = await resp.json();
+      if (res.success && Array.isArray(res.result)) {
+        const prods = res.result;
+        const suggested = Array.from(new Set(prods.filter((p: any) => Number(p.price) > 0).map((p: any) => Number(p.price)))).sort((a: any, b: any) => a - b);
+        setPolicies({
+          min_recharge_kz: res.min_recharge_kz || 0,
+          min_recharge_usdt: res.min_recharge_usdt || 0,
+          max_recharge_kz: res.max_recharge_kz || 0,
+          min_withdrawal_kz: res.min_withdrawal_kz || 0,
+          withdrawal_fee_pct: res.withdrawal_fee_pct || 0,
+          refund_days: res.refund_days || 0,
+          refund_min_subordinates: res.refund_min_subordinates || 0,
+          suggested_recharge_kz: suggested.length > 0 ? suggested : (res.suggested_recharge_kz || []),
+          products: prods
+        });
+      } else {
+        throw new Error(res.error || "Failed to load products from gateway");
+      }
+    } catch {
+      // silent — policies unavailable
     } finally {
       setLoading(false);
     }
@@ -1317,13 +1381,13 @@ export const CompanyPoliciesModal: React.FC<ModalProps> = ({ isOpen, onClose }) 
   }
 
   const p = policies || {
-    min_recharge_kz: 8000,
-    min_recharge_usdt: 8,
-    max_recharge_kz: 3000000,
-    min_withdrawal_kz: 2000,
-    withdrawal_fee_pct: 50,
-    refund_days: 180,
-    refund_min_subordinates: 50,
+    min_recharge_kz: 0,
+    min_recharge_usdt: 0,
+    max_recharge_kz: 0,
+    min_withdrawal_kz: 0,
+    withdrawal_fee_pct: 0,
+    refund_days: 0,
+    refund_min_subordinates: 0,
     products: []
   };
 
@@ -1588,8 +1652,8 @@ export const DailyDeclarationModal: React.FC<ModalProps> = ({ isOpen, onClose })
         if (prodJson.success && Array.isArray(prodJson.result)) {
           setProducts(prodJson.result);
         }
-      } catch (err) {
-        console.error('DailyDeclaration fetch error:', err);
+      } catch {
+        // silent — week data unavailable
       } finally {
         setLoading(false);
         hideLoading();
@@ -1636,53 +1700,6 @@ export const DailyDeclarationModal: React.FC<ModalProps> = ({ isOpen, onClose })
     <ModalBase isOpen={isOpen} onClose={onClose} title="Declaração Diária">
       <div className="space-y-4">
 
-        {/* === HEADER: Rendimento Semanal Real === */}
-        <div className="relative bg-gradient-to-br from-[#0f4c35] to-[#1a7a56] rounded-2xl p-4 overflow-hidden">
-          {/* Background grid pattern */}
-          <div className="absolute inset-0 opacity-10">
-            <svg width="100%" height="100%" viewBox="0 0 200 80">
-              <defs>
-                <pattern id="bgGrid" width="20" height="20" patternUnits="userSpaceOnUse">
-                  <path d="M 20 0 L 0 0 0 20" fill="none" stroke="white" strokeWidth="0.5"/>
-                </pattern>
-              </defs>
-              <rect width="200" height="80" fill="url(#bgGrid)" />
-            </svg>
-          </div>
-
-          <div className="relative z-10">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] uppercase font-bold text-green-300 tracking-widest">Rendimento Semanal Real</span>
-              {loading && <span className="text-[9px] text-green-300 animate-pulse">A carregar...</span>}
-            </div>
-            <h3 className="text-2xl font-mono font-extrabold text-white mt-1">
-              KZ {Math.round(totalSemana).toLocaleString('pt-AO')}
-            </h3>
-            <p className="text-[10px] text-green-200 mt-1">
-              Estatística real dos últimos 7 dias • Nível {user.level}
-            </p>
-
-            {/* Progress bar: realização vs capacidade */}
-            {weeklyCapacity > 0 && (
-              <div className="mt-3">
-                <div className="flex justify-between items-center mb-1">
-                  <span className="text-[9px] text-green-300">Taxa de realização</span>
-                  <span className="text-[10px] font-bold text-white">{realizationRate.toFixed(1)}%</span>
-                </div>
-                <div className="w-full bg-white/20 rounded-full h-1.5">
-                  <div
-                    className="bg-gradient-to-r from-green-300 to-emerald-400 h-1.5 rounded-full transition-all duration-700"
-                    style={{ width: `${realizationRate}%` }}
-                  />
-                </div>
-                <div className="flex justify-between items-center mt-0.5">
-                  <span className="text-[8px] text-green-300/70">KZ 0</span>
-                  <span className="text-[8px] text-green-300/70">Cap. semanal: KZ {Math.round(weeklyCapacity).toLocaleString('pt-AO')}</span>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
 
         {/* === GRÁFICO SVG REAL === */}
         <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-3">
@@ -1871,10 +1888,20 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
       fetchWithdrawalRecords()
         .then((data) => {
           // Expected shape: array of records matching LogRecord fields
-          setWithdrawalLogs(data);
+          const mappedLogs = data.map((rec: any) => ({
+            id: rec.id || 'ret_' + String(Math.floor(10000 + Math.random() * 90000)),
+            type: 'retirada',
+            currency: 'KZ',
+            amount: Number(rec.amount || rec.valor_solicitado || 0),
+            date: rec.created_at ? new Date(rec.created_at).toISOString().replace('T', ' ').slice(0, 16) : new Date().toISOString().replace('T', ' ').slice(0, 16),
+            status: rec.status?.toLowerCase().includes('pendente') || rec.status?.toLowerCase().includes('processando') ? 'pendente' : (rec.status?.toLowerCase() === 'rejeitado' ? 'rejeitado' : 'aprovado'),
+            bank_name: rec.bank_name,
+            iban: rec.iban
+          }));
+          setWithdrawalLogs(mappedLogs);
         })
-        .catch((err) => {
-          console.error('Error fetching withdrawal records:', err);
+        .catch(() => {
+          // silent — withdrawal records unavailable
         })
         .finally(() => setLoading(false));
     }
@@ -1920,8 +1947,8 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
           if (data.success) {
             setCompletedTasks(data.result || []);
           }
-        } catch (error) {
-          console.error(error);
+        } catch {
+          // silent — receita data unavailable
         } finally {
           setLoading(false);
           hideLoading();
@@ -1988,8 +2015,8 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
             
             setDepositLogs(mergedLogs);
           }
-        } catch (error) {
-          console.error(error);
+        } catch {
+          // silent — deposit records unavailable
         } finally {
           setLoading(false);
           hideLoading();
@@ -2111,7 +2138,7 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
                   const orderId = log.id === 'ret_default' ? '260' : 
                     (Math.abs(log.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)) % 900 + 100);
                   
-                  const dateOnly = log.date.split(' ')[0] || '2023-06-26';
+                  const dateOnly = log.date ? log.date.split(' ')[0] : 'N/A';
 
                   return (
                     <div 
@@ -2141,20 +2168,20 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
             /* DETAILED VIEW: Exact mockup match */
             (() => {
               // Formatting bank initials
-              let bankDisplay = 'BAI';
-              if (user.bankName) {
-                const match = user.bankName.match(/^([A-Za-z0-9]+)/);
+              let bankDisplay = selectedLog.bank_name || 'N/A';
+              if (bankDisplay && bankDisplay !== 'N/A') {
+                const match = bankDisplay.match(/^([A-Za-z0-9]+)/);
                 if (match) {
                   bankDisplay = match[1].toUpperCase();
                 }
               }
 
               // Normalise the account display
-              const acctDisplay = user.bankAccount 
-                ? user.bankAccount.replace(/\s+/g, '') 
-                : 'RI0004000009570177510185';
+              const acctDisplay = selectedLog.iban 
+                ? selectedLog.iban.replace(/\s+/g, '') 
+                : 'N/A';
 
-              const dateOnly = selectedLog.date.split(' ')[0] || '2023-06-26';
+              const dateOnly = selectedLog.date ? selectedLog.date.split(' ')[0] : 'N/A';
 
               return (
                 <div className="bg-white px-5 pt-5 pb-8 animate-fadeIn" id={`ret_record_wrapper_${selectedLog.id}`}>
