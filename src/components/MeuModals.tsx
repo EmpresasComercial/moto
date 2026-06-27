@@ -633,13 +633,8 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
                 <div className="py-8 flex justify-center"><div className="w-6 h-6 border-2 border-[#1e88e5] border-t-transparent rounded-full animate-spin"></div></div>
               ) : (
                 <div className="divide-y divide-slate-100 overflow-hidden">
-                  {(() => {
-                    const methods = dbBanks.map(b => b.nome_do_banco);
-                    if (!methods.includes('USDT-TRC20')) {
-                      methods.push('USDT-TRC20');
-                    }
-                    return methods;
-                  })().map((methodName, idx) => {
+                  {dbBanks.map((bank, idx) => {
+                    const methodName = bank.nome_do_banco;
                     const isUSDT = methodName === 'USDT-TRC20';
                   return (
                     <button
