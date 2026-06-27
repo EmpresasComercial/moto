@@ -90,7 +90,6 @@ export const PurchaseDetailsPage: React.FC = () => {
         addToast(res?.error || res?.result?.message || 'Não foi possível finalizar a compra.', 'error');
       }
     } catch (err: any) {
-      console.error('Erro ao finalizar compra via gateway:', err);
       addToast(err.message || 'Erro ao processar a compra. Tente novamente ou contate o suporte.', 'error');
     } finally {
       hideLoading();

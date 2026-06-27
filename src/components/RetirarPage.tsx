@@ -140,9 +140,9 @@ export const RetirarPage: React.FC = () => {
               >
                 <div className="flex justify-between items-center text-neutral-800 font-bold text-[13px]">
                   {displayBank && lastFourDigits ? (
-                    <span>Tipo de Gateway: {displayBank} (...{lastFourDigits})</span>
+                    <span>Canal de Pagamento: {displayBank} (...{lastFourDigits})</span>
                   ) : displayBank ? (
-                    <span>Tipo de Gateway: {displayBank}</span>
+                    <span>Canal de Pagamento: {displayBank}</span>
                   ) : (
                     <span className="text-red-600 font-bold">⚠ Nenhuma conta bancária associada — Toque para adicionar</span>
                   )}
@@ -249,7 +249,7 @@ export const RetirarPage: React.FC = () => {
             <div className="opacity-40 pointer-events-none flex flex-col flex-1">
               <div className="bg-[#f0f3f6] p-4 flex flex-col">
                 <div className="flex justify-between items-center text-neutral-800 font-bold text-[13px]">
-                  <span>Tipo de Gateway: {displayBank} (...{lastFourDigits})</span>
+                  <span>Canal de Pagamento: {displayBank} (...{lastFourDigits})</span>
                 </div>
               </div>
               <div className="p-5 flex-1">
@@ -276,7 +276,7 @@ export const RetirarPage: React.FC = () => {
                 {/* Tips List */}
                 <div className="p-4 space-y-3 text-[12px] text-neutral-600 leading-normal text-left font-medium">
                   <p>1. Hora de chegada: 0-72 horas;</p>
-                  <p>2. Diferentes gateways podem ter taxas de serviço;</p>
+                  <p>2. Diferentes canais de pagamento podem ter taxas de serviço;</p>
                   <p>3. Confirme que as informações de pagamento estão corretas, caso contrário, os fundos serão perdidos e não poderão ser recuperados;</p>
                   <p>4. Se a retirada for rejeitada, seus fundos serão devolvidos para a carteira correspondente e você poderá retirar novamente.</p>
                 </div>
@@ -308,7 +308,7 @@ export const RetirarPage: React.FC = () => {
             {/* Top info summary */}
             <div className="p-4 flex flex-col items-center">
               <span className="text-[12px] text-neutral-500 font-bold mb-1">
-                Tipo de Gateway: {displayBank} (...{lastFourDigits})
+                Canal de Pagamento: {displayBank} (...{lastFourDigits})
               </span>
               <span className="text-[28px] font-black text-neutral-900 mb-4">
                 KZ {amount.toLocaleString('pt-AO')}

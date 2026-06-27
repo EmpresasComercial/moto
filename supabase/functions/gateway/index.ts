@@ -407,16 +407,7 @@ serve(async (req) => {
           p_product_id: productId,
         });
 
-        if (error) {
-          console.error("Erro RPC purchase_product:", error);
-          throw error;
-        }
-
-        // Log para debug com base no retorno seguro da RPC, para não expor consultas/credenciais na Edge Function
-        if (data && typeof data === "object") {
-          const resObj = data as Record<string, any>;
-          console.log(`[COMPRA DEBUG] user_id: ${resObj.user_id}, produto_id_clicado: ${resObj.produto_id_clicado}, preco_produto: ${resObj.preco_produto}, saldo_antes: ${resObj.saldo_antes}`);
-        }
+        if (error) throw error;
 
         if (data && typeof data === "object" && data.success === false) {
           return json(400, data);
@@ -570,27 +561,26 @@ serve(async (req) => {
 
     return json(200, {
       success: true,
-      user_id: user.id,
-      op,
       result,
     });
   } catch (error) {
-    console.error("Gateway error:", error);
-    const errorMessage = error instanceof Error ? error.message : (typeof error === 'object' && error !== null ? JSON.stringify(error) : String(error));
-    
-    // Tratamento robusto para forçar o logout do lado do cliente
+    const errorMessage = error instanceof Error
+      ? error.message
+      : (typeof error === 'object' && error !== null ? JSON.stringify(error) : String(error));
+
+    // SESSION_EXPIRED: sinal para o frontend forçar logout
     if (errorMessage.includes("SESSION_EXPIRED")) {
       return json(401, {
         success: false,
         error: errorMessage.replace("SESSION_EXPIRED: ", ""),
-        force_logout: true // Sinal claro para o frontend deslogar o usuário
+        force_logout: true
       });
     }
 
+    // Erros de banco de dados ou lógica de negócio com mensagem segura
     return json(500, {
       success: false,
       error: errorMessage,
-      raw_error: error
     });
   }
 });

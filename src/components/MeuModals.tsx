@@ -595,7 +595,7 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
           </svg>
         </button>
         <span className="font-bold text-[15px] text-slate-800 tracking-tight text-center flex-1 translate-x-[-10px]">
-          {rechargeStep === 'instructions' ? 'Detalhes de Gateway' : rechargeStep === 'method' ? 'Metódos pagamentos' : 'Recarregar'}
+          {rechargeStep === 'instructions' ? 'Detalhes de Pagamento' : rechargeStep === 'method' ? 'Métodos de pagamento' : 'Recarregar'}
         </span>
       </div>
 
@@ -860,8 +860,8 @@ export const InviteModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
           if (data.success && data.result?.dominio_publicidad) {
             setDomain(data.result.dominio_publicidad);
           }
-        } catch (error) {
-          console.error(error);
+        } catch {
+          // silent — invite domain unavailable
         } finally {
           hideLoading();
         }

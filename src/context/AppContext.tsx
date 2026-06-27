@@ -140,20 +140,9 @@ const INITIAL_STATS: FinancialStats = {
   unfinishedCount: 0
 };
 
-const INITIAL_LOGS: LogRecord[] = [
-  { id: 'rec_1', type: 'recarga', amount: 30000, date: '2026-05-18 10:14', status: 'aprovado', details: 'Depósito Multicaixa Express' },
-  { id: 'rec_2', type: 'recarga', amount: 10000, date: '2026-05-15 14:22', status: 'aprovado', details: 'Banco BAI' },
-  { id: 'ret_1', type: 'retirada', amount: 15260, date: '2023-06-26 11:15', status: 'aprovado', details: 'Retirada solicitada por IBAN' },
-  { id: 'tr_1', type: 'recompensa', amount: 1150, date: '2026-05-20 18:41', status: 'aprovado', details: 'Tarefa Amazon Concluída' },
-  { id: 'tr_2', type: 'recompensa', amount: 1150, date: '2026-05-20 19:12', status: 'aprovado', details: 'Tarefa Facebook Concluída' }
-];
+const INITIAL_LOGS: LogRecord[] = [];
 
-const INITIAL_REFERRALS: TeamReferral[] = [
-  { phone: '244933****12', level: 'WS1', joinDate: '2026-05-10', contribution: 12000 },
-  { phone: '244941****55', level: 'WS2', joinDate: '2026-05-18', contribution: 48000 },
-  { phone: '244925****67', level: 'WS0', joinDate: '2026-05-19', contribution: 0 },
-  { phone: '244937****89', level: 'WS1', joinDate: '2026-05-20', contribution: 6500 }
-];
+const INITIAL_REFERRALS: TeamReferral[] = [];
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [alertConfig, setAlertConfig] = useState<AlertConfig | null>(null);
@@ -178,12 +167,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
+  // Sanitizes any user-facing message: strips technical terms that must never be exposed
+  const sanitizeMessage = (msg: string): string =>
+    msg.replace(/\bgateway\b/gi, '').replace(/\s{2,}/g, ' ').trim();
+
   const addToast = (message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info', duration: number = 4000) => {
+    const safe = sanitizeMessage(message);
     setToasts(prev => {
-      const exists = prev.some(t => t.message === message && t.type === type);
+      const exists = prev.some(t => t.message === safe && t.type === type);
       if (exists) return prev;
       const id = Math.random().toString(36).substring(2, 9);
-      return [...prev, { id, message, type, duration }];
+      return [...prev, { id, message: safe, type, duration }];
     });
   };
 
@@ -224,7 +218,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Intercept window.alert for absolute sandboxing safety in iframes
   useEffect(() => {
     window.alert = (msg: any) => {
-      const rawText = String(msg);
+      const rawText = sanitizeMessage(String(msg));
       let type: 'info' | 'success' | 'warning' | 'error' = 'info';
       
       const lower = rawText.toLowerCase();
@@ -375,14 +369,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       };
     }
     return {
-      phone: '244922342885', // Matches Image 1!
-      id: '13793',
-      level: 'WS2', // Matches WS2 Level in image
-      creditScore: 95, // bom rating
-      inviteCode: '931242',
-      bankName: 'Banco BAI',
-      bankAccount: 'RIB004000009570177510185',
-      holderName: 'Mateus Santos',
+      phone: '',
+      id: '',
+      level: 'WS0',
+      creditScore: 100,
+      inviteCode: '',
+      bankName: '',
+      bankAccount: '',
+      holderName: '',
       paymentPin: undefined
     };
   });
@@ -426,7 +420,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     let wasLoggedIn = localStorage.getItem('asiaray_logged') === 'true';
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('onAuthStateChange:', event, session);
       if (session) {
         setIsLoggedIn(true);
         localStorage.setItem('asiaray_logged', 'true');
@@ -478,8 +471,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           }));
         }
       }
-    } catch (err) {
-      console.error('Erro ao buscar estatísticas financeiras:', err);
+    } catch {
+      // silent — financial stats fetch failed
     }
   };
 
@@ -514,7 +507,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // Debounced handler: collapses bursts of Realtime events into a single fetch
     const handleRealtimeChange = (source: string, payload: any) => {
       if (sessionExpiredRef.current) return;
-      console.log(`Realtime ${source} change:`, payload);
       // Cancel any pending call and schedule a fresh one after 500ms quiet period
       if (realtimeDebounceRef.current) clearTimeout(realtimeDebounceRef.current);
       realtimeDebounceRef.current = setTimeout(async () => {
@@ -546,9 +538,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         },
         (payload) => handleRealtimeChange('tarefa', payload)
       )
-      .subscribe((status) => {
-        console.log('Realtime subscription status:', status);
-      });
+      .subscribe();
 
     return () => {
       if (realtimeDebounceRef.current) clearTimeout(realtimeDebounceRef.current);
@@ -678,9 +668,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           throw new Error('IP excedido');
         }
       }
-    } catch (err: any) {
-      if (err.message === 'IP excedido') throw err;
-      console.warn("Aviso ao obter/verificar IP:", err);
+    } catch {
+      // silent — ip fetch failed
     }
 
     // 1. Cadastro no Supabase Auth (signUp)
@@ -945,7 +934,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return { success: false, error: resData?.error || 'Falha na comunicação com o servidor.' };
       }
     } catch (err: any) {
-      console.error('Erro na retirada:', err);
       return { success: false, error: err.message || 'Erro de rede. Tente novamente.' };
     }
   };
@@ -958,8 +946,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return res.resData.result;
       }
       return null;
-    } catch (error) {
-      console.error('Error fetching Minha Financas:', error);
+    } catch {
       return null;
     }
   };
@@ -988,8 +975,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       } else {
         return { success: false, message: resData?.error || 'Falha na comunicação com o servidor.' };
       }
-    } catch (err) {
-      console.error('Erro na conversão:', err);
+    } catch {
       return { success: false, message: 'Erro de rede. Tente novamente mais tarde.' };
     }
   };
@@ -1022,14 +1008,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const { resp, resData } = gw;
       if (resp.ok) {
         if (resData?.success === false) {
-           alert("Gateway Error (Stats): " + JSON.stringify(resData.raw_error || resData.error));
+           addToast("Não foi possível carregar os registos de retirada.", "error");
         }
         if (resData?.success && resData?.result) {
           return Array.isArray(resData.result) ? resData.result : [resData.result];
         }
       }
-    } catch (e) {
-      console.error('Failed to fetch withdrawal records', e);
+    } catch {
+      // silent — fetch withdrawal records failed
     }
     return [];
   };
@@ -1042,7 +1028,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (!gw) return; // session expired or no token
       const { resp, resData: res } = gw;
       if (!resp.ok || res?.success === false) {
-         alert("Gateway Error (UserProfile): " + JSON.stringify(res?.raw_error || res?.error || "Unknown Error"));
+         addToast("Erro ao carregar dados do perfil. Tente novamente mais tarde.", "error");
       }
       if (res?.success && res?.result) {
         // result can be an array (RETURNS TABLE) or single object
@@ -1078,8 +1064,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           balanceUSDT: p.balance_correte_usdt20 !== undefined && p.balance_correte_usdt20 !== null ? parseNum(p.balance_correte_usdt20, prev.balanceUSDT) : prev.balanceUSDT,
         }));
       }
-    } catch (e) {
-      console.error('Failed to refresh user profile', e);
+    } catch {
+      // silent — profile refresh failed
     }
   };
 
@@ -1101,8 +1087,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             return false;
           }
         }
-      } catch (err) {
-        console.error('Erro ao ativar VIP no backend:', err);
+      } catch {
         addToast('Erro ao processar ativação.', 'error');
         return false;
       }
@@ -1205,14 +1190,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const resetAll = () => {
     setIsLoggedIn(true);
     setUser({
-      phone: '244922342885',
-      id: '13793',
-      level: 'WS2',
-      creditScore: 95,
-      inviteCode: '931242',
-      bankName: 'Banco BAI',
-      bankAccount: 'AO06 0040 0000 9312 4224 1018 3',
-      holderName: 'Mateus Santos',
+      phone: '',
+      id: '',
+      level: 'WS0',
+      creditScore: 100,
+      inviteCode: '',
+      bankName: '',
+      bankAccount: '',
+      holderName: '',
       paymentPin: undefined
     });
     setStats(INITIAL_STATS);
