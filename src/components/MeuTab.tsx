@@ -34,7 +34,7 @@ import termosIcon from '../../assets/icons8-politique-de-confidentialité-48.png
 import politicasIcon from '../../assets/icons8-sécurité-vérifiée-48.png';
 
 export const MeuTab: React.FC = () => {
-  const { user, stats, logout, resetAll, refreshUserProfile } = useApp();
+  const { user, stats, logout, resetAll, refreshUserProfile, showLoading, hideLoading } = useApp();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -86,8 +86,12 @@ export const MeuTab: React.FC = () => {
 
   useEffect(() => {
     const fetchTeamAndNotif = async () => {
+      showLoading('Wait...');
       const token = await getAccessToken();
-      if (!token) return;
+      if (!token) {
+        hideLoading();
+        return;
+      }
       try {
         // Fetch Team Stats
         const respTeam = await fetch(GATEWAY_URL, {
@@ -116,7 +120,10 @@ export const MeuTab: React.FC = () => {
         if (resNotif.success && Array.isArray(resNotif.result)) {
           setDbNotificacoes(resNotif.result);
         }
-      } catch {}
+      } catch {
+      } finally {
+        hideLoading();
+      }
     };
     fetchTeamAndNotif();
   }, []);

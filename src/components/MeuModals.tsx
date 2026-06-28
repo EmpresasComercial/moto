@@ -63,6 +63,7 @@ export const BankModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
   const [bank, setBank] = useState('Banco BAI');
   const [account, setAccount] = useState('');
   const [holder, setHolder] = useState('');
+  const [ibanError, setIbanError] = useState<string | null>(null);
   const accountInputRef = React.useRef<HTMLInputElement>(null);
 
   const bankCodes: Record<string, string> = {
@@ -87,14 +88,23 @@ export const BankModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
     }, 0);
   };
 
+  const IBAN_REGEX = /^[0-9]{21}$/;
+
   const handleAccountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let val = e.target.value.replace(/\s/g, '').replace(/[^0-9]/g, '');
+    const val = e.target.value.replace(/\s/g, '').replace(/[^0-9]/g, '').slice(0, 21);
     setAccount(val);
+    if (ibanError) setIbanError(null);
   };
 
   const handleSave = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    
+
+    const cleanIban = account.replace(/\s/g, '');
+    if (!IBAN_REGEX.test(cleanIban)) {
+      setIbanError('IBAN incompleto, deve ter exatamente 21 dígitos numéricos.');
+      return;
+    }
+
     showLoading('A processar e gravar os dados bancários...');
     
     try {
@@ -155,9 +165,9 @@ export const BankModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
             </div>
 
             {/* IBAN */}
-            <div className="border-b border-gray-200">
+            <div className={`border-b ${ibanError ? 'border-red-400' : 'border-gray-200'}`}>
               <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">IBAN de Angola (AO06...)</div>
-              <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] border-t border-gray-200">
+              <div className={`bg-[#f5f5f5] px-3 py-1.5 text-[12px] border-t ${ibanError ? 'border-red-400' : 'border-gray-200'}`}>
                 <input 
                   ref={accountInputRef}
                   type="text"
@@ -170,6 +180,14 @@ export const BankModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
                   className="bg-transparent border-none outline-none w-full text-neutral-800 text-[12px] font-sans font-bold"
                 />
               </div>
+              {ibanError && (
+                <div className="px-3 py-1.5 text-[11px] text-red-600 bg-red-50 flex items-center gap-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  {ibanError}
+                </div>
+              )}
             </div>
 
             {/* Titular */}
@@ -1898,7 +1916,7 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
             bank_name: rec.bank_name,
             iban: rec.iban
           }));
-          setWithdrawalLogs(mappedLogs);
+          setWithdrawalLogs(mappedLogs as LogRecord[]);
         })
         .catch(() => {
           // silent — withdrawal records unavailable

@@ -97,34 +97,34 @@ const INITIAL_TASKS: Task[] = [
   { id: 't0_3', title: 'Avaliar Produto Amazónia', type: 'Tiktok', reward: 100, requiredLevel: 'WS0', desc: 'Dê 5 estrelas ao produto listado no carrinho da Amazon parceira.', status: 'disponivel' },
   
   // WS1 Tasks
-  { id: 't1_1', title: 'Seguir Página Facebook Premium', type: 'Facebook', reward: 450, requiredLevel: 'WS1', desc: 'Siga a página da marca parceira de cosméticos e compartilhe uma postagem pública.', status: 'disponivel' },
-  { id: 't1_2', title: 'Vídeo Promocional YouTube AS', type: 'Whatsapp', reward: 450, requiredLevel: 'WS1', desc: 'Assista a 2 minutos deste anúncio de produto e curta.', status: 'disponivel' },
-  { id: 't1_3', title: 'Adicionar Item ao Carrinho Amazon', type: 'Tiktok', reward: 450, requiredLevel: 'WS1', desc: 'Adicione ao seu carrinho de interesse e tire um print screen.', status: 'disponivel' },
-  { id: 't1_4', title: 'Avaliação Positiva de Loja Amazon', type: 'Tiktok', reward: 450, requiredLevel: 'WS1', desc: 'Deixe um feedback positivo na loja do vendedor verificado.', status: 'disponivel' },
-  { id: 't1_5', title: 'Compartilhar Post de Evento FB', type: 'Facebook', reward: 450, requiredLevel: 'WS1', desc: 'Publique o link do evento parceiro em seu perfil social publicamente.', status: 'disponivel' },
+  { id: 't1_1', title: 'Seguir Página Facebook Premium', type: 'Facebook', reward: 500, requiredLevel: 'WS1', desc: 'Siga a página da marca parceira de cosméticos e compartilhe uma postagem pública.', status: 'disponivel' },
+  { id: 't1_2', title: 'Vídeo Promocional YouTube AS', type: 'Whatsapp', reward: 500, requiredLevel: 'WS1', desc: 'Assista a 2 minutos deste anúncio de produto e curta.', status: 'disponivel' },
+  { id: 't1_3', title: 'Adicionar Item ao Carrinho Amazon', type: 'Tiktok', reward: 500, requiredLevel: 'WS1', desc: 'Adicione ao seu carrinho de interesse e tire um print screen.', status: 'disponivel' },
+  { id: 't1_4', title: 'Avaliação Positiva de Loja Amazon', type: 'Tiktok', reward: 500, requiredLevel: 'WS1', desc: 'Deixe um feedback positivo na loja do vendedor verificado.', status: 'disponivel' },
+  { id: 't1_5', title: 'Compartilhar Post de Evento FB', type: 'Facebook', reward: 500, requiredLevel: 'WS1', desc: 'Publique o link do evento parceiro em seu perfil social publicamente.', status: 'disponivel' },
 
   // WS2 Tasks (User matches this in image!)
-  { id: 't2_1', title: 'Avaliar Gadget de Alta Tecnologia', type: 'Tiktok', reward: 1150, requiredLevel: 'WS2', desc: 'Escreva um comentário curto e objetivo de 5 estrelas sobre o fone de ouvido de última geração.', status: 'disponivel' },
-  { id: 't2_2', title: 'Fazer Compartilhamento Viral FB', type: 'Facebook', reward: 1150, requiredLevel: 'WS2', desc: 'Compartilhe o anúncio oficial do aplicativo com texto recomendado e tire screenshot.', status: 'disponivel' },
-  { id: 't2_3', title: 'Subir Review Vídeo YouTube', type: 'Whatsapp', reward: 1150, requiredLevel: 'WS2', desc: 'Dê feedback em vídeo comentado, curta e comente na live stream oficial.', status: 'disponivel' },
-  { id: 't2_4', title: 'Comentário em Post no Facebook', type: 'Facebook', reward: 1150, requiredLevel: 'WS2', desc: 'Escreva um comentário focado nas vantagens da marca parceira de vestuários.', status: 'disponivel' },
-  { id: 't2_5', title: 'Visualizar Shorts de Viagem YT', type: 'Whatsapp', reward: 1150, requiredLevel: 'WS2', desc: 'Assista a 3 shorts seguidos de nossa rede de entretenimento parceira e favorite.', status: 'disponivel' },
-  { id: 't2_6', title: 'Check-in de Compras de Moda Amazon', type: 'Tiktok', reward: 1150, requiredLevel: 'WS2', desc: 'Visite a vitrine de vestuário e clique em simular interesse para validar cupom.', status: 'disponivel' },
-  { id: 't2_7', title: 'Inscrição em Canal de Finanças YT', type: 'Whatsapp', reward: 1150, requiredLevel: 'WS2', desc: 'Inscreva-se no canal financeiro parceiro e curta o último vídeo publicado.', status: 'disponivel' },
-  { id: 't2_8', title: 'Engajamento no Grupo de FB', type: 'Facebook', reward: 1150, requiredLevel: 'WS2', desc: 'Faça um post construtivo em grupo público parceiro sobre oportunidades de home-office.', status: 'disponivel' },
+  { id: 't2_1', title: 'Avaliar Gadget de Alta Tecnologia', type: 'Tiktok', reward: 1300, requiredLevel: 'WS2', desc: 'Escreva um comentário curto e objetivo de 5 estrelas sobre o fone de ouvido de última geração.', status: 'disponivel' },
+  { id: 't2_2', title: 'Fazer Compartilhamento Viral FB', type: 'Facebook', reward: 1300, requiredLevel: 'WS2', desc: 'Compartilhe o anúncio oficial do aplicativo com texto recomendado e tire screenshot.', status: 'disponivel' },
+  { id: 't2_3', title: 'Subir Review Vídeo YouTube', type: 'Whatsapp', reward: 1300, requiredLevel: 'WS2', desc: 'Dê feedback em vídeo comentado, curta e comente na live stream oficial.', status: 'disponivel' },
+  { id: 't2_4', title: 'Comentário em Post no Facebook', type: 'Facebook', reward: 1300, requiredLevel: 'WS2', desc: 'Escreva um comentário focado nas vantagens da marca parceira de vestuários.', status: 'disponivel' },
+  { id: 't2_5', title: 'Visualizar Shorts de Viagem YT', type: 'Whatsapp', reward: 1300, requiredLevel: 'WS2', desc: 'Assista a 3 shorts seguidos de nossa rede de entretenimento parceira e favorite.', status: 'disponivel' },
+  { id: 't2_6', title: 'Check-in de Compras de Moda Amazon', type: 'Tiktok', reward: 1300, requiredLevel: 'WS2', desc: 'Visite a vitrine de vestuário e clique em simular interesse para validar cupom.', status: 'disponivel' },
+  { id: 't2_7', title: 'Inscrição em Canal de Finanças YT', type: 'Whatsapp', reward: 1300, requiredLevel: 'WS2', desc: 'Inscreva-se no canal financeiro parceiro e curta o último vídeo publicado.', status: 'disponivel' },
+  { id: 't2_8', title: 'Engajamento no Grupo de FB', type: 'Facebook', reward: 1300, requiredLevel: 'WS2', desc: 'Faça um post construtivo em grupo público parceiro sobre oportunidades de home-office.', status: 'disponivel' },
 
   // WS3 Tasks
-  { id: 't3_1', title: 'Avaliação de Notebook Gamer Amazon', type: 'Tiktok', reward: 3200, requiredLevel: 'WS3', desc: 'Revisão profissional simulada de produto premium com descrição técnica de compra.', status: 'disponivel' },
-  { id: 't3_2', title: 'Campanha de Divulgação YouTube', type: 'Whatsapp', reward: 3200, requiredLevel: 'WS3', desc: 'Assista ao vídeo corporativo de inovação tecnológica de 10 min e valide código oculto.', status: 'disponivel' },
-  { id: 't3_3', title: 'Compartilhamento em Grupo FB', type: 'Facebook', reward: 3200, requiredLevel: 'WS3', desc: 'Compartilhe em 5 grupos de classificados locais o banner de recrutamento.', status: 'disponivel' },
+  { id: 't3_1', title: 'Avaliação de Notebook Gamer Amazon', type: 'Tiktok', reward: 4000, requiredLevel: 'WS3', desc: 'Revisão profissional simulada de produto premium com descrição técnica de compra.', status: 'disponivel' },
+  { id: 't3_2', title: 'Campanha de Divulgação YouTube', type: 'Whatsapp', reward: 4000, requiredLevel: 'WS3', desc: 'Assista ao vídeo corporativo de inovação tecnológica de 10 min e valide código oculto.', status: 'disponivel' },
+  { id: 't3_3', title: 'Compartilhamento em Grupo FB', type: 'Facebook', reward: 4000, requiredLevel: 'WS3', desc: 'Compartilhe em 5 grupos de classificados locais o banner de recrutamento.', status: 'disponivel' },
 
   // WS4 Tasks
-  { id: 't4_1', title: 'Promoção de Dropshipping Amazon', type: 'Tiktok', reward: 10000, requiredLevel: 'WS4', desc: 'Divulgue o portfólio de fornecedores globais de alto giro no mercado regional.', status: 'disponivel' },
-  { id: 't4_2', title: 'Vídeo Patrocinado de Investimento YT', type: 'Whatsapp', reward: 10000, requiredLevel: 'WS4', desc: 'Engaje na campanha oficial da corretora internacional com curtida, comentário e compartilhamento.', status: 'disponivel' },
+  { id: 't4_1', title: 'Promoção de Dropshipping Amazon', type: 'Tiktok', reward: 25000, requiredLevel: 'WS4', desc: 'Divulgue o portfólio de fornecedores globais de alto giro no mercado regional.', status: 'disponivel' },
+  { id: 't4_2', title: 'Vídeo Patrocinado de Investimento YT', type: 'Whatsapp', reward: 25000, requiredLevel: 'WS4', desc: 'Engaje na campanha oficial da corretora internacional com curtida, comentário e compartilhamento.', status: 'disponivel' },
 
   // WS5 Tasks
-  { id: 't5_1', title: 'Parceria de Mídia Estruturada YT', type: 'Whatsapp', reward: 35000, requiredLevel: 'WS5', desc: 'Geração de visualizações orgânicas patrocinadas por parceiros multilaterais de anúncios.', status: 'disponivel' },
-  { id: 't5_2', title: 'Promoção de Marca Principal Amazon', type: 'Tiktok', reward: 35000, requiredLevel: 'WS5', desc: 'Classificação máxima e divulgação do hub principal de eletrônicos no e-commerce.', status: 'disponivel' }
+  { id: 't5_1', title: 'Parceria de Mídia Estruturada YT', type: 'Whatsapp', reward: 75000, requiredLevel: 'WS5', desc: 'Geração de visualizações orgânicas patrocinadas por parceiros multilaterais de anúncios.', status: 'disponivel' },
+  { id: 't5_2', title: 'Promoção de Marca Principal Amazon', type: 'Tiktok', reward: 75000, requiredLevel: 'WS5', desc: 'Classificação máxima e divulgação do hub principal de eletrônicos no e-commerce.', status: 'disponivel' }
 ];
 
 const INITIAL_STATS: FinancialStats = {

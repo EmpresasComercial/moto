@@ -17,9 +17,17 @@ export const getAccessToken = async (): Promise<string | null> => {
 
 const INTERNET_CHECK_URL = `${SUPABASE_URL}/auth/v1`;
 
+let lastConnectivityResult: boolean | null = null;
+let lastConnectivityCheckTime = 0;
+
 export const checkInternetConnectivity = async (timeoutMs = 4000): Promise<boolean> => {
   if (typeof window === 'undefined') return true;
   if (!navigator.onLine) return false;
+
+  const now = Date.now();
+  if (lastConnectivityResult !== null && now - lastConnectivityCheckTime < 10000) {
+    return lastConnectivityResult;
+  }
 
   const controller = new AbortController();
   const timeout = window.setTimeout(() => controller.abort(), timeoutMs);
@@ -30,11 +38,15 @@ export const checkInternetConnectivity = async (timeoutMs = 4000): Promise<boole
       mode: 'no-cors',
       signal: controller.signal
     });
-    return response.ok || response.type === 'opaque';
+    const isConnected = response.ok || response.type === 'opaque';
+    lastConnectivityResult = isConnected;
+    lastConnectivityCheckTime = now;
+    return isConnected;
   } catch {
-    // Some browsers or network environments may block cross-origin connectivity probes.
-    // If the browser still reports online, allow the request to proceed and handle real network failures later.
-    return navigator.onLine;
+    const isOnline = navigator.onLine;
+    lastConnectivityResult = isOnline;
+    lastConnectivityCheckTime = now;
+    return isOnline;
   } finally {
     window.clearTimeout(timeout);
   }

@@ -6,22 +6,34 @@ import { useApp } from '../context/AppContext';
 
 export const SupportScreen: React.FC = () => {
   const navigate = useNavigate();
-  const { showAlert } = useApp();
-  const [gerenteUrl, setGerenteUrl] = useState<string | null>(null);
-  const [grupoUrl, setGrupoUrl] = useState<string | null>(null);
-  const [mensagemIndisponibilidade, setMensagemIndisponibilidade] = useState<string | null>(null);
+  const { showAlert, showLoading, hideLoading } = useApp();
+  
+  const [gerenteUrl, setGerenteUrl] = useState<string | null>(() => localStorage.getItem('asiaray_support_gerente'));
+  const [grupoUrl, setGrupoUrl] = useState<string | null>(() => localStorage.getItem('asiaray_support_grupo'));
+  const [mensagemIndisponibilidade, setMensagemIndisponibilidade] = useState<string | null>(() => localStorage.getItem('asiaray_support_msg'));
 
   useEffect(() => {
     const fetchSupportLinks = async () => {
+      showLoading('Wait...');
       try {
         const response = await gatewayCall(901);
         if (response && response.success && response.result) {
-          setGerenteUrl(response.result.whatsapp_gerente_url);
-          setGrupoUrl(response.result.whatsapp_grupo);
-          setMensagemIndisponibilidade(response.result.mensagem_indisponibilidade);
+          const newGerente = response.result.whatsapp_gerente_url || '';
+          const newGrupo = response.result.whatsapp_grupo || '';
+          const newMsg = response.result.mensagem_indisponibilidade || '';
+
+          setGerenteUrl(newGerente);
+          setGrupoUrl(newGrupo);
+          setMensagemIndisponibilidade(newMsg);
+
+          localStorage.setItem('asiaray_support_gerente', newGerente);
+          localStorage.setItem('asiaray_support_grupo', newGrupo);
+          localStorage.setItem('asiaray_support_msg', newMsg);
         }
       } catch {
         // silent
+      } finally {
+        hideLoading();
       }
     };
 
