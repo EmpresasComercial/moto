@@ -36,9 +36,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({ setActiveTab, setSelectedTaskC
             : (res.result?.team && Array.isArray(res.result.team) ? res.result.team : []);
           setTeamList(arr);
         }
-      } catch (err) {
-        console.error('Erro ao buscar equipa para a Home:', err);
-      }
+      } catch {}
     };
     fetchTeam();
   }, []);

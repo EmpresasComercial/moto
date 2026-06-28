@@ -20,8 +20,8 @@ export const SupportScreen: React.FC = () => {
           setGrupoUrl(response.result.whatsapp_grupo);
           setMensagemIndisponibilidade(response.result.mensagem_indisponibilidade);
         }
-      } catch (err) {
-        console.error('Error in fetchSupportLinks:', err);
+      } catch {
+        // silent
       }
     };
 

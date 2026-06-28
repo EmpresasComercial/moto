@@ -416,7 +416,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [isLoggedIn, user, stats, tasks, logs, team]);
 
 
-  // Sync session state with Supabase Auth state changes
+  // Sync session state with auth state changes
   useEffect(() => {
     let wasLoggedIn = localStorage.getItem('asiaray_logged') === 'true';
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {

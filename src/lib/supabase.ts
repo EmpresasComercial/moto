@@ -8,7 +8,7 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 export const GATEWAY_URL = `${SUPABASE_URL}/functions/v1/gateway`;
 
 /**
- * Helper: Returns the current access token from the Supabase session.
+ * Helper: Returns the current access token.
  */
 export const getAccessToken = async (): Promise<string | null> => {
   const { data } = await supabase.auth.getSession();

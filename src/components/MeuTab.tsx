@@ -116,9 +116,7 @@ export const MeuTab: React.FC = () => {
         if (resNotif.success && Array.isArray(resNotif.result)) {
           setDbNotificacoes(resNotif.result);
         }
-      } catch (err) {
-        console.error('Error fetching team or notifications', err);
-      }
+      } catch {}
     };
     fetchTeamAndNotif();
   }, []);

@@ -57,8 +57,7 @@ export const CuponsPage: React.FC<CuponsPageProps> = ({ isOpen, onClose }) => {
         const couponEntries = data.result.filter((r: any) => r.codigo_presente && r.codigo_presente.trim() !== '');
         setRedeemedList(couponEntries);
       }
-    } catch (err) {
-      console.error('CuponsPage history error:', err);
+    } catch {
     } finally {
       setLoadingHistory(false);
     }
@@ -111,8 +110,7 @@ export const CuponsPage: React.FC<CuponsPageProps> = ({ isOpen, onClose }) => {
         const errMsg = data.result?.message || data.error || 'Erro ao gravar o cupão.';
         addToast(errMsg, 'error');
       }
-    } catch (err) {
-      console.error('CuponsPage redeem error:', err);
+    } catch {
       addToast('Erro de conexão. Tente novamente.', 'error');
     } finally {
       setSubmitting(false);

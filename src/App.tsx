@@ -222,9 +222,7 @@ function MainAppLayout() {
         if (!error && data?.splash_message) {
           setSplashMessage(data.splash_message);
         }
-      } catch (err) {
-        console.error('Error fetching splash_message:', err);
-      }
+      } catch {}
     };
     fetchSplash();
   }, []);

@@ -72,12 +72,9 @@ export const GravarTab: React.FC = () => {
       if (res.success && res.result) {
         setCounts(res.result);
       }
-    } catch (err) {
-      console.error(err);
-    }
+    } catch {}
   };
 
-  // Load Active Tasks (Transformacao) via OP 604
   const loadAgdTasks = async () => {
     if (isSessionExpired) return;
     if (!(await ensureInternetConnectivity())) return;
@@ -96,14 +93,12 @@ export const GravarTab: React.FC = () => {
       }
       const res = await resp.json();
       if (res.success) setAgdTasks(res.result || []);
-    } catch (err) {
-      console.error(err);
+    } catch {
     } finally {
       hideLoading();
     }
   };
 
-  // Load Completed Tasks (Terminado) via OP 605
   const loadCompletedTasks = async () => {
     if (isSessionExpired) return;
     if (!(await ensureInternetConnectivity())) return;
@@ -122,14 +117,12 @@ export const GravarTab: React.FC = () => {
       }
       const res = await resp.json();
       if (res.success) setCompletedTasks(res.result || []);
-    } catch (err) {
-      console.error(err);
+    } catch {
     } finally {
       hideLoading();
     }
   };
 
-  // Load Failed Tasks via OP 606
   const loadFailedTasks = async () => {
     if (isSessionExpired) return;
     if (!(await ensureInternetConnectivity())) return;
@@ -145,8 +138,7 @@ export const GravarTab: React.FC = () => {
       if (resp.status === 401) return;
       const res = await resp.json();
       if (res.success) setFailedTasks(res.result || []);
-    } catch (err) {
-      console.error(err);
+    } catch {
     } finally {
       hideLoading();
     }
@@ -220,8 +212,7 @@ export const GravarTab: React.FC = () => {
       } else {
         window.dispatchEvent(new CustomEvent('show-toast', { detail: { message: res.error || 'Erro ao concluir tarefa', type: 'error' } }));
       }
-    } catch (err) {
-      console.error(err);
+    } catch {
       window.dispatchEvent(new CustomEvent('show-toast', { detail: { message: 'Erro na conexão', type: 'error' } }));
     } finally {
       hideLoading();

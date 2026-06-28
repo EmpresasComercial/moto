@@ -26,9 +26,7 @@ export const SessionExpiredModal: React.FC<SessionExpiredModalProps> = ({ isOpen
         try {
           const cacheKeys = await caches.keys();
           await Promise.all(cacheKeys.map(key => caches.delete(key)));
-        } catch (err) {
-          console.warn('Error clearing caches:', err);
-        }
+        } catch {}
       }
       try {
         const cookies = document.cookie.split(';');
@@ -39,12 +37,8 @@ export const SessionExpiredModal: React.FC<SessionExpiredModalProps> = ({ isOpen
           document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
           document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=${window.location.hostname}`;
         }
-      } catch (err) {
-        console.warn('Error clearing cookies:', err);
-      }
-    } catch (error) {
-      console.error('Error in session cleanup:', error);
-    } finally {
+      } catch {}
+    } catch {} finally {
       window.location.href = '/register';
     }
   };

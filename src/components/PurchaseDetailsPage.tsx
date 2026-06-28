@@ -56,8 +56,7 @@ export const PurchaseDetailsPage: React.FC = () => {
           payPerTask: Number(product.daily_income) || 0,
           durationDays: Number(product.duration_days) || 30
         });
-      } catch (err) {
-        console.error(err);
+      } catch {
         setError('Erro ao carregar os detalhes do produto.');
       } finally {
         setLoading(false);
