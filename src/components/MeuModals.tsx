@@ -2534,14 +2534,15 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
                 if (!displayIban) return 'N/A';
                 if (displayIban.length <= 8) return displayIban;
 
-                // Angolan IBAN format usually has 21 digits: e.g. 0055 4002 1001 0120 1818 1
-                // User requested e.g. 005100001123••••2554521455
-                // Let's show first 12 digits, then ••••, then last 10 digits
-                const first = displayIban.slice(0, 12);
-                const last = displayIban.slice(12).slice(-10);
-
-                if (first && last && displayIban.length > 16) {
-                  return `${first}••••${last}`;
+                // Out of 21 digits, mask 12 numbers in the middle (5 visible at start, 4 visible at end)
+                if (displayIban.startsWith('AO') && displayIban.length >= 25) {
+                  const first = displayIban.slice(0, 9);
+                  const last = displayIban.slice(-4);
+                  return `${first}••••••••••••${last}`;
+                } else if (displayIban.length >= 21) {
+                  const first = displayIban.slice(0, 5);
+                  const last = displayIban.slice(-4);
+                  return `${first}••••••••••••${last}`;
                 }
 
                 // Standard masking fallback for shorter strings
