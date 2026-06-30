@@ -2491,10 +2491,27 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
                 }
               }
 
+              // Mask IBAN: if encrypted (long base64 string), detect and show masked version
+              const maskIban = (raw: string): string => {
+                if (!raw) return 'N/A';
+                const cleaned = raw.replace(/\s+/g, '');
+                // Detect encrypted string: too long (>34 chars) or contains base64 chars like +/=
+                const isEncrypted = cleaned.length > 34 || /[+/=]/.test(cleaned);
+                if (isEncrypted) {
+                  // Can't decrypt on frontend — show safe masked placeholder
+                  return '•••• ••••• ••••';
+                }
+                // Normal IBAN — mask 5 middle characters with *****
+                if (cleaned.length <= 8) return cleaned;
+                const visibleStart = Math.ceil(cleaned.length / 3);
+                const visibleEnd = Math.floor(cleaned.length / 4);
+                const first = cleaned.slice(0, visibleStart);
+                const last = cleaned.slice(-visibleEnd);
+                return `${first} ***** ${last}`;
+              };
+
               // Normalise the account display
-              const acctDisplay = selectedLog.iban 
-                ? selectedLog.iban.replace(/\s+/g, '') 
-                : 'N/A';
+              const acctDisplay = maskIban(selectedLog.iban || '');
 
               const dateOnly = selectedLog.date ? selectedLog.date.split(' ')[0] : 'N/A';
 
