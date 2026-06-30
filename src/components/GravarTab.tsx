@@ -307,14 +307,6 @@ export const GravarTab: React.FC = () => {
       {/* 1. Page Header & Info block identical to image */}
       <div className="bg-[#f4f6f9] pt-4 pb-2 px-4 flex items-center justify-between select-none" id="gravar-header-area">
         <div className="flex items-center gap-2">
-          <button 
-            onClick={() => window.history.back()} 
-            className="w-8 h-8 flex items-center justify-center rounded-full bg-white shadow-sm text-neutral-600 hover:text-neutral-800"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
           <div className="space-y-0.5">
             <h2 className="text-[17px] font-bold text-neutral-800 tracking-tight leading-none">Registo de tarefas</h2>
             <p className="text-[9px] text-[#9ea3a9] font-medium select-none">
