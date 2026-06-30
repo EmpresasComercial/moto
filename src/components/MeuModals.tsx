@@ -2397,7 +2397,7 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
   };
 
 
-  if (type === 'retirada') {
+  if (type === 'retirada' || type === 'recarga') {
     const selectedLog = filtered.find(l => l.id === selectedLogId);
 
     const handleBackClick = () => {
@@ -2408,12 +2408,16 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
       }
     };
 
+    const headerTitle = type === 'retirada' ? 'Registo de retirada' : 'Registo de recargas';
+    const modalId = type === 'retirada' ? 'retirada-modal-fullscreen' : 'recarga-modal-fullscreen';
+    const backArrowId = type === 'retirada' ? 'retirada-back-arrow' : 'recarga-back-arrow';
+
     return (
-      <div className="fixed inset-0 bg-[#f5f5f5] flex flex-col z-[50] animate-fadeIn font-sans" id="retirada-modal-fullscreen">
+      <div className="fixed inset-0 bg-[#f5f5f5] flex flex-col z-[50] animate-fadeIn font-sans" id={modalId}>
         {/* Header with back button and Title on neutral slate-gray background */}
         <div className="bg-[#cbd5e1]/45 px-4 py-3 border-b border-neutral-200 flex items-center relative select-none shrink-0" style={{ height: '48px' }}>
           <button 
-            id="retirada-back-arrow"
+            id={backArrowId}
             onClick={handleBackClick}
             className="p-1 text-neutral-600 hover:text-neutral-900 bg-transparent hover:bg-neutral-100 rounded-lg transition-colors cursor-pointer flex items-center z-10"
           >
@@ -2422,7 +2426,7 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
             </svg>
           </button>
           <div className="absolute inset-x-0 mx-auto w-max text-center font-bold text-neutral-800 text-[15px] tracking-wide select-none">
-            Registo de retirada
+            {headerTitle}
           </div>
         </div>
 
@@ -2434,7 +2438,7 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
                 <EmptyState
                   className="py-10"
                   message="Sem dados"
-                  description="Nenhum registo de retirada localizado no momento."
+                  description={`Nenhum registo de ${type === 'retirada' ? 'retirada' : 'recarga'} localizado no momento.`}
                 />
               </div>
             ) : (
@@ -2443,9 +2447,11 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
                 {filtered.map((log) => {
                   // Generate a stable numeric orderId based on log ID
                   const orderId = log.id === 'ret_default' ? '260' : 
-                    (Math.abs(log.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)) % 900 + 100);
+                    (Math.abs(log.id.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0)) % 900 + 100);
                   
                   const dateOnly = log.date ? log.date.split(' ')[0] : 'N/A';
+                  const currencySymbol = log.currency === 'USDT' ? 'USDT' : 'KZ';
+                  const labelType = log.type === 'retirada' ? 'Pedido' : 'Recarga';
 
                   return (
                     <div 
@@ -2455,7 +2461,7 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
                     >
                       <div className="flex flex-col space-y-0.5">
                         <span className="text-[12px] text-neutral-400">ID da encomenda: {orderId}</span>
-                        <span className="text-[14px] font-bold text-neutral-800">Pedido {log.amount.toFixed(2)} KZ</span>
+                        <span className="text-[14px] font-bold text-neutral-800">{labelType} {log.amount.toFixed(2)} {currencySymbol}</span>
                         <span className="text-[12px] text-neutral-400">{dateOnly}</span>
                       </div>
                       <div className="flex items-center gap-1.5 select-none shrink-0">
@@ -2474,9 +2480,11 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
           ) : (
             /* DETAILED VIEW: Exact mockup match */
             (() => {
-              // Formatting bank initials
-              let bankDisplay = selectedLog.bank_name || 'N/A';
-              if (bankDisplay && bankDisplay !== 'N/A') {
+              const isRetirada = selectedLog.type === 'retirada';
+              
+              // Formatting bank initials or channel name
+              let bankDisplay = isRetirada ? (selectedLog.bank_name || 'N/A') : (selectedLog.details || 'Depósito');
+              if (isRetirada && bankDisplay && bankDisplay !== 'N/A') {
                 const match = bankDisplay.match(/^([A-Za-z0-9]+)/);
                 if (match) {
                   bankDisplay = match[1].toUpperCase();
@@ -2491,39 +2499,48 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
               const dateOnly = selectedLog.date ? selectedLog.date.split(' ')[0] : 'N/A';
 
               return (
-                <div className="bg-white px-5 pt-5 pb-8 animate-fadeIn" id={`ret_record_wrapper_${selectedLog.id}`}>
+                <div className="bg-white px-5 pt-5 pb-8 animate-fadeIn" id={`${selectedLog.type}_record_wrapper_${selectedLog.id}`}>
                   
-                  {/* Row 1: Retirada do saldo | Date */}
+                  {/* Row 1: Retirada / Recarga do saldo | Date */}
                   <div className="flex justify-between items-center py-3.5">
-                    <span className="text-neutral-500 text-sm select-none font-medium">Retirada do saldo</span>
+                    <span className="text-neutral-500 text-sm select-none font-medium">
+                      {isRetirada ? 'Retirada do saldo' : 'Recarga do saldo'}
+                    </span>
                     <span className="text-neutral-400 font-mono text-sm select-none">{dateOnly}</span>
                   </div>
                   <div className="border-t border-neutral-100 w-full"></div>
 
-                  {/* Row 2: Banco beneficiário | Initials */}
+                  {/* Row 2: Banco beneficiário / Canal de depósito | Initials */}
                   <div className="flex justify-between items-center py-3.5">
-                    <span className="text-neutral-500 text-sm select-none font-medium">Banco beneficiário</span>
+                    <span className="text-neutral-500 text-sm select-none font-medium">
+                      {isRetirada ? 'Banco beneficiário' : 'Canal de depósito'}
+                    </span>
                     <span className="text-neutral-400 font-sans tracking-wide font-medium text-sm select-none">{bankDisplay}</span>
                   </div>
                   <div className="border-t border-neutral-100 w-full"></div>
 
-                  {/* Row 3: Conta bancária | Value */}
-                  <div className="flex justify-between items-start py-3.5">
-                    <div className="flex flex-col text-neutral-500 text-sm leading-tight select-none font-medium">
-                      <span>Conta</span>
-                      <span>bancária</span>
-                    </div>
-                    <span className="text-neutral-400 font-mono text-sm break-all max-w-[70%] text-right font-medium">
-                      {acctDisplay}
-                    </span>
-                  </div>
-                  <div className="border-t border-neutral-100 w-full"></div>
+                  {/* Row 3: Conta bancária (Only for Retirada) */}
+                  {isRetirada && (
+                    <>
+                      <div className="flex justify-between items-start py-3.5">
+                        <div className="flex flex-col text-neutral-500 text-sm leading-tight select-none font-medium">
+                          <span>Conta</span>
+                          <span>bancária</span>
+                        </div>
+                        <span className="text-neutral-400 font-mono text-sm break-all max-w-[70%] text-right font-medium">
+                          {acctDisplay}
+                        </span>
+                      </div>
+                      <div className="border-t border-neutral-100 w-full"></div>
+                    </>
+                  )}
 
                   {/* Row 4: Montante label and large flat text value */}
                   <div className="pt-5 pb-2 space-y-1">
                     <span className="text-[12px] text-neutral-400 select-none block font-semibold uppercase tracking-wider">Montante</span>
                     <div className="text-3xl font-display font-extrabold text-neutral-900 tracking-wide select-all">
-                      KZ {selectedLog.amount.toFixed(2)}
+                      {selectedLog.currency === 'USDT' ? 'USDT ' : 'KZ '}
+                      {selectedLog.amount.toFixed(2)}
                     </div>
                   </div>
 
