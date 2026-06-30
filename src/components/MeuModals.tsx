@@ -2187,6 +2187,28 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
   const [completedTasks, setCompletedTasks] = useState<any[]>([]);
   const [depositLogs, setDepositLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [userIban, setUserIban] = useState<string>('');
+
+  // Fetch real IBAN from bnking_saques to decrypt fallback
+  useEffect(() => {
+    if (isOpen && type === 'retirada' && user?.id) {
+      const getRealIban = async () => {
+        try {
+          const { data, error } = await supabase
+            .from('bnking_saques')
+            .select('iban')
+            .eq('user_id', user.id)
+            .maybeSingle();
+          if (data?.iban) {
+            setUserIban(data.iban);
+          }
+        } catch (e) {
+          // silent fallback
+        }
+      };
+      getRealIban();
+    }
+  }, [isOpen, type, user?.id]);
 
   // Fetch withdrawal records when modal opens for retirada
   useEffect(() => {
@@ -2493,21 +2515,41 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
 
               // Mask IBAN: if encrypted (long base64 string), detect and show masked version
               const maskIban = (raw: string): string => {
-                if (!raw) return 'N/A';
-                const cleaned = raw.replace(/\s+/g, '');
+                const cleaned = raw ? raw.replace(/\s+/g, '') : '';
                 // Detect encrypted string: too long (>34 chars) or contains base64 chars like +/=
                 const isEncrypted = cleaned.length > 34 || /[+/=]/.test(cleaned);
+                
+                let displayIban = cleaned;
                 if (isEncrypted) {
-                  // Can't decrypt on frontend — show safe masked placeholder
-                  return '•••• ••••• ••••';
+                  const plainFallback = userIban || user?.bankAccount || '';
+                  const cleanFallback = plainFallback.replace(/\s+/g, '');
+                  const fallbackEncrypted = cleanFallback.length > 34 || /[+/=]/.test(cleanFallback);
+                  if (cleanFallback && !fallbackEncrypted) {
+                    displayIban = cleanFallback;
+                  } else {
+                    return '•••• ••••• ••••';
+                  }
                 }
-                // Normal IBAN — mask 5 middle characters with *****
-                if (cleaned.length <= 8) return cleaned;
-                const visibleStart = Math.ceil(cleaned.length / 3);
-                const visibleEnd = Math.floor(cleaned.length / 4);
-                const first = cleaned.slice(0, visibleStart);
-                const last = cleaned.slice(-visibleEnd);
-                return `${first} ***** ${last}`;
+
+                if (!displayIban) return 'N/A';
+                if (displayIban.length <= 8) return displayIban;
+
+                // Angolan IBAN format usually has 21 digits: e.g. 0055 4002 1001 0120 1818 1
+                // User requested e.g. 005100001123••••2554521455
+                // Let's show first 12 digits, then ••••, then last 10 digits
+                const first = displayIban.slice(0, 12);
+                const last = displayIban.slice(12).slice(-10);
+
+                if (first && last && displayIban.length > 16) {
+                  return `${first}••••${last}`;
+                }
+
+                // Standard masking fallback for shorter strings
+                const visibleStart = Math.ceil(displayIban.length / 3);
+                const visibleEnd = Math.floor(displayIban.length / 4);
+                const startStr = displayIban.slice(0, visibleStart);
+                const endStr = displayIban.slice(-visibleEnd);
+                return `${startStr}••••${endStr}`;
               };
 
               // Normalise the account display
