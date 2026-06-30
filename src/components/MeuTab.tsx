@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
-import { getAccessToken, GATEWAY_URL } from '../lib/supabase';
+import { supabase, getAccessToken, GATEWAY_URL } from '../lib/supabase';
 import { 
   Bell, Settings, User, Copy, ClipboardList, Wallet, Sparkles, 
   Gift, Layers, HelpCircle, UserCheck, Receipt, 
@@ -256,7 +256,25 @@ export const MeuTab: React.FC = () => {
         setIsLedgerOpen(true);
         break;
       case 'download':
-        alert('PWA: Instale o aplicativo móvel a partir do menu do seu navegador.');
+        showLoading('A obter o link de download...');
+        (async () => {
+          try {
+            const { data, error } = await supabase
+              .from('support_link')
+              .select('link_de_dowloadapk')
+              .limit(1)
+              .single();
+            if (!error && data?.link_de_dowloadapk) {
+              window.open(data.link_de_dowloadapk, '_blank');
+            } else {
+              alert('Link de download não configurado ou indisponível.');
+            }
+          } catch (e) {
+            alert('Falha ao obter o link de download.');
+          } finally {
+            hideLoading();
+          }
+        })();
         break;
       case 'termos':
         setIsPrivacyOpen(true);
