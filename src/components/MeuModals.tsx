@@ -2443,7 +2443,7 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
               </div>
             ) : (
               /* LIST VIEW: Exact mockup match */
-              <div className="divide-y divide-neutral-150">
+              <div className="divide-y divide-neutral-100">
                 {filtered.map((log) => {
                   // Generate a stable numeric orderId based on log ID
                   const orderId = log.id === 'ret_default' ? '260' : 
