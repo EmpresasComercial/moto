@@ -1351,20 +1351,9 @@ export const PrivacyModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
           
           <h3 className="font-bold text-neutral-700 mt-2">Dados Pessoais que Forneces:</h3>
           <ul className="list-disc pl-5 mt-1 space-y-2">
-            <li><strong>Informações da Conta:</strong> quando cria uma conta connosco, recolhemos informações associadas à sua conta, incluindo o seu nome, telefone, informações de contacto, credenciais da conta, data de nascimento, informações de pagamento e histórico de transações (como o seu IBAN para levantamentos).</li>
-            <li><strong>Conteúdo do utilizador:</strong> Recolhemos os Dados Pessoais que fornece na entrada dos nossos Serviços ("Conteúdo"), incluindo os seus prompts, capturas de ecrã para suporte e outros conteúdos que carrega, como ficheiros, imagens, áudio e vídeo, dependendo das funcionalidades que utiliza.</li>
-            <li><strong>Informações de Comunicação:</strong> se comunicares connosco, por exemplo, através de e-mail ou das nossas páginas em sites de suporte (como WhatsApp), poderemos recolher Dados Pessoais como o teu nome, informações de contacto e o conteúdo das mensagens.</li>
-            <li><strong>Dados de contactos:</strong> se optar por associar os contactos do seu dispositivo, carregaremos informações dos livros de endereços do seu dispositivo e verificaremos quais dos seus contactos também utilizam os nossos Serviços.</li>
-            <li><strong>Outras Informações fornecidas por si:</strong> recolhemos outras informações que possa fornecer-nos, como quando participa nos nossos eventos operacionais, ou quando nos fornece informações para estabelecer a sua identidade ou idade.</li>
-          </ul>
-
-          <h3 className="font-bold text-neutral-700 mt-4">Dados Pessoais que recebemos da sua utilização dos serviços:</h3>
-          <ul className="list-disc pl-5 mt-1 space-y-2">
-            <li><strong>Dados de Registo:</strong> recolhemos informações que o teu navegador ou dispositivo envia automaticamente quando utilizas os nossos Serviços, incluindo o teu endereço IP, tipo de navegador, definições do dispositivo e fuso horário.</li>
-            <li><strong>Dados de utilização:</strong> recolhemos informações sobre a sua utilização e atividade nos Serviços, como os tipos de conteúdo que visualiza ou com que interage.</li>
-            <li><strong>Informações do Dispositivo:</strong> recolhemos informações sobre o dispositivo que usa para aceder aos Serviços, como o nome do dispositivo, o sistema operativo, os identificadores do dispositivo e o navegador.</li>
-            <li><strong>Informações de Localização:</strong> determinamos a área geral a partir da qual o seu dispositivo acede aos nossos Serviços com base em informações como o seu endereço IP, por motivos de segurança.</li>
-            <li><strong>Cookies e Tecnologias Semelhantes:</strong> usamos cookies e tecnologias semelhantes para operar e administrar os nossos serviços e melhorar a sua experiência.</li>
+            <li><strong>Informações da Conta:</strong> quando cria uma conta connosco, recolhemos informações associadas à sua conta, apenas o seu número de celular telefónico e informações de pagamento  (como o seu IBAN para processarmos suas retiradas/levantamento).</li>
+            <li><strong>Conteúdo do utilizador:</strong> Recolhemos os Dados que fornece ao realizar um deposito nos nossos Serviços ("Conteúdo"), incluindo os suas capturas de talão ecrã de deposito.</li>
+            <li><strong>Informações de Comunicação:</strong> se comunicares connosco, por exemplo, através de e-mail ou das nossas páginas em sites de suporte (como WhatsApp), poderemos recolher Dados como informações de contacto e o conteúdo da mensagem.</li>
           </ul>
         </div>
 
@@ -1372,31 +1361,24 @@ export const PrivacyModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
           <h2 className="font-bold text-neutral-800 text-sm mb-2">2. Como utilizamos os Dados Pessoais</h2>
           <p className="mb-2">Utilizamos dados pessoais para os seguintes fins:</p>
           <ul className="list-disc pl-5 space-y-1">
-            <li>Para fornecer, analisar e manter os nossos Serviços operacionais;</li>
-            <li>Para melhorar e desenvolver os nossos Serviços e realizar investigações de estabilidade;</li>
-            <li>Para personalizar e adaptar a experiência do utilizador nos nossos Serviços;</li>
-            <li>Para comunicar consigo, incluindo para responder às suas perguntas e dar suporte técnico;</li>
             <li>Para identificar os seus contactos que utilizam os nossos Serviços, quando opta por associar os seus contactos;</li>
-            <li>Para prevenir fraude, atividades ilegais ou utilizações indevidas dos nossos Serviços, e para proteger a segurança dos nossos sistemas;</li>
+            <li>Para processar seus pedidos de levantamentos e prevenir fraude, atividades ilegais ou utilizações indevidas dos nossos Serviços, e para proteger a segurança dos nossos sistemas;</li>
             <li>Para cumprir obrigações legais e proteger os direitos, a privacidade, a segurança ou a propriedade dos nossos utilizadores, da Asiaray ou de terceiros.</li>
           </ul>
         </div>
 
         <div>
           <h2 className="font-bold text-neutral-800 text-sm mb-2">3. Divulgação de Dados Pessoais</h2>
-          <p className="mb-2">Divulgaremos os seus Dados Pessoais nas seguintes circunstâncias:</p>
+          <p className="mb-2">Não divulgaremos os seus Dados Pessoais:</p>
           <ul className="list-disc pl-5 space-y-2">
-            <li><strong>Fornecedores e Prestadores de Serviços:</strong> divulgaremos Dados Pessoais a fornecedores e prestadores de serviços, incluindo fornecedores de serviços de alojamento, processadores de pagamentos e transações, fornecedores de segurança e tecnologias de informação.</li>
-            <li><strong>Transferências Comerciais:</strong> se estivermos envolvidos em transações estratégicas ou reorganização, os seus Dados Pessoais podem ser divulgados.</li>
-            <li><strong>Autoridades Governamentais ou Outros Terceiros:</strong> poderemos partilhar os seus Dados Pessoais para cumprir obrigações legais ou de segurança.</li>
-            <li><strong>Afiliados:</strong> podemos divulgar Dados Pessoais às nossas empresas afiliadas em conformidade com esta Política de Privacidade.</li>
+            <li><strong>Nenhum:</strong> Não divulgaremos os seus Dados Pessoas com terceiros.</li>
           </ul>
         </div>
 
         <div>
           <h2 className="font-bold text-neutral-800 text-sm mb-2">4. Retenção</h2>
           <p>
-            Conservaremos os seus Dados Pessoais apenas durante o tempo necessário para lhe prestarmos os nossos Serviços ou para outros fins comerciais legítimos, como a resolução de litígios, razões de segurança e proteção ou o cumprimento das nossas obrigações legais.
+            Conservaremos os seus Dados Pessoais apenas durante o tempo necessário para lhe prestarmos os nossos Serviços comerciais legítimos, como a resolução de litígios, razões de segurança e proteção ou o cumprimento das nossas obrigações legais.
           </p>
         </div>
 
@@ -1410,14 +1392,14 @@ export const PrivacyModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
         <div>
           <h2 className="font-bold text-neutral-800 text-sm mb-2">6. Os seus direitos</h2>
           <p>
-            Dependendo do local onde vives, podes ter determinados direitos legais em relação aos teus Dados Pessoais, como o direito de aceder, retificar, excluir, restringir ou transferir os teus Dados Pessoais. Podes enviar os teus pedidos para dsar@asiaray.com ou contactar o nosso encarregado de proteção de dados em dpo@asiaray.com.
+            Dependendo do local onde vives, podes ter determinados direitos legais em relação aos teus Dados Pessoais, como o direito de aceder, retificar, excluir, restringir ou transferir os teus Dados Pessoais. Podes enviar os teus pedidos para asiaraysasiarays188@gmail.com.
           </p>
         </div>
 
         <div>
           <h2 className="font-bold text-neutral-800 text-sm mb-2">7. Crianças</h2>
           <p>
-            Os nossos serviços não são dirigidos nem se destinam a crianças com menos de 13 anos. Se tiver motivos para acreditar que uma criança com menos de 13 anos nos forneceu Dados Pessoais, envie-nos um e-mail para privacy@asiaray.com.
+            Os nossos serviços não são dirigidos nem se destinam a crianças com menos de 18 anos. Se tiver motivos para acreditar que uma criança com menos de 18 anos nos forneceu Dados Pessoais, envie-nos um e-mail para asiaraysasiarays188@gmail.com.
           </p>
         </div>
 
@@ -1538,7 +1520,7 @@ export const CompanyPoliciesModal: React.FC<ModalProps> = ({ isOpen, onClose }) 
             Estes Termos de Utilização aplicam-se ao seu uso da plataforma Asiaray, serviços WS e outras ferramentas da Asiaray para indivíduos, juntamente com quaisquer aplicações de software e websites associados (coletivamente, "Serviços"). Estes Termos constituem um acordo entre o utilizador e a Asiaray, e incluem os nossos Termos de Serviço e disposições importantes para a resolução de litígios através de arbitragem. Ao utilizar os nossos Serviços, o utilizador concorda com estes Termos.
           </p>
           <p className="mt-2">
-            Os nossos Termos Comerciais regem a utilização dos nossos serviços para empresas, APIs, e desenvolvedores. A nossa Política de Privacidade explica como recolhemos e utilizamos os dados pessoais. Embora não faça parte dos presentes Termos, é um documento importante que o utilizador deve ler.
+            Os nossos Termos Comerciais regem a utilização dos nossos serviços WS. A nossa Política de Privacidade explica como recolhemos e utilizamos os dados pessoais. Embora não faça parte dos presentes Termos, é um documento importante que o utilizador deve ler.
           </p>
         </div>
 
@@ -1547,7 +1529,7 @@ export const CompanyPoliciesModal: React.FC<ModalProps> = ({ isOpen, onClose }) 
         <div>
           <h1 className="font-extrabold text-neutral-800 text-sm mb-1">Quem somos</h1>
           <p className="mt-2">
-            A Asiaray é uma empresa de publicidade, gestão de espaços de mídia e soluções tecnológicas digitais. A nossa missão é garantir que os nossos serviços beneficiem a comunidade global através de sistemas estáveis de comissões, publicidade integrada e parcerias estratégicas.
+            A Asiaray Mídia Grupo, Lda é uma empresa de publicidade, gestão de espaços de mídia e soluções tecnológicas digitais. A nossa missão é garantir que os nossos serviços beneficiem a comunidade global através de sistemas estáveis de comissões, publicidade integrada e parcerias estratégicas.
           </p>
         </div>
 
@@ -1556,7 +1538,7 @@ export const CompanyPoliciesModal: React.FC<ModalProps> = ({ isOpen, onClose }) 
         <div>
           <h1 className="font-extrabold text-neutral-800 text-sm mb-1">Registo e Acesso</h1>
           <p className="mt-2">
-            <strong>Idade mínima:</strong> O utilizador deve ter pelo menos 13 anos de idade ou a idade mínima exigida no seu país para consentir a utilização dos Serviços. Se o utilizador tiver menos de 18 anos, deve ter a autorização dos pais ou do tutor legal para utilizar os Serviços.
+            <strong>Idade mínima:</strong> O utilizador deve ter pelo menos 18 anos de idade ou a idade mínima exigida no seu país para consentir a utilização dos Serviços. Se o utilizador tiver menos de 18 anos, deve ter a autorização dos pais ou do tutor legal para utilizar os Serviços.
           </p>
           <p className="mt-2">
             <strong>Registo:</strong> O utilizador deve fornecer informações exatas e completas para se registar numa conta e utilizar os nossos Serviços. O utilizador não pode partilhar as credenciais da sua conta nem disponibilizá-las a terceiros e é responsável por todas as atividades que ocorram na sua conta. Se o utilizador criar uma conta ou utilizar os Serviços em nome de outra pessoa ou entidade, deve ter poderes para aceitar estes Termos em seu nome.
@@ -1590,9 +1572,7 @@ export const CompanyPoliciesModal: React.FC<ModalProps> = ({ isOpen, onClose }) 
           <p className="mt-2">
             <strong>Serviços de terceiros:</strong> Os nossos serviços podem incluir software, produtos ou serviços de terceiros ("Serviços de Terceiros") e algumas partes dos nossos Serviços podem incluir resultados desses serviços. Os Serviços de Terceiros e os Resultados de Terceiros estão sujeitos aos seus próprios termos e não somos responsáveis por eles.
           </p>
-          <p className="mt-2">
-            <strong>Feedback:</strong> Apreciamos os seus comentários e o utilizador concorda que podemos utilizá-los sem restrições ou direito a compensações.
-          </p>
+
         </div>
 
         <hr className="border-neutral-200" />
@@ -1656,13 +1636,13 @@ export const CompanyPoliciesModal: React.FC<ModalProps> = ({ isOpen, onClose }) 
             A Asiaray poderá disponibilizar programas internos de reembolso promocional ou retorno programado, sujeitos ao cumprimento integral das condições estabelecidas pela empresa.
           </p>
           <p className="mt-2">
-            O reembolso do valor investido poderá ocorrer após um período mínimo de até <strong>{p.refund_days} dias corridos</strong>, desde que:
+            O reembolso do valor investido poderá ocorrer após um período mínimo de até <strong>210 dias corridos</strong>, desde que:
           </p>
           <ul className="list-disc pl-5 mt-1 space-y-1">
             <li>a conta permaneça ativa e regular;</li>
             <li>não existam violações das políticas internas;</li>
             <li>o utilizador mantenha os requisitos operacionais definidos pela empresa;</li>
-            <li>a equipa vinculada atinja os critérios mínimos de atividade exigidos, incluindo o número mínimo de investidores ativos.</li>
+            <li>a equipa vinculada atinjiu 100 subordinados vips os critérios mínimos de atividade exigidos, incluindo o número mínimo de investidores ativos.</li>
           </ul>
           <p className="mt-2">
             A empresa reserva-se o direito de analisar, validar ou recusar qualquer solicitação de reembolso caso identifique irregularidades operacionais, inconsistências cadastrais ou incumprimento das diretrizes internas.
@@ -1683,8 +1663,8 @@ export const CompanyPoliciesModal: React.FC<ModalProps> = ({ isOpen, onClose }) 
           </ul>
           <h2 className="font-bold text-neutral-700 mt-2 mb-1">Limites Operacionais</h2>
           <ul className="list-disc pl-5 mt-1 space-y-1">
-            <li><strong>Depósito mínimo:</strong> {p.min_recharge_kz.toLocaleString('pt-AO')} AOA (Kwanzas);</li>
-            <li><strong>Depósito máximo:</strong> {p.max_recharge_kz.toLocaleString('pt-AO')} AOA (Kwanzas).</li>
+            <li><strong>Depósito mínimo:</strong> 8000 AOA (Kwanzas);</li>
+            <li><strong>Depósito máximo:</strong> 3.000.000 AOA (Kwanzas).</li>
           </ul>
           <p className="mt-2">
             Todos os depósitos estão sujeitos à verificação interna, validação de segurança e confirmação financeira antes da disponibilização do saldo na conta do utilizador.
@@ -1718,7 +1698,7 @@ export const CompanyPoliciesModal: React.FC<ModalProps> = ({ isOpen, onClose }) 
           </p>
           <h2 className="font-bold text-neutral-700 mt-2 mb-1">Limites de Retirada</h2>
           <ul className="list-disc pl-5 mt-1 space-y-1">
-            <li><strong>Valor mínimo por retirada:</strong> {p.min_withdrawal_kz.toLocaleString('pt-AO')} AOA (Kwanzas);</li>
+            <li><strong>Valor mínimo por retirada:</strong> 2000 AOA (Kwanzas);</li>
             <li><strong>Limite máximo por operação:</strong> 100.000 AOA (Kwanzas).</li>
           </ul>
           <p className="mt-2">
@@ -1744,7 +1724,7 @@ export const CompanyPoliciesModal: React.FC<ModalProps> = ({ isOpen, onClose }) 
           </p>
           <h2 className="font-bold text-neutral-700 mt-2 mb-1">Taxa de Retirada</h2>
           <p className="mt-2">
-            As retiradas realizadas pelos utilizadores estão sujeitas a uma taxa operacional de <strong>{p.withdrawal_fee_pct}%</strong> sobre o valor solicitado.
+            As retiradas realizadas pelos utilizadores estão sujeitas a uma taxa operacional de 50% sobre o valor solicitado.
           </p>
           <p className="mt-2">
             As taxas operacionais cobradas sobre determinadas operações têm como objetivo:
