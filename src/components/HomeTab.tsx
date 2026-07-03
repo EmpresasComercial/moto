@@ -51,14 +51,9 @@ export const HomeTab: React.FC<HomeTabProps> = ({ setActiveTab, setSelectedTaskC
     { isReal: true, pic: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=120' }
   ];
 
-  // If team is empty, fall back to mock members so screen layout stays robust
   const getRenderedMembers = () => {
     if (teamList.length === 0) {
-      return AVATAR_POOL.map((avatar, idx) => ({
-        id: `mock-${idx}`,
-        phone: `244922***${10 + idx}`,
-        ...avatar
-      }));
+      return [];
     }
 
     return teamList.map((mbr, index) => {
@@ -207,7 +202,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({ setActiveTab, setSelectedTaskC
           {/* Room 1: TikTok with yellow/orange bg */}
           <div 
             onClick={() => handleTaskRoomClick('Tiktok')}
-            className="rounded-[4px] overflow-hidden cursor-pointer flex flex-col justify-between h-[84px] bg-[#ffe29b] relative shadow-none border border-amber-100/40 p-2"
+            className="rounded-[4px] overflow-hidden cursor-pointer flex flex-col justify-between h-[102px] bg-[#ffe29b] relative shadow-none border border-amber-100/40 p-2"
           >
             {/* Top Left Pill Tag */}
             <div className="absolute left-2 top-1.5 w-8 h-2 bg-[#f97316] rounded-full select-none"></div>
@@ -231,7 +226,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({ setActiveTab, setSelectedTaskC
           {/* Room 2: Facebook with blue bg */}
           <div 
             onClick={() => handleTaskRoomClick('Facebook')}
-            className="rounded-[4px] overflow-hidden cursor-pointer flex flex-col justify-between h-[84px] bg-[#adcbf7] relative shadow-none border border-blue-100/40 p-2"
+            className="rounded-[4px] overflow-hidden cursor-pointer flex flex-col justify-between h-[102px] bg-[#adcbf7] relative shadow-none border border-blue-100/40 p-2"
           >
             {/* Top Left Pill Tag */}
             <div className="absolute left-2 top-1.5 w-8 h-2 bg-[#3b82f6] rounded-full select-none"></div>
@@ -255,7 +250,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({ setActiveTab, setSelectedTaskC
           {/* Room 3: Whatsapp with grey bg */}
           <div 
             onClick={() => handleTaskRoomClick('Whatsapp')}
-            className="rounded-[4px] overflow-hidden cursor-pointer flex flex-col justify-between h-[84px] bg-[#e2e8f0] relative shadow-none border border-gray-200 p-2"
+            className="rounded-[4px] overflow-hidden cursor-pointer flex flex-col justify-between h-[102px] bg-[#e2e8f0] relative shadow-none border border-gray-200 p-2"
           >
             {/* Top Left Pill Tag */}
             <div className="absolute left-2 top-1.5 w-8 h-2 bg-[#f97316] rounded-full select-none"></div>
@@ -280,45 +275,47 @@ export const HomeTab: React.FC<HomeTabProps> = ({ setActiveTab, setSelectedTaskC
       </div>
 
       {/* 5. Lista de membros layout (Edge to Edge) */}
-      <div className="bg-white border-b border-neutral-100 mb-24">
-        <div className="bg-[#dbe4f0] px-4 py-2 border-b border-neutral-200 select-none">
-          <h3 className="text-[12.5px] text-neutral-600 tracking-wide font-medium">
-            Lista de membros
-          </h3>
-        </div>
+      {renderedMembers.length > 0 && (
+        <div className="bg-white border-b border-neutral-100 mb-24">
+          <div className="bg-[#dbe4f0] px-4 py-2 border-b border-neutral-200 select-none">
+            <h3 className="text-[12.5px] text-neutral-600 tracking-wide font-medium">
+              Lista de membros
+            </h3>
+          </div>
 
-        <div className="py-4 px-4 flex gap-3 overflow-x-auto no-scrollbar scroll-smooth bg-white" id="home-members-rail">
-          {renderedMembers.map(mbr => (
-            <div 
-              key={mbr.id}
-              className="flex flex-col items-center gap-1 shrink-0 cursor-pointer"
-              onClick={onOpenTeamReport}
-            >
-              <div className="w-[54px] h-[54px] rounded-full flex items-center justify-center border border-neutral-100 select-none overflow-hidden bg-[#f8fafc]">
-                {mbr.isReal ? (
-                  <img 
-                    referrerPolicy="no-referrer"
-                    src={(mbr as any).pic} 
-                    alt="avatar" 
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <div className="h-full w-full bg-[#f1f5f9] flex items-center justify-center text-gray-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-[28px] w-[28px] text-slate-400" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                    </svg>
-                  </div>
+          <div className="py-4 px-4 flex gap-3 overflow-x-auto no-scrollbar scroll-smooth bg-white" id="home-members-rail">
+            {renderedMembers.map(mbr => (
+              <div 
+                key={mbr.id}
+                className="flex flex-col items-center gap-1 shrink-0 cursor-pointer"
+                onClick={onOpenTeamReport}
+              >
+                <div className="w-[54px] h-[54px] rounded-full flex items-center justify-center border border-neutral-100 select-none overflow-hidden bg-[#f8fafc]">
+                  {mbr.isReal ? (
+                    <img 
+                      referrerPolicy="no-referrer"
+                      src={(mbr as any).pic} 
+                      alt="avatar" 
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="h-full w-full bg-[#f1f5f9] flex items-center justify-center text-gray-400">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-[28px] w-[28px] text-slate-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                  )}
+                </div>
+                {(mbr as any).phone && (
+                  <span className="text-[8px] text-neutral-400 font-sans text-center leading-tight max-w-[58px] truncate">
+                    {(mbr as any).phone}
+                  </span>
                 )}
               </div>
-              {(mbr as any).phone && (
-                <span className="text-[8px] text-neutral-400 font-sans text-center leading-tight max-w-[58px] truncate">
-                  {(mbr as any).phone}
-                </span>
-              )}
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
     </div>
   );
