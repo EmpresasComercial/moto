@@ -93,7 +93,7 @@ export const LoginScreen: React.FC = () => {
 
     (async () => {
       try {
-        await registerUser(cleanPhone, senha, convite.trim());
+        await registerUser(cleanPhone.trim(), senha.trim(), convite.trim());
       } catch (err) {
         // O próprio registerUser já mostra toast de erro com a mensagem do banco
       } finally {
@@ -118,7 +118,7 @@ export const LoginScreen: React.FC = () => {
 
     (async () => {
       try {
-        const ok = await login(phone, senha);
+        const ok = await login(phone.trim(), senha.trim());
         // O próprio login já trata a exibição de toasts de erro ou sucesso baseados no banco/Supabase.
       } catch (err) {
         // Tratado no AppContext
@@ -169,9 +169,11 @@ export const LoginScreen: React.FC = () => {
                   <input 
                     id="cadastro-senha-field"
                     type={showSenha ? 'text' : 'password'}
-                    placeholder="Mínimo 6 caracteres"
+                    placeholder="Introduza a sua senha"
                     value={senha}
                     onChange={(e) => setSenha(e.target.value)}
+                    autoCapitalize="none"
+                    autoCorrect="off"
                     minLength={6}
                     className="bg-transparent border-none outline-none flex-1 text-neutral-800 text-[12px] font-sans"
                   />
@@ -326,6 +328,8 @@ export const LoginScreen: React.FC = () => {
                     placeholder="Sua senha de acesso"
                     value={senha}
                     onChange={(e) => setSenha(e.target.value)}
+                    autoCapitalize="none"
+                    autoCorrect="off"
                     className="bg-transparent border-none outline-none flex-1 text-neutral-800 text-[12px] font-sans"
                   />
                   <button
