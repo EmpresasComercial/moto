@@ -60,7 +60,7 @@ export const BankModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
       setIsFullScreenActive(false);
     };
   }, [isOpen, setIsFullScreenActive]);
-  const [bank, setBank] = useState('Banco BAI');
+  const [bank, setBank] = useState('');
   const [account, setAccount] = useState('');
   const [holder, setHolder] = useState('');
   const [ibanError, setIbanError] = useState<string | null>(null);
@@ -80,12 +80,14 @@ export const BankModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
     setBank(selectedBank);
     const code = bankCodes[selectedBank] || '';
     setAccount(code);
-    setTimeout(() => {
-      if (accountInputRef.current) {
-        accountInputRef.current.focus();
-        accountInputRef.current.setSelectionRange(code.length, code.length);
-      }
-    }, 0);
+    if (code) {
+      setTimeout(() => {
+        if (accountInputRef.current) {
+          accountInputRef.current.focus();
+          accountInputRef.current.setSelectionRange(code.length, code.length);
+        }
+      }, 0);
+    }
   };
 
   const IBAN_REGEX = /^[0-9]{21}$/;
@@ -98,6 +100,11 @@ export const BankModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
 
   const handleSave = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
+
+    if (!bank) {
+      setIbanError('Por favor, selecione a instituição bancária.');
+      return;
+    }
 
     const cleanIban = account.replace(/\s/g, '');
     if (!IBAN_REGEX.test(cleanIban)) {
@@ -157,6 +164,7 @@ export const BankModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
                   onChange={handleBankChange}
                   className="bg-transparent border-none outline-none w-full text-neutral-800 text-[12px] font-sans font-bold"
                 >
+                  <option value="" disabled>Selecione o banco</option>
                   {banksList.map((b, idx) => (
                     <option key={idx} value={b}>{b}</option>
                   ))}
