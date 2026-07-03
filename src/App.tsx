@@ -58,7 +58,7 @@ function MainAppLayout() {
 
   // Keep document.title in sync with routing
   useEffect(() => {
-    document.title = 'Asiaray group';
+    document.title = 'Asiaray';
   }, []);
 
   const setActiveTab = (tab: string) => {
