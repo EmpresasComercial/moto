@@ -77,8 +77,8 @@ export const GravarTab: React.FC = () => {
 
   const loadAgdTasks = async () => {
     if (isSessionExpired) return;
-    if (!(await ensureInternetConnectivity())) return;
     showLoading('Carregando tarefas de transformação...');
+    if (!(await ensureInternetConnectivity())) { hideLoading(); return; }
     try {
       const token = await getAccessToken();
       if (!token) return;
@@ -101,8 +101,8 @@ export const GravarTab: React.FC = () => {
 
   const loadCompletedTasks = async () => {
     if (isSessionExpired) return;
-    if (!(await ensureInternetConnectivity())) return;
     showLoading('Carregando tarefas concluídas...');
+    if (!(await ensureInternetConnectivity())) { hideLoading(); return; }
     try {
       const token = await getAccessToken();
       if (!token) return;
@@ -125,8 +125,8 @@ export const GravarTab: React.FC = () => {
 
   const loadFailedTasks = async () => {
     if (isSessionExpired) return;
-    if (!(await ensureInternetConnectivity())) return;
     showLoading('Carregando tarefas falhadas...');
+    if (!(await ensureInternetConnectivity())) { hideLoading(); return; }
     try {
       const token = await getAccessToken();
       if (!token) return;

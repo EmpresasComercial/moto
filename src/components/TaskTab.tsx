@@ -146,9 +146,9 @@ export const TaskTab: React.FC<TaskTabProps> = ({ selectedCategory, setSelectedC
     if (isSessionExpired) return;
 
     const loadShopItems = async () => {
-      if (!(await ensureInternetConnectivity())) { setLoading(false); return; }
       setLoading(true);
       showLoading('Carregando itens da loja...');
+      if (!(await ensureInternetConnectivity())) { setLoading(false); hideLoading(); return; }
       try {
         const token = await getAccessToken();
         if (!token) { setLoading(false); hideLoading(); return; }

@@ -38,8 +38,8 @@ export const WSTab: React.FC = () => {
     if (isSessionExpired) return;
 
     const loadProducts = async () => {
-      if (!(await ensureInternetConnectivity())) return;
       showLoading('Carregando níveis WS...');
+      if (!(await ensureInternetConnectivity())) { hideLoading(); return; }
       try {
         const token = await getAccessToken();
         if (!token) return;
