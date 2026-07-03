@@ -11,7 +11,7 @@ interface HomeTabProps {
 
 export const HomeTab: React.FC<HomeTabProps> = ({ setActiveTab, setSelectedTaskCategory, onOpenTeamReport }) => {
   const { stats } = useApp();
-  
+
   const handleTaskRoomClick = (category: TaskType) => {
     setSelectedTaskCategory(category);
     setActiveTab('tarefa');
@@ -31,12 +31,12 @@ export const HomeTab: React.FC<HomeTabProps> = ({ setActiveTab, setSelectedTaskC
         });
         const res = await resp.json();
         if (res.success) {
-          const arr = Array.isArray(res.result) 
-            ? res.result 
+          const arr = Array.isArray(res.result)
+            ? res.result
             : (res.result?.team && Array.isArray(res.result.team) ? res.result.team : []);
           setTeamList(arr);
         }
-      } catch {}
+      } catch { }
     };
     fetchTeam();
   }, []);
@@ -76,7 +76,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({ setActiveTab, setSelectedTaskC
 
   return (
     <div id="home-tab-container" className="pb-24 bg-[#f4f6f9] min-h-screen animate-fadeIn font-sans select-none">
-      
+
       {/* 1. Header Media Trailer Widget (Keep exact positioning) */}
       <div className="w-full bg-black" id="home-video-wrapper">
         <video
@@ -113,7 +113,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({ setActiveTab, setSelectedTaskC
 
         {/* 3x3 Metrics layout exactly matching colors and values in the screenshot */}
         <div className="grid grid-cols-3 py-4 px-4 text-left bg-white select-none gap-x-2 gap-y-4">
-          
+
           {/* Column 1 */}
           <div className="flex flex-col">
             <span className="text-[10px] text-gray-400 font-medium leading-tight">Balance (KZ)</span>
@@ -121,7 +121,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({ setActiveTab, setSelectedTaskC
               {stats.balance.toFixed(2)}
             </span>
           </div>
-          
+
           {/* Column 2 */}
           <div className="flex flex-col border-l border-neutral-100 pl-3">
             <span className="text-[10px] text-gray-400 font-medium leading-tight">Ontem (KZ)</span>
@@ -129,7 +129,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({ setActiveTab, setSelectedTaskC
               +{stats.incomeYesterday.toFixed(2)}
             </span>
           </div>
-          
+
           {/* Column 3 */}
           <div className="flex flex-col border-l border-neutral-100 pl-3">
             <span className="text-[10px] text-gray-400 font-medium leading-tight">Hoje (KZ)</span>
@@ -145,7 +145,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({ setActiveTab, setSelectedTaskC
               {stats.incomeThisWeek.toFixed(2)}
             </span>
           </div>
-          
+
           {/* Row 2 - Column 2 */}
           <div className="flex flex-col border-l border-neutral-100 pl-3">
             <span className="text-[10px] text-gray-400 font-medium leading-tight">Este mês (KZ)</span>
@@ -153,7 +153,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({ setActiveTab, setSelectedTaskC
               +{stats.incomeThisMonth.toFixed(2)}
             </span>
           </div>
-          
+
           {/* Row 2 - Column 3 */}
           <div className="flex flex-col border-l border-neutral-100 pl-3">
             <span className="text-[10px] text-gray-400 font-medium leading-tight">No mês passado (KZ)</span>
@@ -169,7 +169,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({ setActiveTab, setSelectedTaskC
               {stats.incomeTotal.toFixed(2)}
             </span>
           </div>
-          
+
           {/* Row 3 - Column 2 */}
           <div className="flex flex-col border-l border-neutral-100 pl-3">
             <span className="text-[10px] text-gray-400 font-medium leading-tight">Terminado hoje</span>
@@ -177,7 +177,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({ setActiveTab, setSelectedTaskC
               {stats.completedTodayCount}
             </span>
           </div>
-          
+
           {/* Row 3 - Column 3 */}
           <div className="flex flex-col border-l border-neutral-100 pl-3">
             <span className="text-[10px] text-gray-400 font-medium leading-tight">Tarefa inacabada</span>
@@ -196,9 +196,9 @@ export const HomeTab: React.FC<HomeTabProps> = ({ setActiveTab, setSelectedTaskC
             Sala de Tarefas
           </h3>
         </div>
-        
+
         <div className="grid grid-cols-3 gap-2 px-3 py-4 select-none bg-white" id="task-room-grid">
-          
+
           {/* Room 1: TikTok with yellow/orange bg */}
           <div 
             onClick={() => handleTaskRoomClick('Tiktok')}
@@ -206,7 +206,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({ setActiveTab, setSelectedTaskC
           >
             {/* Top Left Pill Tag */}
             <div className="absolute left-2 top-1.5 w-8 h-2 bg-[#f97316] rounded-full select-none"></div>
-            
+
             <div className="z-10 text-left flex flex-col justify-end h-full pt-4">
               <div className="text-[12px] font-bold text-gray-800 leading-tight">TikTok</div>
               <div className="text-[8.5px] text-gray-600 font-medium mt-0.5 leading-tight">(fazer tarefa)</div>
@@ -230,7 +230,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({ setActiveTab, setSelectedTaskC
           >
             {/* Top Left Pill Tag */}
             <div className="absolute left-2 top-1.5 w-8 h-2 bg-[#3b82f6] rounded-full select-none"></div>
-            
+
             <div className="z-10 text-left flex flex-col justify-end h-full pt-4">
               <div className="text-[12px] font-bold text-gray-800 leading-tight">Facebook</div>
               <div className="text-[8.5px] text-gray-600 font-medium mt-0.5 leading-tight">(Anúncio de imagem)</div>
@@ -254,7 +254,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({ setActiveTab, setSelectedTaskC
           >
             {/* Top Left Pill Tag */}
             <div className="absolute left-2 top-1.5 w-8 h-2 bg-[#f97316] rounded-full select-none"></div>
-            
+
             <div className="z-10 text-left flex flex-col justify-end h-full pt-4">
               <div className="text-[12px] font-bold text-gray-800 leading-tight">Whatsapp</div>
               <div className="text-[8px] text-gray-500 font-medium mt-0.5 leading-tight">download app para ganhar recompensa</div>
