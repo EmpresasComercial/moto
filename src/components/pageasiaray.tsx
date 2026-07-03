@@ -154,7 +154,7 @@ export const LoginScreen: React.FC = () => {
                   <input 
                     id="cadastro-phone-field"
                     type="tel" 
-                    placeholder="9XXXXXXXX"
+                    placeholder="Por favor inser nº celular"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value.replace(/\s+/g, ''))}
                     className="bg-transparent border-none outline-none w-full text-neutral-800 text-[12px] font-sans"
