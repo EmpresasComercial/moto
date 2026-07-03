@@ -262,7 +262,7 @@ export const LoginScreen: React.FC = () => {
             {/* Termos de Uso */}
             <div className="flex items-center gap-2 px-1 select-none cursor-pointer" onClick={() => setTermosAceitos(!termosAceitos)}>
               <div 
-                className={`w-[18px] h-[18px] flex shrink-0 items-center justify-center rounded-[3px] transition-colors border ${termosAceitos ? 'bg-[#3b82f6] border-[#3b82f6]' : 'bg-[#eab308] border-[#eab308]'}`}
+                className={`w-[18px] h-[18px] flex shrink-0 items-center justify-center rounded-[3px] transition-colors border-2 ${termosAceitos ? 'bg-[#3b82f6] border-[#3b82f6]' : 'bg-transparent border-[#eab308]'}`}
               >
                 {termosAceitos && (
                   <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
