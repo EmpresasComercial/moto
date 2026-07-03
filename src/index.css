@@ -18,6 +18,12 @@
   100% { transform: translateX(-100%); }
 }
 
+/* Spinner animation - pure CSS, never freezes */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 .animate-marquee {
   display: inline-block;
   white-space: nowrap;

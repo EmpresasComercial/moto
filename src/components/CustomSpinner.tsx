@@ -1,7 +1,6 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
 import { motion, AnimatePresence } from 'motion/react';
-import spinnerImg from '../../assets/icons8-spinner-24.apng.png';
 
 export const CustomSpinner: React.FC = () => {
   const { isLoading, loadingMessage } = useApp();
@@ -25,9 +24,14 @@ export const CustomSpinner: React.FC = () => {
             className="bg-white/90 backdrop-blur-md rounded-2xl p-6 shadow-2xl border border-neutral-100/50 flex flex-col items-center gap-4 max-w-[210px] w-full text-center"
             id="global-spinner-box"
           >
-            {/* Simple spinner with thin 'Wait...' text */}
+            {/* Pure CSS spinner - no image dependency, never freezes */}
             <div className="flex flex-col items-center gap-2">
-              <img src={spinnerImg} alt="Loading" className="h-10 w-10 animate-spin" />
+              <div
+                className="h-10 w-10 rounded-full border-[3px] border-slate-200 border-t-[3px] border-t-blue-500"
+                style={{
+                  animation: 'spin 0.7s linear infinite',
+                }}
+              />
               <span className="text-sm font-light text-slate-800">Wait...</span>
             </div>
           </motion.div>
