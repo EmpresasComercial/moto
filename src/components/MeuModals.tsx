@@ -1213,11 +1213,6 @@ export const TeamReportModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
 
         {/* Members List Table */}
         <div className="bg-white divide-y divide-gray-100 relative min-h-[100px]">
-          {loading && (
-            <div className="absolute inset-0 bg-white/60 flex items-center justify-center z-10">
-              <div className="animate-spin rounded-full h-5 w-5 border-2 border-slate-200 border-t-blue-500"></div>
-            </div>
-          )}
           {getMemberList().length === 0 && !loading && (
             <div className="py-10 text-center text-neutral-400 text-[11px]">Nenhum membro encontrado.</div>
           )}
