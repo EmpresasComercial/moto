@@ -20,6 +20,7 @@ export const LoginScreen: React.FC = () => {
   const [convite, setConvite] = useState<string>('');
   const [verificacao, setVerificacao] = useState<string>('');
   const [showSenha, setShowSenha] = useState<boolean>(false);
+  const [termosAceitos, setTermosAceitos] = useState<boolean>(false);
   
   const [captchaText, setCaptchaText] = useState<string>('FyPAE');
 
@@ -258,12 +259,29 @@ export const LoginScreen: React.FC = () => {
               </div>
             </div>
 
+            {/* Termos de Uso */}
+            <div className="flex items-center gap-2 px-1 select-none cursor-pointer" onClick={() => setTermosAceitos(!termosAceitos)}>
+              <div 
+                className={`w-[18px] h-[18px] flex shrink-0 items-center justify-center rounded-[3px] transition-colors border ${termosAceitos ? 'bg-[#3b82f6] border-[#3b82f6]' : 'bg-[#eab308] border-[#eab308]'}`}
+              >
+                {termosAceitos && (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                )}
+              </div>
+              <span className="text-[12px] text-gray-600">
+                Concordo com os Termos de Uso e a Política de Privacidade
+              </span>
+            </div>
+
             {/* Buttons */}
             <div className="flex flex-col items-center justify-center gap-3 select-none">
               <button
                 id="submit-register-action-btn"
                 type="submit"
-                className="bg-[#60a5fa] hover:bg-[#3b82f6] text-white font-bold text-[12px] py-2.5 px-6 rounded-sm cursor-pointer transition-colors w-full text-center uppercase tracking-wide"
+                disabled={!termosAceitos}
+                className={`${termosAceitos ? 'bg-[#60a5fa] hover:bg-[#3b82f6] cursor-pointer' : 'bg-gray-400 cursor-not-allowed'} text-white font-bold text-[12px] py-2.5 px-6 rounded-sm transition-colors w-full text-center uppercase tracking-wide`}
               >
                 Registar
               </button>
