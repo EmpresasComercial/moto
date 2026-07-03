@@ -686,7 +686,7 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
               </p>
 
               {!banksLoaded ? (
-                <div className="py-8 flex justify-center"><div className="w-6 h-6 border-2 border-[#1e88e5] border-t-transparent rounded-full animate-spin"></div></div>
+                <div className="py-8 flex justify-center"><div className="w-6 h-6 rounded-full border-2 border-slate-200 border-t-[2px] border-t-blue-500 animate-spin"></div></div>
               ) : (
                 <div className="divide-y divide-slate-100 overflow-hidden">
                   {dbBanks.map((bank, idx) => {
@@ -1215,7 +1215,7 @@ export const TeamReportModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
         <div className="bg-white divide-y divide-gray-100 relative min-h-[100px]">
           {loading && (
             <div className="absolute inset-0 bg-white/60 flex items-center justify-center z-10">
-              <div className="animate-spin h-5 w-5 border-2 border-[#10b981] border-t-transparent rounded-full"></div>
+              <div className="animate-spin rounded-full h-5 w-5 border-2 border-slate-200 border-t-blue-500"></div>
             </div>
           )}
           {getMemberList().length === 0 && !loading && (
@@ -1484,7 +1484,7 @@ export const CompanyPoliciesModal: React.FC<ModalProps> = ({ isOpen, onClose }) 
     return (
       <ModalBase isOpen={isOpen} onClose={onClose} title="Políticas da Empresa">
         <div className="flex justify-center items-center h-40">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1e88e5]"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-[3px] border-slate-200 border-t-blue-500"></div>
         </div>
       </ModalBase>
     );
