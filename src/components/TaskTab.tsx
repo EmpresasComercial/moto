@@ -296,9 +296,7 @@ export const TaskTab: React.FC<TaskTabProps> = ({ selectedCategory, setSelectedC
 
       <div className="p-3.5 space-y-3" id="tasks-list-cards-viewport">
         {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="w-6 h-6 border-2 border-zinc-300 border-t-zinc-600 rounded-full animate-spin" />
-          </div>
+          <div className="py-20" />
         ) : displayItems.length === 0 ? (
           <EmptyState
             className="bg-white rounded-lg border border-zinc-200 p-12"
