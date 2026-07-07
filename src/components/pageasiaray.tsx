@@ -296,6 +296,33 @@ export const LoginScreen: React.FC = () => {
                 Já tenho conta — Login
               </button>
             </div>
+
+            {/* Rodapé de Contatos */}
+            <div className="mt-6 pt-4 border-t border-gray-200 flex justify-between items-start text-[11px] text-gray-500">
+              <div className="flex flex-col gap-1">
+                <span className="font-bold text-gray-700">Grupo de WhatsApp</span>
+                <span className="text-gray-400">Atendimento & Vendas</span>
+                <a 
+                  href="https://chat.whatsapp.com/KuvqmnwRitGIJi5PsYqt4W" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="text-blue-600 font-semibold hover:underline mt-0.5"
+                >
+                  Clique para entrar
+                </a>
+              </div>
+
+              <div className="flex flex-col gap-1 items-end text-right">
+                <span className="font-bold text-gray-700">Suporte Técnico</span>
+                <span className="text-gray-400">Suporte da Empresa</span>
+                <a 
+                  href="mailto:asiaraygrupo@asiary.it.com" 
+                  className="text-blue-600 font-semibold hover:underline mt-0.5"
+                >
+                  asiaraygrupo@asiary.it.com
+                </a>
+              </div>
+            </div>
           </form>
         ) : (
           <form onSubmit={handleSubmitLogin} className="space-y-4" id="form-login-asiaray">
