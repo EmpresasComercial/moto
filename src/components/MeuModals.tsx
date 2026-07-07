@@ -1395,14 +1395,14 @@ export const PrivacyModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
         <div>
           <h2 className="font-bold text-neutral-800 text-sm mb-2">6. Os seus direitos</h2>
           <p>
-            Dependendo do local onde vives, podes ter determinados direitos legais em relação aos teus Dados Pessoais, como o direito de aceder, retificar, excluir, restringir ou transferir os teus Dados Pessoais. Podes enviar os teus pedidos para asiaraysasiarays188@gmail.com.
+            Dependendo do local onde vives, podes ter determinados direitos legais em relação aos teus Dados Pessoais, como o direito de aceder, retificar, excluir, restringir ou transferir os teus Dados Pessoais. Podes enviar os teus pedidos para <a href="mailto:asiaraygrupo@asiary.it.com" className="text-blue-600 hover:underline">asiaraygrupo@asiary.it.com</a>.
           </p>
         </div>
 
         <div>
           <h2 className="font-bold text-neutral-800 text-sm mb-2">7. Crianças</h2>
           <p>
-            Os nossos serviços não são dirigidos nem se destinam a crianças com menos de 18 anos. Se tiver motivos para acreditar que uma criança com menos de 18 anos nos forneceu Dados Pessoais, envie-nos um e-mail para asiaraysasiarays188@gmail.com.
+            Os nossos serviços não são dirigidos nem se destinam a crianças com menos de 18 anos. Se tiver motivos para acreditar que uma criança com menos de 18 anos nos forneceu Dados Pessoais, envie-nos um e-mail para <a href="mailto:asiaraygrupo@asiary.it.com" className="text-blue-600 hover:underline">asiaraygrupo@asiary.it.com</a>.
           </p>
         </div>
 
