@@ -75,6 +75,8 @@ export const MeuTab: React.FC = () => {
   const [isPoliciesOpen, setIsPoliciesOpen] = useState(false);
   const [ledgerType, setLedgerType] = useState<'receita' | 'recarga' | 'retirada'>('receita');
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [showDownloadConfirmModal, setShowDownloadConfirmModal] = useState(false);
+  const [downloadProgress, setDownloadProgress] = useState<number | null>(null);
 
   // Bell and Credit Rating States
   const [teamStats, setTeamStats] = useState({ total: 0, investors: 0 });
@@ -214,6 +216,32 @@ export const MeuTab: React.FC = () => {
     }
   };
 
+  const startDownload = () => {
+    setDownloadProgress(1);
+    let progress = 1;
+    const interval = setInterval(() => {
+      progress += Math.floor(Math.random() * 15) + 5;
+      if (progress >= 100) {
+        progress = 100;
+        clearInterval(interval);
+        
+        // Trigger download
+        const link = document.createElement('a');
+        link.href = '/asiaray.apk';
+        link.setAttribute('download', 'Asiaray.apk');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        setTimeout(() => {
+          setShowDownloadConfirmModal(false);
+          setDownloadProgress(null);
+        }, 500);
+      }
+      setDownloadProgress(progress);
+    }, 300);
+  };
+
   const copyInviteCode = () => {
     navigator.clipboard.writeText(user.inviteCode);
     setCopied(true);
@@ -257,25 +285,7 @@ export const MeuTab: React.FC = () => {
         setIsLedgerOpen(true);
         break;
       case 'download':
-        showLoading('A obter o link de download...');
-        (async () => {
-          try {
-            const { data, error } = await supabase
-              .from('support_link')
-              .select('link_de_dowloadapk')
-              .limit(1)
-              .single();
-            if (!error && data?.link_de_dowloadapk) {
-              window.open(data.link_de_dowloadapk, '_blank');
-            } else {
-              alert('Link de download não configurado ou indisponível.');
-            }
-          } catch (e) {
-            alert('Falha ao obter o link de download.');
-          } finally {
-            hideLoading();
-          }
-        })();
+        setShowDownloadConfirmModal(true);
         break;
       case 'termos':
         setIsPrivacyOpen(true);
@@ -611,9 +621,9 @@ export const MeuTab: React.FC = () => {
             className="py-5 px-1 text-center cursor-pointer flex flex-col justify-center items-center gap-2 h-[100px] select-none"
           >
             <div className="h-[30px] flex items-center justify-center">
-              <img src={downloadAppIcon} alt="download da aplicação" className="w-[26px] h-[26px] object-contain" />
+              <img src={downloadAppIcon} alt="download do APK" className="w-[26px] h-[26px] object-contain" />
             </div>
-            <span className="text-[11px] font-normal text-neutral-500">download da aplicação</span>
+            <span className="text-[11px] font-normal text-neutral-500">download do APK</span>
           </div>
 
           {/* Tile 9: Perguntas frequentes */}
@@ -713,24 +723,30 @@ export const MeuTab: React.FC = () => {
       {isFinancaOpen && <MinhasFinancasModal isOpen={isFinancaOpen} onClose={() => setIsFinancaOpen(false)} />}
       {isCuponsOpen && <CuponsPage isOpen={isCuponsOpen} onClose={() => setIsCuponsOpen(false)} />}
 
+      {/* Logout Confirmation Modal */}
       {showLogoutConfirm && (
-        <div className="fixed inset-0 bg-black/45 flex items-center justify-center z-[9999] p-6 animate-fadeIn">
-          <div className="bg-white rounded-2xl w-full max-w-[270px] overflow-hidden flex flex-col shadow-xl border border-neutral-100/50">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+          <div 
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300"
+            onClick={() => setShowLogoutConfirm(false)}
+            aria-hidden="true"
+          />
+          <div className="relative z-10 bg-white rounded-2xl w-full max-w-[270px] overflow-hidden flex flex-col shadow-xl border border-neutral-100/50 animate-scaleIn">
             <div className="px-5 py-6 text-center">
-              <p className="text-[14px] font-normal text-neutral-800 leading-snug">
-                Deseja realmente terminar a sessão?
+              <p className="text-[14px] font-bold text-neutral-800">
+                Tem a certeza que deseja terminar a sessão?
               </p>
             </div>
             
             <div className="border-t border-neutral-100 flex">
-              <button
+              <button 
                 type="button"
                 onClick={() => setShowLogoutConfirm(false)}
                 className="flex-1 py-3 text-[14px] font-normal text-neutral-500 hover:bg-neutral-50 active:bg-neutral-100 border-r border-neutral-100 focus:outline-none transition-colors cursor-pointer"
               >
-                Canc
+                Cancelar
               </button>
-              <button
+              <button 
                 type="button"
                 onClick={() => {
                   setShowLogoutConfirm(false);
@@ -738,9 +754,58 @@ export const MeuTab: React.FC = () => {
                 }}
                 className="flex-1 py-3 text-[14px] font-bold text-[#2563eb] hover:bg-neutral-50 active:bg-neutral-100 focus:outline-none transition-colors cursor-pointer"
               >
-                OK
+                Terminar sessão
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Download APK Confirmation Modal */}
+      {showDownloadConfirmModal && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+          <div 
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300"
+            onClick={() => downloadProgress === null && setShowDownloadConfirmModal(false)}
+            aria-hidden="true"
+          />
+          <div className="relative z-10 bg-white rounded-2xl w-full max-w-[270px] overflow-hidden flex flex-col shadow-xl border border-neutral-100/50 animate-scaleIn">
+            <div className="px-5 py-6 text-center">
+              <p className="text-[14px] font-bold text-neutral-800">
+                Tem a certeza que deseja fazer o download do APK?
+              </p>
+              {downloadProgress !== null && (
+                <div className="mt-4 flex flex-col items-center">
+                  <div className="text-[20px] font-bold text-[#2563eb]">{downloadProgress}%</div>
+                  <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                    <div 
+                      className="bg-[#2563eb] h-2 rounded-full transition-all duration-300" 
+                      style={{ width: `${downloadProgress}%` }}
+                    ></div>
+                  </div>
+                  <div className="text-[10px] text-gray-400 mt-1">A transferir ficheiro...</div>
+                </div>
+              )}
+            </div>
+            
+            {downloadProgress === null && (
+              <div className="border-t border-neutral-100 flex">
+                <button 
+                  type="button"
+                  onClick={() => setShowDownloadConfirmModal(false)}
+                  className="flex-1 py-3 text-[14px] font-normal text-neutral-500 hover:bg-neutral-50 active:bg-neutral-100 border-r border-neutral-100 focus:outline-none transition-colors cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button 
+                  type="button"
+                  onClick={startDownload}
+                  className="flex-1 py-3 text-[14px] font-bold text-[#2563eb] hover:bg-neutral-50 active:bg-neutral-100 focus:outline-none transition-colors cursor-pointer"
+                >
+                  Fazer download
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}

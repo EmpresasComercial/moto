@@ -14,6 +14,8 @@ export const RetirarPage: React.FC = () => {
   
   // Pin inputs
   const [pin, setPin] = useState<string>('');
+  // No bank account modal
+  const [showNoBankModal, setShowNoBankModal] = useState(false);
 
   // Auto-hide full screen footer layout
   useEffect(() => {
@@ -24,6 +26,13 @@ export const RetirarPage: React.FC = () => {
       setIsFullScreenActive(false);
     };
   }, [setIsFullScreenActive]);
+
+  // Show modal automatically if no bank account is linked
+  useEffect(() => {
+    if (!user.bankAccount && !user.bankId) {
+      setShowNoBankModal(true);
+    }
+  }, [user.bankAccount, user.bankId]);
 
   // Derived values
   const displayBank = user.bankName || '';
@@ -144,7 +153,7 @@ export const RetirarPage: React.FC = () => {
                   ) : displayBank ? (
                     <span>Canal de Pagamento: {displayBank}</span>
                   ) : (
-                    <span className="text-red-600 font-bold">⚠ Nenhuma conta bancária associada — Toque para adicionar</span>
+                    <span className="text-neutral-400 text-[12px] font-normal">Nenhuma conta associada</span>
                   )}
                   <span className="text-neutral-400 text-lg font-light">&gt;</span>
                 </div>
@@ -403,6 +412,42 @@ export const RetirarPage: React.FC = () => {
         )}
 
       </div>
+
+      {showNoBankModal && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+          <div
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300"
+            aria-hidden="true"
+          />
+          <div className="relative z-10 bg-white rounded-2xl w-full max-w-[270px] overflow-hidden flex flex-col shadow-xl border border-neutral-100/50 animate-scaleIn">
+            <div className="px-5 py-6 text-center">
+              <p className="text-[14px] font-normal text-neutral-800 leading-snug">
+                Nenhuma conta bancária associada. É necessário associar uma conta bancária para continuar.
+              </p>
+            </div>
+            <div className="border-t border-neutral-100 flex">
+              <button
+                type="button"
+                onClick={() => setShowNoBankModal(false)}
+                className="flex-1 py-3 text-[14px] font-normal text-neutral-500 hover:bg-neutral-50 active:bg-neutral-100 border-r border-neutral-100 focus:outline-none transition-colors cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowNoBankModal(false);
+                  navigate('/meu', { state: { openMyInfoModal: true, selectBankSection: true } });
+                }}
+                className="flex-1 py-3 text-[14px] font-bold text-[#2563eb] hover:bg-neutral-50 active:bg-neutral-100 focus:outline-none transition-colors cursor-pointer"
+              >
+                Ir adicionar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

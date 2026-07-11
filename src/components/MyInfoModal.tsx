@@ -29,6 +29,9 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
   const [showOldPin, setShowOldPin] = useState(false);
   const [showNewPin, setShowNewPin] = useState(false);
   const [showConfirmPin, setShowConfirmPin] = useState(false);
+
+  // Confirmation modal state
+  const [confirmAction, setConfirmAction] = useState<null | 'login' | 'paymentCreate' | 'paymentChange'>(null);
   
   const resetPasswordInputs = () => {
     setOldPassword('');
@@ -66,6 +69,59 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
 
   if (!isOpen) return null;
 
+  // Called when user clicks OK in the confirmation modal
+  const handleConfirmedAction = () => {
+    const type = confirmAction;
+    setConfirmAction(null);
+    if (!type) return;
+
+    if (type === 'login') {
+      updateUserLoginPassword(oldPassword, newPassword).then(res => {
+        if (res.success) {
+          addToast(res.message, 'success');
+          resetPasswordInputs();
+          setActiveSubPage('none');
+        } else {
+          addToast(res.message, 'error');
+        }
+      });
+      return;
+    }
+
+    if (type === 'paymentCreate') {
+      updateUserPaymentPin(newPassword)
+        .then((res) => {
+          if (res.success) {
+            addToast(res.message, 'success');
+            resetPasswordInputs();
+            setActiveSubPage('none');
+          } else {
+            addToast(res.message, 'error');
+          }
+        })
+        .catch((err) => {
+          addToast(err.message || 'Erro ao processar.', 'error');
+        });
+      return;
+    }
+
+    if (type === 'paymentChange') {
+      updateUserPaymentPin(newPassword, oldPassword)
+        .then((res) => {
+          if (res.success) {
+            addToast(res.message, 'success');
+            resetPasswordInputs();
+            setActiveSubPage('none');
+          } else {
+            addToast(res.message, 'error');
+          }
+        })
+        .catch((err) => {
+          addToast(err.message || 'Erro ao processar.', 'error');
+        });
+    }
+  };
+
   const handlePasswordReset = (type: 'login' | 'paymentCreate' | 'paymentChange') => {
     const isValidPin = (pin: string) => /^\d{4}$/.test(pin);
 
@@ -78,16 +134,8 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
         addToast('A nova senha e a confirmação não coincidem.', 'error');
         return;
       }
-
-      updateUserLoginPassword(oldPassword, newPassword).then(res => {
-        if (res.success) {
-          addToast(res.message, 'success');
-          resetPasswordInputs();
-          setActiveSubPage('none');
-        } else {
-          addToast(res.message, 'error');
-        }
-      });
+      // Show confirmation modal instead of executing directly
+      setConfirmAction('login');
       return;
     }
 
@@ -110,20 +158,8 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
         addToast('O PIN e a confirmação não coincidem.', 'error');
         return;
       }
-
-      updateUserPaymentPin(newPassword)
-        .then((res) => {
-          if (res.success) {
-            addToast(res.message, 'success');
-            resetPasswordInputs();
-            setActiveSubPage('none');
-          } else {
-            addToast(res.message, 'error');
-          }
-        })
-        .catch((err) => {
-          addToast(err.message || 'Erro ao processar.', 'error');
-        });
+      // Show confirmation modal
+      setConfirmAction('paymentCreate');
       return;
     }
 
@@ -150,21 +186,70 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
         addToast('O novo PIN e a confirmação não coincidem.', 'error');
         return;
       }
-
-      updateUserPaymentPin(newPassword, oldPassword)
-        .then((res) => {
-          if (res.success) {
-            addToast(res.message, 'success');
-            resetPasswordInputs();
-            setActiveSubPage('none');
-          } else {
-            addToast(res.message, 'error');
-          }
-        })
-        .catch((err) => {
-          addToast(err.message || 'Erro ao processar.', 'error');
-        });
+      // Show confirmation modal
+      setConfirmAction('paymentChange');
     }
+  };
+
+  // Reusable confirmation modal (same style as purchase confirmation)
+  const renderConfirmModal = () => {
+    if (!confirmAction) return null;
+
+    let message: React.ReactNode = null;
+    if (confirmAction === 'login') {
+      message = (
+        <>
+          Tem a certeza que deseja atualizar a sua senha de login para{' '}
+          <span className="text-[#2563eb] font-semibold">{newPassword}</span>?
+        </>
+      );
+    } else if (confirmAction === 'paymentCreate') {
+      message = (
+        <>
+          Tem a certeza que deseja gravar a senha de pagamento{' '}
+          <span className="text-[#2563eb] font-semibold">{newPassword}</span>?
+        </>
+      );
+    } else if (confirmAction === 'paymentChange') {
+      message = (
+        <>
+          Tem a certeza que deseja alterar a senha de pagamento para{' '}
+          <span className="text-[#2563eb] font-semibold">{newPassword}</span>?
+        </>
+      );
+    }
+
+    return (
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+        <div
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300"
+          aria-hidden="true"
+        />
+        <div className="relative z-10 bg-white rounded-2xl w-full max-w-[270px] overflow-hidden flex flex-col shadow-xl border border-neutral-100/50 animate-scaleIn">
+          <div className="px-5 py-6 text-center">
+            <p className="text-[14px] font-normal text-neutral-800 leading-snug">
+              {message}
+            </p>
+          </div>
+          <div className="border-t border-neutral-100 flex">
+            <button
+              type="button"
+              onClick={() => setConfirmAction(null)}
+              className="flex-1 py-3 text-[14px] font-normal text-neutral-500 hover:bg-neutral-50 active:bg-neutral-100 border-r border-neutral-100 focus:outline-none transition-colors cursor-pointer"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              onClick={handleConfirmedAction}
+              className="flex-1 py-3 text-[14px] font-bold text-[#2563eb] hover:bg-neutral-50 active:bg-neutral-100 focus:outline-none transition-colors cursor-pointer"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   const handleSavePersonalInfo = () => {
@@ -277,6 +362,7 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
   // 2. RENDERING SUB-PAGE: Alterar a senha de Login
   if (activeSubPage === 'loginPassword') {
     return (
+      <>
       <div className="fixed inset-0 z-[50] bg-[#f5f5f5] flex flex-col font-sans animate-fadeIn">
         <div className="bg-white px-4 py-3 flex items-center justify-between border-b border-gray-200 select-none" style={{ height: '48px' }}>
           <button 
@@ -421,6 +507,8 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
           </div>
         </div>
       </div>
+      {renderConfirmModal()}
+      </>
     );
   }
 
@@ -429,6 +517,7 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
     const isCreateMode = activeSubPage === 'payPasswordCreate';
     const title = isCreateMode ? 'Gravar senha de pagamento' : 'Alterar senha de pagamento';
     return (
+      <>
       <div className="fixed inset-0 z-[50] bg-[#f5f5f5] flex flex-col font-sans animate-fadeIn">
         <div className="bg-white px-4 py-3 flex items-center justify-between border-b border-gray-200 select-none" style={{ height: '48px' }}>
           <button 
@@ -577,6 +666,8 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
           </div>
         </div>
       </div>
+      {renderConfirmModal()}
+      </>
     );
   }
 
