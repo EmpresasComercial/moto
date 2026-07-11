@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { Check, User } from 'lucide-react';
-import { GATEWAY_URL, getAccessToken } from '../lib/supabase';
+import { GATEWAY_URL, getAccessToken, gatewayCall } from '../lib/supabase';
 
 const BlueCardIcon: React.FC = () => (
   <svg className="w-[30px] h-[21px] rounded-[3px] shadow-xs select-none shrink-0" viewBox="0 0 30 21" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -29,59 +29,61 @@ const GoldCoinIcon: React.FC = () => (
 
 export const WSTab: React.FC = () => {
   const navigate = useNavigate();
-  const { user, isSessionExpired, showLoading, hideLoading, ensureInternetConnectivity } = useApp();
+  const { user, isSessionExpired, showLoading, hideLoading, ensureInternetConnectivity, refreshUserProfile, addToast } = useApp();
 
   const [dbProducts, setDbProducts] = useState<any[]>([]);
   const [purchasedNames, setPurchasedNames] = useState<Set<string>>(new Set());
+  const [confirmTier, setConfirmTier] = useState<any | null>(null);
+  const [purchaseProcessing, setPurchaseProcessing] = useState<boolean>(false);
+
+  const loadProducts = async () => {
+    showLoading('Carregando níveis WS...');
+    if (!(await ensureInternetConnectivity())) { hideLoading(); return; }
+    try {
+      const token = await getAccessToken();
+      if (!token) return;
+
+      const [respProducts, respShop] = await Promise.all([
+        fetch(GATEWAY_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ op: 512, data: {} })
+        }),
+        fetch(GATEWAY_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ op: 601, data: {} })
+        })
+      ]);
+
+      if (respProducts.status === 401) {
+        const errData = await respProducts.json().catch(() => ({}));
+        window.dispatchEvent(new CustomEvent('force-logout', { detail: { message: errData?.error || 'Sessão inválida.' } }));
+        return;
+      }
+
+      if (respProducts.ok) {
+        const res = await respProducts.json();
+        if (res?.success && Array.isArray(res.result)) {
+          setDbProducts(res.result);
+        }
+      }
+
+      if (respShop.ok) {
+        const shopRes = await respShop.json();
+        if (shopRes?.success && Array.isArray(shopRes.result)) {
+          const names = new Set<string>(shopRes.result.map((s: any) => String(s.nome_produto || '').toUpperCase()));
+          setPurchasedNames(names);
+        }
+      }
+    } catch {
+    } finally {
+      hideLoading();
+    }
+  };
 
   useEffect(() => {
     if (isSessionExpired) return;
-
-    const loadProducts = async () => {
-      showLoading('Carregando níveis WS...');
-      if (!(await ensureInternetConnectivity())) { hideLoading(); return; }
-      try {
-        const token = await getAccessToken();
-        if (!token) return;
-
-        const [respProducts, respShop] = await Promise.all([
-          fetch(GATEWAY_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-            body: JSON.stringify({ op: 512, data: {} })
-          }),
-          fetch(GATEWAY_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-            body: JSON.stringify({ op: 601, data: {} })
-          })
-        ]);
-
-        if (respProducts.status === 401) {
-          const errData = await respProducts.json().catch(() => ({}));
-          window.dispatchEvent(new CustomEvent('force-logout', { detail: { message: errData?.error || 'Sessão inválida.' } }));
-          return;
-        }
-
-        if (respProducts.ok) {
-          const res = await respProducts.json();
-          if (res?.success && Array.isArray(res.result)) {
-            setDbProducts(res.result);
-          }
-        }
-
-        if (respShop.ok) {
-          const shopRes = await respShop.json();
-          if (shopRes?.success && Array.isArray(shopRes.result)) {
-            const names = new Set<string>(shopRes.result.map((s: any) => String(s.nome_produto || '').toUpperCase()));
-            setPurchasedNames(names);
-          }
-        }
-      } catch {
-      } finally {
-        hideLoading();
-      }
-    };
     loadProducts();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSessionExpired]);
@@ -114,7 +116,30 @@ export const WSTab: React.FC = () => {
   const currentTier = tiers.find(t => t.level === user.level) || tiers[0] || { dailyTasks: 0 };
 
   const handleUpgradeClick = (tier: any) => {
-    navigate(`/ws/compra/${tier.level}`, { state: { tier } });
+    setConfirmTier(tier);
+  };
+
+  const handleConfirmPurchase = async () => {
+    if (!confirmTier || purchaseProcessing) return;
+    const productId = confirmTier.dbId;
+    setConfirmTier(null); // Close modal immediately
+    setPurchaseProcessing(true);
+    showLoading('Finalizando compra...');
+    try {
+      const res = await gatewayCall(511, { product_id: productId });
+      if (res?.success && res.result?.success) {
+        addToast(res.result?.message || 'Compra concluída com sucesso!', 'success');
+        await refreshUserProfile();
+        await loadProducts();
+      } else {
+        addToast(res?.error || res?.result?.message || 'Não foi possível finalizar a compra.', 'error');
+      }
+    } catch (err: any) {
+      addToast(err.message || 'Erro ao processar a compra. Tente novamente ou contate o suporte.', 'error');
+    } finally {
+      hideLoading();
+      setPurchaseProcessing(false);
+    }
   };
 
   return (
@@ -217,6 +242,35 @@ export const WSTab: React.FC = () => {
           );
         })}
       </div>
+
+      {confirmTier && (
+        <div className="fixed inset-0 bg-black/45 flex items-center justify-center z-[9999] p-6 animate-fadeIn">
+          <div className="bg-white rounded-2xl w-full max-w-[270px] overflow-hidden flex flex-col shadow-xl border border-neutral-100/50">
+            <div className="px-5 py-6 text-center">
+              <p className="text-[14px] font-normal text-neutral-800 leading-snug">
+                Deseja realmente comprar o produto {confirmTier.level} por {confirmTier.price.toLocaleString('pt-AO')} KZ?
+              </p>
+            </div>
+            
+            <div className="border-t border-neutral-100 flex">
+              <button
+                type="button"
+                onClick={() => setConfirmTier(null)}
+                className="flex-1 py-3 text-[14px] font-normal text-neutral-500 hover:bg-neutral-50 active:bg-neutral-100 border-r border-neutral-100 focus:outline-none transition-colors cursor-pointer"
+              >
+                Canc
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmPurchase}
+                className="flex-1 py-3 text-[14px] font-bold text-[#2563eb] hover:bg-neutral-50 active:bg-neutral-100 focus:outline-none transition-colors cursor-pointer"
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

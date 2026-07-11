@@ -74,6 +74,7 @@ export const MeuTab: React.FC = () => {
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
   const [isPoliciesOpen, setIsPoliciesOpen] = useState(false);
   const [ledgerType, setLedgerType] = useState<'receita' | 'recarga' | 'retirada'>('receita');
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   // Bell and Credit Rating States
   const [teamStats, setTeamStats] = useState({ total: 0, investors: 0 });
@@ -286,7 +287,7 @@ export const MeuTab: React.FC = () => {
         setIsBankOpen(true);
         break;
       case 'logout':
-        logout();
+        setShowLogoutConfirm(true);
         break;
       case 'financa':
         setIsFinancaOpen(true);
@@ -711,6 +712,38 @@ export const MeuTab: React.FC = () => {
       {isConverterOpen && <CurrencyConverterModal isOpen={isConverterOpen} onClose={() => setIsConverterOpen(false)} />}
       {isFinancaOpen && <MinhasFinancasModal isOpen={isFinancaOpen} onClose={() => setIsFinancaOpen(false)} />}
       {isCuponsOpen && <CuponsPage isOpen={isCuponsOpen} onClose={() => setIsCuponsOpen(false)} />}
+
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 bg-black/45 flex items-center justify-center z-[9999] p-6 animate-fadeIn">
+          <div className="bg-white rounded-2xl w-full max-w-[270px] overflow-hidden flex flex-col shadow-xl border border-neutral-100/50">
+            <div className="px-5 py-6 text-center">
+              <p className="text-[14px] font-normal text-neutral-800 leading-snug">
+                Deseja realmente terminar a sessão?
+              </p>
+            </div>
+            
+            <div className="border-t border-neutral-100 flex">
+              <button
+                type="button"
+                onClick={() => setShowLogoutConfirm(false)}
+                className="flex-1 py-3 text-[14px] font-normal text-neutral-500 hover:bg-neutral-50 active:bg-neutral-100 border-r border-neutral-100 focus:outline-none transition-colors cursor-pointer"
+              >
+                Canc
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowLogoutConfirm(false);
+                  logout();
+                }}
+                className="flex-1 py-3 text-[14px] font-bold text-[#2563eb] hover:bg-neutral-50 active:bg-neutral-100 focus:outline-none transition-colors cursor-pointer"
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

@@ -4,7 +4,7 @@ import { AppProvider, useApp } from './context/AppContext';
 import { LoginScreen } from './components/pageasiaray';
 import { HomeTab } from './components/HomeTab';
 import { WSTab } from './components/WSTab';
-import { PurchaseDetailsPage } from './components/PurchaseDetailsPage';
+
 import { TaskTab } from './components/TaskTab';
 import { GravarTab } from './components/GravarTab';
 import { MeuTab } from './components/MeuTab';
@@ -303,7 +303,7 @@ function MainAppLayout() {
         <Route path="/Public/reg/smid/:inviteCode" element={!isLoggedIn ? <LoginScreen /> : <Navigate to="/home" replace />} />
         <Route path="/public/reg/smid/:inviteCode" element={!isLoggedIn ? <LoginScreen /> : <Navigate to="/home" replace />} />
         <Route path="/retirar" element={isLoggedIn ? <RetirarPage /> : <Navigate to="/register" replace />} />
-        <Route path="/ws/compra/:tierLevel" element={isLoggedIn ? <PurchaseDetailsPage /> : <Navigate to="/register" replace />} />
+
         <Route path="/support" element={isLoggedIn ? <SupportScreen /> : <Navigate to="/register" replace />} />
 
         {/* Main authenticated shell — handles /home, /ws, /tarefa, /gravar, /meu etc. */}

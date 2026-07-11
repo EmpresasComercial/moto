@@ -28,9 +28,9 @@ const ModalBase: React.FC<ModalProps & { children: React.ReactNode }> = ({ isOpe
     <div className="fixed inset-0 z-[50] bg-[#f5f5f5] flex flex-col font-sans animate-fadeIn" id={`modal-container-${title.replace(/\s+/g, '-').toLowerCase()}`}>
       {/* Header */}
       <div className="bg-white px-4 py-3 flex items-center justify-between border-b border-gray-200 select-none" style={{ height: '48px' }}>
-        <button 
+        <button
           id="modal-close-btn"
-          onClick={onClose} 
+          onClick={onClose}
           className="text-neutral-500 hover:text-neutral-800 select-none cursor-pointer focus:outline-none flex items-center p-1"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-[20px] w-[20px] text-neutral-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.4}>
@@ -113,7 +113,7 @@ export const BankModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
     }
 
     showLoading('A processar e gravar os dados bancários...');
-    
+
     try {
       const res = await updateBankInfo(bank, account, holder);
       hideLoading();
@@ -140,8 +140,8 @@ export const BankModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
     <div className="fixed inset-0 z-[50] bg-[#f5f5f5] flex flex-col font-sans animate-fadeIn">
       {/* Header */}
       <div className="bg-white px-4 py-3 flex items-center justify-between border-b border-gray-200 select-none" style={{ height: '48px' }}>
-        <button 
-          onClick={onClose} 
+        <button
+          onClick={onClose}
           className="text-neutral-500 hover:text-neutral-800 select-none cursor-pointer focus:outline-none flex items-center p-1"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-[20px] w-[20px] text-neutral-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.4}>
@@ -159,8 +159,8 @@ export const BankModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
             <div className="border-b border-gray-200">
               <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">Instituição Bancária</div>
               <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] border-t border-gray-200">
-                <select 
-                  value={bank} 
+                <select
+                  value={bank}
                   onChange={handleBankChange}
                   className="bg-transparent border-none outline-none w-full text-neutral-800 text-[12px] font-sans font-bold"
                 >
@@ -176,7 +176,7 @@ export const BankModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
             <div className={`border-b ${ibanError ? 'border-red-400' : 'border-gray-200'}`}>
               <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">IBAN de Angola (AO06...)</div>
               <div className={`bg-[#f5f5f5] px-3 py-1.5 text-[12px] border-t ${ibanError ? 'border-red-400' : 'border-gray-200'}`}>
-                <input 
+                <input
                   ref={accountInputRef}
                   type="text"
                   inputMode="numeric"
@@ -202,7 +202,7 @@ export const BankModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
             <div className="border-b border-gray-200">
               <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">Nome Completo do Titular</div>
               <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] border-t border-gray-200">
-                <input 
+                <input
                   type="text"
                   placeholder="Como consta na conta bancária"
                   value={holder}
@@ -411,7 +411,7 @@ interface WalletModalProps extends ModalProps {
 
 export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initialTab = 'recharge' }) => {
   const { stats, user, showLoading, hideLoading, setIsFullScreenActive } = useApp();
-  
+
   const [rechargeStep, setRechargeStep] = useState<'amount' | 'method' | 'instructions'>('amount');
   const [rechargeAmt, setRechargeAmt] = useState<number>(0);
   const [selectedMethod, setSelectedMethod] = useState<string>('BFA');
@@ -428,7 +428,7 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
   React.useEffect(() => {
     if (isOpen) {
       setIsFullScreenActive(true);
-      
+
       const fetchDbBanksAndPolicies = async () => {
         try {
           // Fire both fetches at the same time
@@ -490,7 +490,7 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
           setBanksLoaded(true);
         }
       };
-      
+
       setBanksLoaded(false);
       fetchDbBanksAndPolicies();
     }
@@ -513,8 +513,8 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
   const currentFavorecido = selectedBankInfo?.nome_favorecido || '';
   const tipoValue = selectedMethod === 'USDT-TRC20' ? 'USDT' : 'BANCO';
   const walletLabel = selectedMethod === 'USDT-TRC20' ? 'Número da carteira' : 'Número do IBAN';
-  const exchangeRate = (policies?.min_recharge_kz && policies?.min_recharge_usdt) 
-    ? (policies.min_recharge_kz / policies.min_recharge_usdt) 
+  const exchangeRate = (policies?.min_recharge_kz && policies?.min_recharge_usdt)
+    ? (policies.min_recharge_kz / policies.min_recharge_usdt)
     : 1000;
   const requisitoValue = selectedMethod === 'USDT-TRC20' ? (rechargeAmt / exchangeRate).toFixed(2) : `${rechargeAmt.toLocaleString('pt-AO')} KZ`;
 
@@ -561,7 +561,7 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
           reader.onerror = error => reject(error);
         });
       };
-      
+
       const base64Image = await fileToBase64(selectedFile);
 
       const isUSDT = selectedMethod === 'USDT-TRC20';
@@ -607,13 +607,13 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
     <div className="fixed inset-0 z-[60] flex flex-col bg-[#f1f4f8] overflow-y-auto font-sans" id="wallet-fullscreen">
       {/* Header */}
       <div className="bg-white border-b border-neutral-200 px-4 py-3 flex items-center sticky top-0 z-10 select-none h-12">
-        <button 
+        <button
           onClick={() => {
             if (rechargeStep === 'instructions') setRechargeStep('method');
             else if (rechargeStep === 'method') setRechargeStep('amount');
             else onClose();
-          }} 
-          className="mr-3 text-slate-700 cursor-pointer focus:outline-none" 
+          }}
+          className="mr-3 text-slate-700 cursor-pointer focus:outline-none"
           id="wallet-back-btn"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-[20px] w-[20px] text-neutral-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.4}>
@@ -632,8 +632,8 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
               <div className="border border-gray-200 bg-white rounded-sm overflow-hidden">
                 <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">Montante a Recarregar (KZ)</div>
                 <div className="bg-[#f5f5f5] px-3 py-3 border-t border-gray-200">
-                  <input 
-                    type="number" 
+                  <input
+                    type="number"
                     placeholder="Introduza o valor da recarga"
                     value={rechargeAmt === 0 ? '' : rechargeAmt}
                     onChange={(e) => setRechargeAmt(Number(e.target.value))}
@@ -700,33 +700,33 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
                   {dbBanks.map((bank, idx) => {
                     const methodName = bank.nome_do_banco;
                     const isUSDT = methodName === 'USDT-TRC20';
-                  return (
-                    <button
-                      key={methodName}
-                      type="button"
-                      onClick={() => {
-                        setSelectedMethod(methodName as any);
-                        setRechargeStep('instructions');
-                      }}
-                      className="w-full text-left py-3.5 flex items-center justify-between hover:bg-neutral-50/50 cursor-pointer transition-colors"
-                      id={`payment-method-row-${idx}`}
-                    >
-                      <div className="flex items-center gap-4 select-none">
-                        {isUSDT ? (
-                          <GoldCoinIcon />
-                        ) : (
-                          <BlueCardIcon />
-                        )}
-                        <span className="text-[13px] font-semibold text-stone-700 tracking-wide">{methodName}</span>
-                      </div>
-                      <div className="flex items-center text-neutral-400 text-xs font-semibold">
-                        <span className="text-[12px] font-semibold text-neutral-400 pr-1 tracking-tight">&gt;</span>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
+                    return (
+                      <button
+                        key={methodName}
+                        type="button"
+                        onClick={() => {
+                          setSelectedMethod(methodName as any);
+                          setRechargeStep('instructions');
+                        }}
+                        className="w-full text-left py-3.5 flex items-center justify-between hover:bg-neutral-50/50 cursor-pointer transition-colors"
+                        id={`payment-method-row-${idx}`}
+                      >
+                        <div className="flex items-center gap-4 select-none">
+                          {isUSDT ? (
+                            <GoldCoinIcon />
+                          ) : (
+                            <BlueCardIcon />
+                          )}
+                          <span className="text-[13px] font-semibold text-stone-700 tracking-wide">{methodName}</span>
+                        </div>
+                        <div className="flex items-center text-neutral-400 text-xs font-semibold">
+                          <span className="text-[12px] font-semibold text-neutral-400 pr-1 tracking-tight">&gt;</span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
 
@@ -764,7 +764,7 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
                     <div className="flex-1 text-gray-600 px-3 py-1.5 text-[11px] font-mono break-all select-all">
                       {currentAddress}
                     </div>
-                    <button 
+                    <button
                       type="button"
                       onClick={copyCurrentAddress}
                       className="bg-[#60a5fa] hover:bg-[#3b82f6] text-white px-4 py-1.5 text-[11px] font-bold cursor-pointer transition-all active:scale-95 shrink-0 select-none border-l border-gray-200"
@@ -787,7 +787,7 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
                       const now = new Date();
                       const pad = (n: number) => String(n).padStart(2, '0');
                       const suffix = user.phone ? user.phone.slice(-4) : String(Math.floor(1000 + Math.random() * 9000));
-                      return `${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}${suffix}`;
+                      return `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}${suffix}`;
                     })()}
                   </div>
                 </div>
@@ -814,11 +814,11 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
                       <path strokeLinecap="round" strokeLinejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
                     </svg>
                     <span>Credenciais</span>
-                    <input 
-                      type="file" 
-                      accept="image/*" 
-                      onChange={handleFileChange} 
-                      className="hidden" 
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      className="hidden"
                     />
                   </label>
 
@@ -919,7 +919,7 @@ export const InviteModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
       const response = await fetch(qrUrl);
       const blob = await response.blob();
       const blobUrl = URL.createObjectURL(blob);
-      
+
       const link = document.createElement('a');
       link.href = blobUrl;
       link.download = `asiaray-qr-${user?.inviteCode || 'code'}.png`;
@@ -938,12 +938,12 @@ export const InviteModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
   return (
     <div className="fixed inset-0 z-[150] bg-white flex flex-col font-sans animate-fadeIn">
       {/* Header bar */}
-      <div 
-        className="bg-white px-4 py-3 flex items-center justify-between border-b border-gray-150 select-none relative" 
+      <div
+        className="bg-white px-4 py-3 flex items-center justify-between border-b border-gray-150 select-none relative"
         style={{ height: '48px' }}
       >
-        <button 
-          onClick={onClose} 
+        <button
+          onClick={onClose}
           className="text-neutral-500 hover:text-neutral-800 select-none cursor-pointer focus:outline-none flex items-center p-1 z-10"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-[20px] w-[20px] text-neutral-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.4}>
@@ -958,10 +958,10 @@ export const InviteModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
 
       {/* Content area */}
       <div className="flex-1 overflow-y-auto no-scrollbar px-6 pt-8 pb-10 flex flex-col items-center">
-        
+
         {/* Title */}
         <span className="text-[12px] text-neutral-500 font-sans tracking-wide">Partilhar ligação</span>
-        
+
         {/* Link */}
         <span className="text-[12px] text-neutral-700 font-sans font-medium mt-2.5 break-all text-center max-w-xs select-all">
           {inviteUrl ? inviteUrl : 'Ligação de convite indisponível'}
@@ -976,7 +976,7 @@ export const InviteModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
           >
             {copied ? 'Copiado!' : 'cópia'}
           </button>
-          
+
           <button
             onClick={downloadQrCode}
             disabled={!inviteUrl}
@@ -989,9 +989,9 @@ export const InviteModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
         {/* Promotional QR Code */}
         {inviteUrl && (
           <div className="w-full max-w-[200px] mt-8 bg-white p-3 border border-gray-200 rounded-lg shadow-sm flex flex-col items-center">
-            <img 
+            <img
               src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(inviteUrl)}`}
-              alt="QR Code Convite" 
+              alt="QR Code Convite"
               className="w-full h-auto object-contain bg-white"
             />
             <span className="text-[10px] text-gray-500 mt-2 font-medium">Digitalize para se registar</span>
@@ -1069,9 +1069,9 @@ export const TeamReportModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
     amount: Number(m.reloaded_amount || 0).toFixed(2)
   });
 
-  const levelUm   = rawTeam.filter((m: any) => Number(m.level) === 1).map(mapMember);
+  const levelUm = rawTeam.filter((m: any) => Number(m.level) === 1).map(mapMember);
   const secundario = rawTeam.filter((m: any) => Number(m.level) === 2).map(mapMember);
-  const nivelTres  = rawTeam.filter((m: any) => Number(m.level) === 3).map(mapMember);
+  const nivelTres = rawTeam.filter((m: any) => Number(m.level) === 3).map(mapMember);
 
   const getMemberList = () => {
     switch (activeTab) {
@@ -1091,7 +1091,7 @@ export const TeamReportModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
     const isToday = new Date(m.created_at).toDateString() === new Date().toDateString();
     return isToday;
   }).length;
-  
+
   // We don't have direct DB access for these two from this endpoint yet, but we provide realistic fallbacks/placeholders
   const saldoTotal = teamData?.stats?.saldoTotal || 0;
   const fluxoTotal = teamData?.stats?.fluxoTotal || 0;
@@ -1100,12 +1100,12 @@ export const TeamReportModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
   return (
     <div className="fixed inset-0 z-[150] bg-[#f8f9fa] flex flex-col font-sans animate-fadeIn">
       {/* Header bar */}
-      <div 
-        className="bg-[#dbeafe]/40 px-4 py-3 flex items-center justify-between border-b border-gray-200 select-none relative" 
+      <div
+        className="bg-[#dbeafe]/40 px-4 py-3 flex items-center justify-between border-b border-gray-200 select-none relative"
         style={{ height: '48px' }}
       >
-        <button 
-          onClick={onClose} 
+        <button
+          onClick={onClose}
           className="text-neutral-500 hover:text-neutral-800 select-none cursor-pointer focus:outline-none flex items-center p-1 z-10"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-[20px] w-[20px] text-neutral-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.4}>
@@ -1120,10 +1120,10 @@ export const TeamReportModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
 
       {/* Scrollable Container */}
       <div className="flex-1 overflow-y-auto no-scrollbar pb-20">
-        
+
         {/* Metric Grid Table */}
         <div className="bg-white border-b border-gray-150 text-[11px] text-neutral-500 font-sans">
-          
+
           {/* Row 1 */}
           <div className="grid grid-cols-2 border-b border-gray-100">
             <div className="p-3 border-r border-gray-100 flex flex-col justify-between min-h-[56px]">
@@ -1184,33 +1184,30 @@ export const TeamReportModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
 
         {/* Tab Selection */}
         <div className="flex border-b border-gray-250 bg-white select-none mt-4">
-          <button 
+          <button
             onClick={() => setActiveTab('nivel_um')}
-            className={`flex-1 py-3 text-center text-[12px] font-bold transition-all relative ${
-              activeTab === 'nivel_um' ? 'text-[#d24c3c]' : 'text-neutral-500'
-            }`}
+            className={`flex-1 py-3 text-center text-[12px] font-bold transition-all relative ${activeTab === 'nivel_um' ? 'text-[#d24c3c]' : 'text-neutral-500'
+              }`}
           >
             nível um ({levelUm.length})
             {activeTab === 'nivel_um' && (
               <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#d24c3c]" />
             )}
           </button>
-          <button 
+          <button
             onClick={() => setActiveTab('secundario')}
-            className={`flex-1 py-3 text-center text-[12px] font-bold transition-all relative ${
-              activeTab === 'secundario' ? 'text-[#d24c3c]' : 'text-neutral-500'
-            }`}
+            className={`flex-1 py-3 text-center text-[12px] font-bold transition-all relative ${activeTab === 'secundario' ? 'text-[#d24c3c]' : 'text-neutral-500'
+              }`}
           >
             secundário ({secundario.length})
             {activeTab === 'secundario' && (
               <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#d24c3c]" />
             )}
           </button>
-          <button 
+          <button
             onClick={() => setActiveTab('nivel_tres')}
-            className={`flex-1 py-3 text-center text-[12px] font-bold transition-all relative ${
-              activeTab === 'nivel_tres' ? 'text-[#d24c3c]' : 'text-neutral-500'
-            }`}
+            className={`flex-1 py-3 text-center text-[12px] font-bold transition-all relative ${activeTab === 'nivel_tres' ? 'text-[#d24c3c]' : 'text-neutral-500'
+              }`}
           >
             nível três ({nivelTres.length})
             {activeTab === 'nivel_tres' && (
@@ -1243,18 +1240,22 @@ export const TeamReportModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
 const FaqItem: React.FC<{ question: string; answer: React.ReactNode }> = ({ question, answer }) => {
   const [open, setOpen] = React.useState(false);
   return (
-    <div className="border border-neutral-200 rounded-lg overflow-hidden">
+    <div className="bg-white border-b border-gray-100 last:border-b-0">
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between px-4 py-3 text-left bg-white hover:bg-neutral-50 transition-colors"
+        className="w-full flex items-center justify-between px-4 py-3.5 text-left bg-white hover:bg-neutral-50 transition-colors cursor-pointer"
       >
-        <span className="text-[12px] font-normal text-neutral-800 pr-2">{question}</span>
-        <span className={`text-neutral-400 text-lg leading-none transition-transform duration-200 flex-shrink-0 ${open ? 'rotate-180' : ''}`}>
-          ▾
-        </span>
+        <span className="text-[13px] font-normal text-[#2d3748] pr-2 flex-1">{question}</span>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className={`h-4 w-4 text-neutral-400 flex-shrink-0 transition-transform duration-200 ${open ? 'rotate-90' : ''}`}
+          fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
       </button>
       {open && (
-        <div className="px-4 pb-3 pt-1 text-[11.5px] text-neutral-600 leading-relaxed bg-neutral-50 border-t border-neutral-100">
+        <div className="px-4 pb-4 pt-1 text-[12px] text-neutral-600 leading-relaxed bg-[#f7f8fa]">
           {answer}
         </div>
       )}
@@ -1263,137 +1264,184 @@ const FaqItem: React.FC<{ question: string; answer: React.ReactNode }> = ({ ques
 };
 
 const FaqSection: React.FC<{ title: string }> = ({ title }) => (
-  <p className="text-[11px] font-extrabold uppercase tracking-wider text-neutral-400 pt-2 pb-1">{title}</p>
+  <div className="bg-[#edf2f7] px-4 py-2 border-b border-gray-100">
+    <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-500">{title}</span>
+  </div>
 );
 
 export const RulesModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
+  if (!isOpen) return null;
+  const { setIsFullScreenActive } = useApp();
+  React.useEffect(() => {
+    if (isOpen) setIsFullScreenActive(true);
+    return () => setIsFullScreenActive(false);
+  }, [isOpen, setIsFullScreenActive]);
+
   return (
-    <ModalBase isOpen={isOpen} onClose={onClose} title="Perguntas Frequentes">
-      <div className="space-y-2 text-xs font-sans pb-4 select-text">
+    <div className="fixed inset-0 z-[50] flex flex-col font-sans animate-fadeIn bg-[#f4f6f9]">
+      {/* Header — matches SupportScreen exactly */}
+      <div className="bg-white flex items-center px-2 py-3 border-b border-neutral-200 select-none">
+        <button
+          type="button"
+          onClick={onClose}
+          className="w-10 h-10 flex items-center justify-center text-[#475569] active:bg-gray-100 rounded-full"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-[22px] w-[22px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <div className="flex-1 text-center pr-10 text-[17px] font-normal text-[#111827]">
+          Perguntas Frequentes
+        </div>
+      </div>
 
-        <FaqSection title="Sobre retiradas" />
+      {/* Scrollable Body */}
+      <div className="flex-1 overflow-y-auto pb-10 select-text">
 
-        <FaqItem
-          question="Qual é o valor mínimo para realizar uma retirada?"
-          answer={<p>O valor mínimo permitido para retirada é de 2.000 Kz.</p>}
-        />
-        <FaqItem
-          question="Qual é o valor máximo permitido para retirada?"
-          answer={<p>O valor máximo de retirada é de 100.000 Kz.</p>}
-        />
-        <FaqItem
-          question="Qual é o horário disponível para realizar retiradas?"
-          answer={<p>As retiradas são processadas diariamente das 10h00 às 16h00 (horário de Angola).</p>}
-        />
-        <FaqItem
-          question="O que é necessário para realizar uma retirada?"
-          answer={<p>Para efetuar uma retirada, o utilizador deve possuir pelo menos um WS ativo no processo de recarga.</p>}
-        />
-        <FaqItem
-          question="Existe alguma taxa aplicada nas retiradas?"
-          answer={<p>Sim. Cada retirada possui uma taxa de 50%. O utilizador recebe 50% do valor solicitado, enquanto os outros 50% são destinados à cobertura de taxas operacionais e manutenção da estabilidade do projeto.</p>}
-        />
-        <FaqItem
-          question="Quanto tempo demora uma retirada?"
-          answer={<>
-            <p className="mb-1">Cada retirada passa por três etapas:</p>
-            <ol className="list-decimal pl-4 space-y-0.5">
-              <li>Pendente – solicitação recebida e em análise;</li>
-              <li>Em processamento – transferência em andamento;</li>
-              <li>Sucesso – retirada concluída.</li>
-            </ol>
-            <p className="mt-1">Caso a retirada não seja concluída dentro de 24 horas, contacte o suporte.</p>
-          </>}
-        />
-        <FaqItem
-          question="O que acontece se uma retirada for rejeitada?"
-          answer={<p>O valor será automaticamente devolvido à conta do utilizador, aplicando-se uma taxa de 4% sobre o valor devolvido.</p>}
-        />
-        <FaqItem
-          question="A empresa responsabiliza-se por transferências para contas erradas?"
-          answer={<p>Não. A empresa não se responsabiliza pela perda de fundos enviados para contas incorretas. É responsabilidade do utilizador confirmar corretamente os dados antes de concluir uma operação.</p>}
-        />
+        <div className="bg-white">
+          <FaqSection title="Sobre retiradas" />
+          <div className="flex flex-col">
+            <FaqItem
+              question="Qual é o valor mínimo para realizar uma retirada?"
+              answer={<p>O valor mínimo permitido para retirada é de 2.000 Kz.</p>}
+            />
+            <FaqItem
+              question="Qual é o valor máximo permitido para retirada?"
+              answer={<p>O valor máximo de retirada é de 100.000 Kz.</p>}
+            />
+            <FaqItem
+              question="Qual é o horário disponível para realizar retiradas?"
+              answer={<p>As retiradas são processadas diariamente das 10h00 às 16h00 (horário de Angola).</p>}
+            />
+            <FaqItem
+              question="O que é necessário para realizar uma retirada?"
+              answer={<p>Para efetuar uma retirada, o utilizador deve possuir pelo menos um WS ativo no processo de recarga.</p>}
+            />
+            <FaqItem
+              question="Existe alguma taxa aplicada nas retiradas?"
+              answer={<p>Sim. Cada retirada possui uma taxa de 50%. O utilizador recebe 50% do valor solicitado, enquanto os outros 50% são destinados à cobertura de taxas operacionais e manutenção da estabilidade do projeto.</p>}
+            />
+            <FaqItem
+              question="Quanto tempo demora uma retirada?"
+              answer={<>
+                <p className="mb-2">Cada retirada passa por três etapas:</p>
+                <ol className="list-decimal pl-4 space-y-1">
+                  <li>Pendente – solicitação recebida e em análise;</li>
+                  <li>Em processamento – transferência em andamento;</li>
+                  <li>Sucesso – retirada concluída.</li>
+                </ol>
+                <p className="mt-2">Caso a retirada não seja concluída dentro de 24 horas, contacte o suporte.</p>
+              </>}
+            />
+            <FaqItem
+              question="O que acontece se uma retirada for rejeitada?"
+              answer={<p>O valor será automaticamente devolvido à conta do utilizador, aplicando-se uma taxa de 4% sobre o valor devolvido.</p>}
+            />
+            <FaqItem
+              question="A empresa responsabiliza-se por transferências para contas erradas?"
+              answer={<p>Não. A empresa não se responsabiliza pela perda de fundos enviados para contas incorretas. É responsabilidade do utilizador confirmar corretamente os dados antes de concluir uma operação.</p>}
+            />
+          </div>
+        </div>
 
-        <FaqSection title="Sobre recargas e depósitos" />
+        <div className="bg-white mt-3">
+          <FaqSection title="Sobre recargas e depósitos" />
+          <div className="flex flex-col">
+            <FaqItem
+              question="Qual é o horário para realizar recargas?"
+              answer={<p>As recargas são realizadas diariamente das 10h00 às 22h00 (horário de Angola).</p>}
+            />
+            <FaqItem
+              question="Como enviar o comprovativo de pagamento?"
+              answer={<p>Após efetuar o pagamento, envie o comprovativo ao gerente responsável através do WhatsApp para validação.</p>}
+            />
+            <FaqItem
+              question="Quais métodos de depósito são aceites?"
+              answer={<ul className="list-disc pl-4 space-y-1"><li>Criptomoedas</li><li>Depósitos em conta bancária</li></ul>}
+            />
+            <FaqItem
+              question="Qual é o valor mínimo de depósito?"
+              answer={<p>O valor mínimo de depósito é de 8.000 Kz.</p>}
+            />
+            <FaqItem
+              question="Qual é o valor máximo de depósito?"
+              answer={<p>O valor máximo permitido para depósito é de 3.000.000 Kz.</p>}
+            />
+          </div>
+        </div>
 
-        <FaqItem
-          question="Qual é o horário para realizar recargas?"
-          answer={<p>As recargas são realizadas diariamente das 10h00 às 22h00 (horário de Angola).</p>}
-        />
-        <FaqItem
-          question="Como enviar o comprovativo de pagamento?"
-          answer={<p>Após efetuar o pagamento, envie o comprovativo ao gerente responsável através do WhatsApp para validação.</p>}
-        />
-        <FaqItem
-          question="Quais métodos de depósito são aceites?"
-          answer={<ul className="list-disc pl-4 space-y-0.5"><li>Criptomoedas</li><li>Depósitos em conta bancária</li></ul>}
-        />
-        <FaqItem
-          question="Qual é o valor mínimo de depósito?"
-          answer={<p>O valor mínimo de depósito é de 8.000 Kz.</p>}
-        />
-        <FaqItem
-          question="Qual é o valor máximo de depósito?"
-          answer={<p>O valor máximo permitido para depósito é de 3.000.000 Kz.</p>}
-        />
+        <div className="bg-white mt-3">
+          <FaqSection title="Sobre a equipa e convites" />
+          <div className="flex flex-col">
+            <FaqItem
+              question="Como funciona o sistema de equipa?"
+              answer={<><p className="mb-2">Ao convidar novos utilizadores através do seu link exclusivo, constrói uma equipa em três níveis:</p><ul className="list-disc pl-4 space-y-1"><li>Primeiro nível</li><li>Segundo nível</li><li>Terceiro nível</li></ul></>}
+            />
+            <FaqItem
+              question="Qual é a recompensa por convidar novos utilizadores?"
+              answer={<><p>Recebe 100 Kz por cadastro direto bem-sucedido.</p><p className="mt-1">Válido para os primeiros 10 cadastros diretos.</p></>}
+            />
+            <FaqItem
+              question="Como funcionam as recompensas dos três níveis?"
+              answer={<ul className="list-disc pl-4 space-y-1"><li>1.º nível: 10% sobre os investimentos dos subordinados diretos.</li><li>2.º nível: 5% sobre os investimentos deste nível.</li><li>3.º nível: 3% sobre os investimentos deste nível.</li></ul>}
+            />
+          </div>
+        </div>
 
-        <FaqSection title="Sobre a equipa e convites" />
+        <div className="bg-white mt-3">
+          <FaqSection title="Sobre compras de WS" />
+          <div className="flex flex-col">
+            <FaqItem
+              question="Preciso comprar os produtos numa ordem específica?"
+              answer={<p>Não. Pode adquirir qualquer WS disponível, independentemente de já ter comprado outros anteriormente.</p>}
+            />
+            <FaqItem
+              question="Quantas vezes posso comprar o mesmo produto?"
+              answer={<p>Cada produto só pode ser adquirido uma vez por utilizador.</p>}
+            />
+            <FaqItem
+              question="O que acontece após o WS expirar?"
+              answer={<p>Após a expiração, pode adquirir outro WS para continuar a participar e receber os respetivos benefícios.</p>}
+            />
+          </div>
+        </div>
 
-        <FaqItem
-          question="Como funciona o sistema de equipa?"
-          answer={<><p className="mb-1">Ao convidar novos utilizadores através do seu link exclusivo, constrói uma equipa em três níveis:</p><ul className="list-disc pl-4 space-y-0.5"><li>Primeiro nível</li><li>Segundo nível</li><li>Terceiro nível</li></ul></>}
-        />
-        <FaqItem
-          question="Qual é a recompensa por convidar novos utilizadores?"
-          answer={<><p>Recebe 100 Kz por cadastro direto bem-sucedido.</p><p className="mt-1">Válido para os primeiros 10 cadastros diretos.</p></>}
-        />
-        <FaqItem
-          question="Como funcionam as recompensas dos três níveis?"
-          answer={<ul className="list-disc pl-4 space-y-1"><li>1.º nível: 10% sobre os investimentos dos subordinados diretos.</li><li>2.º nível: 5% sobre os investimentos deste nível.</li><li>3.º nível: 3% sobre os investimentos deste nível.</li></ul>}
-        />
+        <div className="bg-white mt-3">
+          <FaqSection title="Sobre suporte" />
+          <div className="flex flex-col">
+            <FaqItem
+              question="Como entrar em contacto com o suporte?"
+              answer={<ol className="list-decimal pl-4 space-y-1"><li>Na aplicação: Definições → Suporte → Contactar.</li><li>Na página de login: clicar em Entrar pelo WhatsApp.</li></ol>}
+            />
+          </div>
+        </div>
 
-        <FaqSection title="Sobre compras de WS" />
+        <div className="bg-white mt-3">
+          <FaqSection title="Sobre a empresa" />
+          <div className="flex flex-col">
+            <FaqItem
+              question="Quando a empresa foi lançada?"
+              answer={<p>A empresa foi lançada em julho de 2016.</p>}
+            />
+          </div>
+        </div>
 
-        <FaqItem
-          question="Preciso comprar os produtos numa ordem específica?"
-          answer={<p>Não. Pode adquirir qualquer WS disponível, independentemente de já ter comprado outros anteriormente.</p>}
-        />
-        <FaqItem
-          question="Quantas vezes posso comprar o mesmo produto?"
-          answer={<p>Cada produto só pode ser adquirido uma vez por utilizador.</p>}
-        />
-        <FaqItem
-          question="O que acontece após o WS expirar?"
-          answer={<p>Após a expiração, pode adquirir outro WS para continuar a participar e receber os respetivos benefícios.</p>}
-        />
-
-        <FaqSection title="Sobre suporte" />
-
-        <FaqItem
-          question="Como entrar em contacto com o suporte?"
-          answer={<ol className="list-decimal pl-4 space-y-1"><li>Na aplicação: Definições → Suporte → Contactar.</li><li>Na página de login: clicar em Entrar pelo WhatsApp.</li></ol>}
-        />
-
-        <FaqSection title="Sobre a empresa" />
-
-        <FaqItem
-          question="Quando a empresa foi lançada?"
-          answer={<p>A empresa foi lançada em julho de 2016.</p>}
-        />
-
-        <FaqSection title="Outras dúvidas" />
-
-        <FaqItem
-          question="Preciso obrigatoriamente começar pelo primeiro WS?"
-          answer={<p>Não. Pode escolher qualquer WS disponível conforme a sua preferência.</p>}
-        />
-        <FaqItem
-          question="Posso continuar a utilizar a plataforma depois que um WS expirar?"
-          answer={<p>Sim. Após a expiração, adquira um novo WS para continuar a utilizar os serviços.</p>}
-        />
+        <div className="bg-white mt-3">
+          <FaqSection title="Outras dúvidas" />
+          <div className="flex flex-col">
+            <FaqItem
+              question="Preciso obrigatoriamente começar pelo primeiro WS?"
+              answer={<p>Não. Pode escolher qualquer WS disponível conforme a sua preferência.</p>}
+            />
+            <FaqItem
+              question="Posso continuar a utilizar a plataforma depois que um WS expirar?"
+              answer={<p>Sim. Após a expiração, adquira um novo WS para continuar a utilizar os serviços.</p>}
+            />
+          </div>
+        </div>
 
       </div>
-    </ModalBase>
+    </div>
   );
 };
 
@@ -1657,7 +1705,7 @@ export const CompanyPoliciesModal: React.FC<ModalProps> = ({ isOpen, onClose }) 
   return (
     <ModalBase isOpen={isOpen} onClose={onClose} title="Políticas da Empresa">
       <div className="space-y-6 text-xs text-neutral-600 leading-relaxed font-sans pb-4">
-        
+
         <div>
           <h2 className="font-bold text-neutral-800 text-sm mb-2">1. Introdução</h2>
           <p className="mb-2">Bem-vindo à Asiaray. Estes Termos de Utilização (“Termos”) regulam a utilização dos nossos serviços, aplicações, website e plataformas digitais (coletivamente designados por “Serviços”).</p>
@@ -1678,7 +1726,7 @@ export const CompanyPoliciesModal: React.FC<ModalProps> = ({ isOpen, onClose }) 
 
         <div>
           <h2 className="font-bold text-neutral-800 text-sm mb-2">3. Quem Somos</h2>
-          <p>A Asiaray é uma plataforma que visa proporcionar ferramentas transparentes para gestão, investimento e acompanhamento de atividades de rede. Operamos com o compromisso de segurança, transparência e conformidade legal.</p>
+          <p>Sobre a Asiaray Media Group Limited<br />A Asiaray Media Group Limited (código de ações na Bolsa de Valores de Hong Kong: 1993) é uma empresa de mídia exterior na região da Grande China, com foco estratégico na gestão de publicidade em grandes meios de transporte, como aeroportos, linhas de metrô e trens de alta velocidade.</p>
         </div>
 
         <div>
@@ -1827,7 +1875,7 @@ export const CompanyPoliciesModal: React.FC<ModalProps> = ({ isOpen, onClose }) 
           </ul>
           <p className="mt-4 font-semibold text-neutral-800">Ao utilizar a Asiaray, o utilizador confirma que leu e aceita estes Termos de Utilização e a Política de Privacidade.</p>
         </div>
-        
+
         <div className="pt-10 pb-4 text-center text-neutral-400 italic">Fim do documento.</div>
 
       </div>
@@ -2271,7 +2319,7 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
 
             // Merge and sort by date descending
             const mergedLogs = [...kzsLogs, ...usdtLogs].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-            
+
             setDepositLogs(mergedLogs);
           }
         } catch {
@@ -2368,7 +2416,7 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
       <div className="fixed inset-0 bg-[#f5f5f5] flex flex-col z-[50] animate-fadeIn font-sans" id={modalId}>
         {/* Header with back button and Title on neutral slate-gray background */}
         <div className="bg-[#cbd5e1]/45 px-4 py-3 border-b border-neutral-200 flex items-center relative select-none shrink-0" style={{ height: '48px' }}>
-          <button 
+          <button
             id={backArrowId}
             onClick={handleBackClick}
             className="p-1 text-neutral-600 hover:text-neutral-900 bg-transparent hover:bg-neutral-100 rounded-lg transition-colors cursor-pointer flex items-center z-10"
@@ -2398,16 +2446,16 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
               <div className="divide-y divide-neutral-100">
                 {filtered.map((log) => {
                   // Generate a stable numeric orderId based on log ID
-                  const orderId = log.id === 'ret_default' ? '260' : 
+                  const orderId = log.id === 'ret_default' ? '260' :
                     (Math.abs(log.id.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0)) % 900 + 100);
-                  
+
                   const dateOnly = log.date ? log.date.split(' ')[0] : 'N/A';
                   const currencySymbol = log.currency === 'USDT' ? 'USDT' : 'KZ';
                   const labelType = log.type === 'retirada' ? 'Pedido' : 'Recarga';
 
                   return (
-                    <div 
-                      key={log.id} 
+                    <div
+                      key={log.id}
                       onClick={() => setSelectedLogId(log.id)}
                       className="flex justify-between items-center px-4 py-3 cursor-pointer hover:bg-neutral-50 active:bg-neutral-100 transition-colors"
                     >
@@ -2433,7 +2481,7 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
             /* DETAILED VIEW: Exact mockup match */
             (() => {
               const isRetirada = selectedLog.type === 'retirada';
-              
+
               // Formatting bank initials or channel name
               let bankDisplay = isRetirada ? (selectedLog.bank_name || 'N/A') : (selectedLog.details || 'Depósito');
               if (isRetirada && bankDisplay && bankDisplay !== 'N/A') {
@@ -2448,7 +2496,7 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
                 const cleaned = raw ? raw.replace(/\s+/g, '') : '';
                 // Detect encrypted string: too long (>34 chars) or contains base64 chars like +/=
                 const isEncrypted = cleaned.length > 34 || /[+/=]/.test(cleaned);
-                
+
                 let displayIban = cleaned;
                 if (isEncrypted) {
                   const plainFallback = userIban || user?.bankAccount || '';
@@ -2490,7 +2538,7 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
 
               return (
                 <div className="bg-white px-5 pt-5 pb-8 animate-fadeIn" id={`${selectedLog.type}_record_wrapper_${selectedLog.id}`}>
-                  
+
                   {/* Row 1: Retirada / Recarga do saldo | Date */}
                   <div className="flex justify-between items-center py-3.5">
                     <span className="text-neutral-500 text-sm select-none font-medium">
@@ -2605,9 +2653,9 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
               {completedTasks.map((task: any) => {
                 const dataRow = new Date(task.data_atribuicao).toLocaleString('pt-AO');
                 const rewardAmount = Number(task.renda_coletada).toFixed(2);
-                
+
                 return (
-                  <div 
+                  <div
                     key={task.id}
                     className="bg-white flex flex-col relative w-full border-b-[10px] border-[#f4f6f9]"
                   >
@@ -2621,7 +2669,7 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
                         <span className="text-gray-400 font-medium min-w-[124px] select-none">Objectivo da tarefa:</span>
                         <span className="text-neutral-850 font-medium">Rendimento Produto</span>
                       </div>
-                      
+
                       <div className="flex items-start leading-tight mt-0.5">
                         <span className="text-gray-400 font-medium min-w-[124px] select-none">Criar:</span>
                         <span className="text-gray-600 font-mono ml-0.5 select-all">{dataRow}</span>
@@ -2640,8 +2688,8 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
 
                       <div className="absolute right-4 top-[50%] -translate-y-1/2 flex items-center select-none">
                         <div className="relative">
-                          <div 
-                            className="h-[62px] w-[62px] rounded-full border border-white/80 shadow-xs flex flex-col items-center justify-center shrink-0" 
+                          <div
+                            className="h-[62px] w-[62px] rounded-full border border-white/80 shadow-xs flex flex-col items-center justify-center shrink-0"
                             style={{ backgroundColor: '#9aaec4' }}
                           >
                             <span className="text-white text-[10px] font-bold tracking-tight select-all text-center flex flex-col leading-none gap-1">

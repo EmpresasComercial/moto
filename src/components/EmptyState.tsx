@@ -1,5 +1,5 @@
 import React from 'react';
-import emptyIcon from '../../assets/icons8-empty-48.png';
+import emptyIcon from '../../assets/empty-image-default.png';
 
 interface EmptyStateProps {
   message?: string;
@@ -12,14 +12,14 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   message = 'Sem dados',
   description,
   className = '',
-  iconClassName = 'w-12 h-12'
+  iconClassName = 'w-24 h-24 opacity-70'
 }) => (
-  <div className={`flex flex-col items-center justify-center gap-3 text-center text-neutral-500 ${className}`}>
+  <div className={`flex flex-col items-center justify-center gap-2 text-center text-neutral-500 ${className}`}>
     <img src={emptyIcon} alt="Sem dados" className={iconClassName} />
     <div className="space-y-1 max-w-[26rem]">
-      <p className="text-base font-semibold text-neutral-900">{message}</p>
+      <p className="text-[13px] font-medium text-neutral-400">{message}</p>
       {description ? (
-        <p className="text-sm text-neutral-500 leading-relaxed">{description}</p>
+        <p className="text-[12px] text-neutral-400 leading-relaxed">{description}</p>
       ) : null}
     </div>
   </div>

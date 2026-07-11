@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
 import { gatewayCall } from '../lib/supabase';
 import { useApp } from '../context/AppContext';
 
@@ -76,7 +76,7 @@ export const SupportScreen: React.FC = () => {
           onClick={handleBack} 
           className="w-10 h-10 flex items-center justify-center text-[#475569] active:bg-gray-100 rounded-full"
         >
-          <ArrowLeft size={22} strokeWidth={2.5} />
+          <ChevronLeft size={24} strokeWidth={2.5} />
         </button>
         <div className="flex-1 text-center pr-10 text-[17px] font-normal text-[#111827]">
           Suporte
@@ -85,47 +85,45 @@ export const SupportScreen: React.FC = () => {
 
       {/* Support Links Section */}
       <div className="bg-white mt-3">
-        {/* Title Bar matching HomeTab style */}
-        <div className="bg-[#dbe4f0] px-4 py-2 border-b border-neutral-200 select-none">
-          <h2 className="text-[12.5px] text-neutral-600 tracking-wide font-medium">
+        {/* Title Bar */}
+        <div className="bg-[#edf2f7] px-4 py-2 border-b border-gray-100">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-500">
             Canais de Atendimento
-          </h2>
+          </span>
         </div>
 
-        <div className="px-4 py-2 flex flex-col">
+        <div className="flex flex-col">
           
           {/* Link 1: Grupo */}
-          <div className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
+          <div className="bg-white border-b border-gray-100 last:border-b-0">
             <a 
               href="#" 
               onClick={(e) => handleLinkClick(e, grupoUrl)}
-              className="text-[#2563eb] text-[14px] leading-snug flex-1 pr-4"
+              className="w-full flex items-center justify-between px-4 py-3.5 text-left bg-white hover:bg-neutral-50 transition-colors cursor-pointer"
             >
-              Grupo de venda Asiaray
+              <span className="text-[13px] font-normal text-[#2d3748] pr-2 flex-1">
+                Grupo de venda Asiaray
+              </span>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-neutral-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
             </a>
-            <span 
-              className="text-[#059669] font-bold text-[12px] underline whitespace-nowrap cursor-pointer active:opacity-70"
-              onClick={(e) => handleLinkClick(e, grupoUrl)}
-            >
-              Abrir
-            </span>
           </div>
 
           {/* Link 2: Gerente */}
-          <div className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
+          <div className="bg-white border-b border-gray-100 last:border-b-0">
             <a 
               href="#" 
               onClick={(e) => handleLinkClick(e, gerenteUrl)}
-              className="text-[#2563eb] text-[14px] leading-snug flex-1 pr-4"
+              className="w-full flex items-center justify-between px-4 py-3.5 text-left bg-white hover:bg-neutral-50 transition-colors cursor-pointer"
             >
-              Gerente Regional
+              <span className="text-[13px] font-normal text-[#2d3748] pr-2 flex-1">
+                Gerente Regional
+              </span>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-neutral-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
             </a>
-            <span 
-              className="text-[#059669] font-bold text-[12px] underline whitespace-nowrap cursor-pointer active:opacity-70"
-              onClick={(e) => handleLinkClick(e, gerenteUrl)}
-            >
-              Abrir
-            </span>
           </div>
 
         </div>

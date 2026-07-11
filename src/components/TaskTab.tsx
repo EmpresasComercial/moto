@@ -298,11 +298,9 @@ export const TaskTab: React.FC<TaskTabProps> = ({ selectedCategory, setSelectedC
         {loading ? (
           <div className="py-20" />
         ) : displayItems.length === 0 ? (
-          <EmptyState
-            className="bg-white rounded-lg border border-zinc-200 p-12"
-            message="Sem dados"
-            description="Nenhuma tarefa disponível nesta categoria no momento. Adquira um produto para começar a receber tarefas."
-          />
+          <div className="py-20 animate-fadeIn">
+            <EmptyState message="Sem dados" />
+          </div>
         ) : (
           displayItems.map((item) => {
             const lucroRestante = calcLucroRestante(item);
