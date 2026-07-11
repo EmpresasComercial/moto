@@ -615,15 +615,15 @@ export const MeuTab: React.FC = () => {
             <span className="text-[11px] font-normal text-neutral-500">download da aplicação</span>
           </div>
 
-          {/* Tile 9: deve ler */}
+          {/* Tile 9: Perguntas frequentes */}
           <div 
             onClick={() => handleGridOption('rules')}
             className="py-5 px-1 text-center cursor-pointer flex flex-col justify-center items-center gap-2 h-[100px] select-none"
           >
             <div className="h-[30px] flex items-center justify-center">
-              <img src={deveLerIcon} alt="deve ler" className="w-[26px] h-[26px] object-contain" />
+              <img src={deveLerIcon} alt="Perguntas frequentes" className="w-[26px] h-[26px] object-contain" />
             </div>
-            <span className="text-[11px] font-normal text-neutral-500">deve ler</span>
+            <span className="text-[11px] font-normal text-neutral-500">Perguntas frequentes</span>
           </div>
 
           {/* Tile 10: Associar conta */}

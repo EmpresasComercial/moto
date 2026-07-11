@@ -1239,72 +1239,158 @@ export const TeamReportModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
   );
 };
 
-// 6. RULES / "DEVE LER" MODAL
+// 6. RULES / "PERGUNTAS FREQUENTES" MODAL
+const FaqItem: React.FC<{ question: string; answer: React.ReactNode }> = ({ question, answer }) => {
+  const [open, setOpen] = React.useState(false);
+  return (
+    <div className="border border-neutral-200 rounded-lg overflow-hidden">
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between px-4 py-3 text-left bg-white hover:bg-neutral-50 transition-colors"
+      >
+        <span className="text-[12px] font-normal text-neutral-800 pr-2">{question}</span>
+        <span className={`text-neutral-400 text-lg leading-none transition-transform duration-200 flex-shrink-0 ${open ? 'rotate-180' : ''}`}>
+          ▾
+        </span>
+      </button>
+      {open && (
+        <div className="px-4 pb-3 pt-1 text-[11.5px] text-neutral-600 leading-relaxed bg-neutral-50 border-t border-neutral-100">
+          {answer}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const FaqSection: React.FC<{ title: string }> = ({ title }) => (
+  <p className="text-[11px] font-extrabold uppercase tracking-wider text-neutral-400 pt-2 pb-1">{title}</p>
+);
+
 export const RulesModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
   return (
-    <ModalBase isOpen={isOpen} onClose={onClose} title="Guia Deve Ler">
-      <div className="space-y-4 text-xs text-neutral-600 leading-relaxed font-sans pb-4">
-        
-        <h2 className="font-extrabold text-neutral-800 text-sm">Sobre a Asiaray Media Group Limited</h2>
-        
-        <p>
-          A Asiaray Media Group Limited (código de ações na Bolsa de Valores de Hong Kong: 1993) é uma empresa de mídia exterior na região da Grande China, com foco estratégico na gestão de publicidade em grandes meios de transporte, como aeroportos, linhas de metrô e trens de alta velocidade.
-        </p>
+    <ModalBase isOpen={isOpen} onClose={onClose} title="Perguntas Frequentes">
+      <div className="space-y-2 text-xs font-sans pb-4 select-text">
 
-        <p className="italic pl-3 border-l-2 border-neutral-300 py-0.5 text-neutral-700">
-          “Estabelecemos uma extensa rede em quase 40 grandes cidades da região da Grande China, baseada em mais de 30 anos de experiência e reputação.”
-        </p>
+        <FaqSection title="Sobre retiradas" />
 
-        <p>
-          A empresa possui direitos exclusivos de concessão em 22 aeroportos e em 15 linhas de metrô, incluindo a linha Thomson-East Coast do MRT de Singapura (TEL). Também administra direitos exclusivos de mídia em 16 estações ferroviárias, entre elas a Estação Ferroviária de Alta Velocidade Hong Kong West Kowloon e a Linha Ferroviária China–Laos–Yumo.
-        </p>
+        <FaqItem
+          question="Qual é o valor mínimo para realizar uma retirada?"
+          answer={<p>O valor mínimo permitido para retirada é de 2.000 Kz.</p>}
+        />
+        <FaqItem
+          question="Qual é o valor máximo permitido para retirada?"
+          answer={<p>O valor máximo de retirada é de 100.000 Kz.</p>}
+        />
+        <FaqItem
+          question="Qual é o horário disponível para realizar retiradas?"
+          answer={<p>As retiradas são processadas diariamente das 10h00 às 16h00 (horário de Angola).</p>}
+        />
+        <FaqItem
+          question="O que é necessário para realizar uma retirada?"
+          answer={<p>Para efetuar uma retirada, o utilizador deve possuir pelo menos um WS ativo no processo de recarga.</p>}
+        />
+        <FaqItem
+          question="Existe alguma taxa aplicada nas retiradas?"
+          answer={<p>Sim. Cada retirada possui uma taxa de 50%. O utilizador recebe 50% do valor solicitado, enquanto os outros 50% são destinados à cobertura de taxas operacionais e manutenção da estabilidade do projeto.</p>}
+        />
+        <FaqItem
+          question="Quanto tempo demora uma retirada?"
+          answer={<>
+            <p className="mb-1">Cada retirada passa por três etapas:</p>
+            <ol className="list-decimal pl-4 space-y-0.5">
+              <li>Pendente – solicitação recebida e em análise;</li>
+              <li>Em processamento – transferência em andamento;</li>
+              <li>Sucesso – retirada concluída.</li>
+            </ol>
+            <p className="mt-1">Caso a retirada não seja concluída dentro de 24 horas, contacte o suporte.</p>
+          </>}
+        />
+        <FaqItem
+          question="O que acontece se uma retirada for rejeitada?"
+          answer={<p>O valor será automaticamente devolvido à conta do utilizador, aplicando-se uma taxa de 4% sobre o valor devolvido.</p>}
+        />
+        <FaqItem
+          question="A empresa responsabiliza-se por transferências para contas erradas?"
+          answer={<p>Não. A empresa não se responsabiliza pela perda de fundos enviados para contas incorretas. É responsabilidade do utilizador confirmar corretamente os dados antes de concluir uma operação.</p>}
+        />
 
-        <p>
-          Além disso, a Asiaray detém direitos exclusivos de concessão da Hong Kong–Zhuhai–Macau Bridge (Porto de Zhuhai), de mais de 500 pontos de ônibus da KMB em Hong Kong e da Travessia do Porto Leste de Hong Kong. A empresa também oferece mais de 350 soluções de publicidade de alta qualidade para outdoors e edifios.
-        </p>
+        <FaqSection title="Sobre recargas e depósitos" />
 
-        <p>
-          Com mais de 30 anos de experiência e um profundo conhecimento em gestão de espaços publicitários, a Asiaray tem fornecido soluções integradas e criativas de mídia exterior, desenvolvendo campanhas de grande impacto em locais estratégicos e de alta circulação.
-        </p>
+        <FaqItem
+          question="Qual é o horário para realizar recargas?"
+          answer={<p>As recargas são realizadas diariamente das 10h00 às 22h00 (horário de Angola).</p>}
+        />
+        <FaqItem
+          question="Como enviar o comprovativo de pagamento?"
+          answer={<p>Após efetuar o pagamento, envie o comprovativo ao gerente responsável através do WhatsApp para validação.</p>}
+        />
+        <FaqItem
+          question="Quais métodos de depósito são aceites?"
+          answer={<ul className="list-disc pl-4 space-y-0.5"><li>Criptomoedas</li><li>Depósitos em conta bancária</li></ul>}
+        />
+        <FaqItem
+          question="Qual é o valor mínimo de depósito?"
+          answer={<p>O valor mínimo de depósito é de 8.000 Kz.</p>}
+        />
+        <FaqItem
+          question="Qual é o valor máximo de depósito?"
+          answer={<p>O valor máximo permitido para depósito é de 3.000.000 Kz.</p>}
+        />
 
-        <h2 className="font-extrabold text-neutral-800 text-sm pt-2">Nossa Visão</h2>
-        
-        <p>
-          Ser uma empresa de comunicação exterior de classe mundial com origem asiática.
-        </p>
+        <FaqSection title="Sobre a equipa e convites" />
 
-        <h2 className="font-extrabold text-neutral-800 text-sm pt-2">Nossa Missão</h2>
-        
-        <p>
-          Fornecer soluções ideais de comunicação Out-Of-Home (OOH), garantindo o mais alto retorno sobre investimento (ROI) e máxima eficácia. Promover excelência profissional na mídia publicitária exterior, desenvolver uma equipe harmoniosa, eficiente e produtiva e atuar como uma empresa consciente e comprometida com a comunidade.
-        </p>
+        <FaqItem
+          question="Como funciona o sistema de equipa?"
+          answer={<><p className="mb-1">Ao convidar novos utilizadores através do seu link exclusivo, constrói uma equipa em três níveis:</p><ul className="list-disc pl-4 space-y-0.5"><li>Primeiro nível</li><li>Segundo nível</li><li>Terceiro nível</li></ul></>}
+        />
+        <FaqItem
+          question="Qual é a recompensa por convidar novos utilizadores?"
+          answer={<><p>Recebe 100 Kz por cadastro direto bem-sucedido.</p><p className="mt-1">Válido para os primeiros 10 cadastros diretos.</p></>}
+        />
+        <FaqItem
+          question="Como funcionam as recompensas dos três níveis?"
+          answer={<ul className="list-disc pl-4 space-y-1"><li>1.º nível: 10% sobre os investimentos dos subordinados diretos.</li><li>2.º nível: 5% sobre os investimentos deste nível.</li><li>3.º nível: 3% sobre os investimentos deste nível.</li></ul>}
+        />
 
-        <h2 className="font-extrabold text-neutral-800 text-sm pt-2">Nossos Valores</h2>
+        <FaqSection title="Sobre compras de WS" />
 
-        <p>
-          <strong>Integridade</strong><br />
-          Agir com honestidade e transparência em todas as relações.
-        </p>
+        <FaqItem
+          question="Preciso comprar os produtos numa ordem específica?"
+          answer={<p>Não. Pode adquirir qualquer WS disponível, independentemente de já ter comprado outros anteriormente.</p>}
+        />
+        <FaqItem
+          question="Quantas vezes posso comprar o mesmo produto?"
+          answer={<p>Cada produto só pode ser adquirido uma vez por utilizador.</p>}
+        />
+        <FaqItem
+          question="O que acontece após o WS expirar?"
+          answer={<p>Após a expiração, pode adquirir outro WS para continuar a participar e receber os respetivos benefícios.</p>}
+        />
 
-        <p>
-          <strong>Excelência</strong><br />
-          Buscar melhoria contínua e excelência em cada projeto.
-        </p>
+        <FaqSection title="Sobre suporte" />
 
-        <p>
-          <strong>Benevolência</strong><br />
-          Assumir responsabilidades sociais e cuidar da comunidade.
-        </p>
+        <FaqItem
+          question="Como entrar em contacto com o suporte?"
+          answer={<ol className="list-decimal pl-4 space-y-1"><li>Na aplicação: Definições → Suporte → Contactar.</li><li>Na página de login: clicar em Entrar pelo WhatsApp.</li></ol>}
+        />
 
-        <h2 className="font-extrabold text-neutral-800 text-sm pt-2">Reconhecimento e Conquistas</h2>
+        <FaqSection title="Sobre a empresa" />
 
-        <p>
-          Em 2024, a Asiaray continuou se destacando em mais de 10 competições internacionais e nacionais de publicidade altamente reconhecidas, conquistando um total de 50 prêmios, incluindo ouro, prata, bronze e mérito.
-        </p>
+        <FaqItem
+          question="Quando a empresa foi lançada?"
+          answer={<p>A empresa foi lançada em julho de 2016.</p>}
+        />
 
-        <p>
-          Todas essas conquistas foram alcançadas através do esforço conjunto entre a Asiaray, anunciantes, agências de publicidade e proprietários de mídia. A empresa continuará fortalecendo essa colaboração, juntamente com sua filosofia de “Gestão de Espaços”, criando experiências extraordinárias para passageiros e públicos, promovendo benefícios mútuos para todas as partes envolvidas.
-        </p>
+        <FaqSection title="Outras dúvidas" />
+
+        <FaqItem
+          question="Preciso obrigatoriamente começar pelo primeiro WS?"
+          answer={<p>Não. Pode escolher qualquer WS disponível conforme a sua preferência.</p>}
+        />
+        <FaqItem
+          question="Posso continuar a utilizar a plataforma depois que um WS expirar?"
+          answer={<p>Sim. Após a expiração, adquira um novo WS para continuar a utilizar os serviços.</p>}
+        />
 
       </div>
     </ModalBase>
@@ -1315,123 +1401,187 @@ export const RulesModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
 // 7. PRIVACY MODAL
 export const PrivacyModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
   return (
-    <ModalBase isOpen={isOpen} onClose={onClose} title="Asiaray Política de Privacidade">
-      <div className="space-y-6 text-xs text-neutral-600 leading-relaxed font-sans pb-6">
+    <ModalBase isOpen={isOpen} onClose={onClose} title="Política de Privacidade">
+      <div className="space-y-6 text-xs text-neutral-600 leading-relaxed font-sans pb-6 select-text">
         <div>
-          <h1 className="font-extrabold text-neutral-800 text-base mb-2">Asiaray Política de Privacidade</h1>
-          <p className="text-neutral-500 text-[10px] mb-4">Última atualização: Junho de 2026</p>
-          <p className="font-semibold text-neutral-700 mb-2">Índice</p>
-          <ol className="list-decimal pl-5 space-y-1 text-neutral-500">
-            <li>Dados Pessoais que Recolhemos</li>
-            <li>Como utilizamos os Dados Pessoais</li>
-            <li>Divulgação de Dados Pessoais</li>
-            <li>Retenção</li>
-            <li>Controlo de dados</li>
-            <li>Os seus direitos</li>
-            <li>Crianças</li>
-            <li>Segurança</li>
-            <li>Divulgações estatais adicionais dos EUA</li>
-            <li>Alterações à política de privacidade</li>
-            <li>Controlador de dados</li>
-            <li>Como entrar em contacto connosco</li>
-            <li>Recursos úteis</li>
-          </ol>
+          <h2 className="font-bold text-neutral-800 text-sm mb-2">1. Introdução</h2>
+          <p className="mb-2">Na Asiaray, respeitamos a privacidade dos nossos utilizadores e comprometemo-nos a proteger todas as informações pessoais que nos sejam confiadas. A presente Política de Privacidade explica de forma clara como recolhemos, utilizamos, armazenamos, protegemos e tratamos os Dados Pessoais dos utilizadores que utilizam os nossos serviços, aplicações, websites e demais plataformas digitais (coletivamente designados por "Serviços").</p>
+          <p className="mb-2">A nossa missão é disponibilizar uma plataforma segura, transparente e eficiente, garantindo que todas as informações pessoais sejam tratadas com responsabilidade, confidencialidade e em conformidade com os princípios da proteção de dados.</p>
+          <p className="mb-2">Ao criar uma conta ou utilizar qualquer serviço disponibilizado pela Asiaray, o utilizador reconhece que leu, compreendeu e aceita a presente Política de Privacidade.</p>
+          <p>Esta Política aplica-se exclusivamente ao tratamento dos Dados Pessoais efetuado pela Asiaray relativamente aos utilizadores da plataforma.</p>
         </div>
 
-        <hr className="border-neutral-200" />
+        <div>
+          <h2 className="font-bold text-neutral-800 text-sm mb-2">2. Dados Pessoais que Recolhemos</h2>
+          <p className="mb-2">A Asiaray recolhe apenas os Dados Pessoais estritamente necessários para disponibilizar os seus serviços, garantir a segurança das operações e permitir o correto funcionamento da plataforma.</p>
+          <p className="mb-4">Os dados poderão ser fornecidos diretamente pelo utilizador durante a utilização dos nossos serviços.</p>
 
-        <p>
-          Na Asiaray, a nossa missão é garantir que os nossos serviços beneficiem todos os utilizadores. Criámos as nossas ferramentas operacionais e sistemas de suporte para ajudar as pessoas a gerenciar, investir e acompanhar as suas atividades de rede de forma transparente. Na Asiaray (juntamente com as nossas afiliadas, "Asiaray", "nós", "nosso" ou "nos") estamos comprometidos a respeitar a sua privacidade e estamos fortemente empenhados em manter seguras todas as informações que obtemos de si ou sobre si. Esta Política de Privacidade descreve as nossas práticas relativamente aos Dados Pessoais que recolhemos de si ou sobre si, e como os utilizamos quando usa o nosso website, aplicações e serviços (coletivamente, "Serviços").
-        </p>
+          <h3 className="font-bold text-neutral-700 mt-2">2.1 Informações da Conta</h3>
+          <p className="mb-2">Quando o utilizador cria uma conta na Asiaray, recolhemos apenas:</p>
+          <ul className="list-disc pl-5 mt-1 space-y-1 mb-4">
+            <li>Número de telefone;</li>
+            <li>Dados bancários, incluindo o IBAN, exclusivamente para o processamento dos levantamentos.</li>
+          </ul>
 
-        <p>
-          Esta Política de Privacidade não se aplica ao conteúdo que tratamos em nome dos clientes das nossas ofertas comerciais. A nossa utilização desses dados é regida pelos nossos acordos correspondentes que abrangem o acesso e a utilização dessas ofertas.
-        </p>
+          <h3 className="font-bold text-neutral-700 mt-2">2.2 Comprovativos de Depósito</h3>
+          <p className="mb-2">Sempre que necessário para validação financeira, poderemos solicitar:</p>
+          <ul className="list-disc pl-5 mt-1 space-y-1 mb-2">
+            <li>Capturas de ecrã dos comprovativos de depósito;</li>
+            <li>Comprovativos de transferência bancária;</li>
+            <li>Outros documentos que comprovem a realização da operação.</li>
+          </ul>
+          <p className="mb-4">Estas informações destinam-se exclusivamente à validação das operações financeiras.</p>
+
+          <h3 className="font-bold text-neutral-700 mt-2">2.3 Informações Técnicas</h3>
+          <p className="mb-2">Durante a utilização da plataforma poderão ser registadas automaticamente determinadas informações técnicas, incluindo:</p>
+          <ul className="list-disc pl-5 mt-1 space-y-1 mb-2">
+            <li>Data e hora de acesso;</li>
+            <li>Endereço IP;</li>
+            <li>Tipo de dispositivo;</li>
+            <li>Sistema operativo;</li>
+            <li>Versão da aplicação;</li>
+            <li>Registos técnicos necessários para garantir a estabilidade, segurança e funcionamento da plataforma.</li>
+          </ul>
+          <p>Estas informações são utilizadas exclusivamente para fins técnicos e de segurança.</p>
+        </div>
 
         <div>
-          <h2 className="font-bold text-neutral-800 text-sm mb-2">1. Dados Pessoais que Recolhemos</h2>
-          <p className="mb-2">Recolhemos dados pessoais relacionados contigo ("Dados Pessoais") da seguinte forma:</p>
-          
-          <h3 className="font-bold text-neutral-700 mt-2">Dados Pessoais que Forneces:</h3>
-          <ul className="list-disc pl-5 mt-1 space-y-2">
-            <li><strong>Informações da Conta:</strong> quando cria uma conta connosco, recolhemos informações associadas à sua conta, apenas o seu número de celular telefónico e informações de pagamento  (como o seu IBAN para processarmos suas retiradas/levantamento).</li>
-            <li><strong>Conteúdo do utilizador:</strong> Recolhemos os Dados que fornece ao realizar um deposito nos nossos Serviços ("Conteúdo"), incluindo os suas capturas de talão ecrã de deposito.</li>
-            <li><strong>Informações de Comunicação:</strong> se comunicares connosco, por exemplo, através de e-mail ou das nossas páginas em sites de suporte (como WhatsApp), poderemos recolher Dados como informações de contacto e o conteúdo da mensagem.</li>
+          <h2 className="font-bold text-neutral-800 text-sm mb-2">3. Como Utilizamos os Dados Pessoais</h2>
+          <p className="mb-2">A Asiaray utiliza os Dados Pessoais apenas para finalidades legítimas relacionadas com a prestação dos seus serviços.</p>
+          <p className="mb-2">Os Dados Pessoais poderão ser utilizados para:</p>
+          <ul className="list-disc pl-5 mt-1 space-y-1 mb-2">
+            <li>Criar e gerir a conta do utilizador;</li>
+            <li>Permitir o acesso aos serviços disponibilizados pela plataforma;</li>
+            <li>Processar depósitos e levantamentos;</li>
+            <li>Validar comprovativos de pagamento;</li>
+            <li>Confirmar operações financeiras;</li>
+            <li>Prevenir fraude, atividades ilegais, utilizações abusivas da plataforma e outras situações que possam comprometer a segurança dos nossos serviços;</li>
+            <li>Verificar a autenticidade das operações realizadas;</li>
+            <li>Melhorar a qualidade dos serviços;</li>
+            <li>Responder a pedidos de apoio ao cliente;</li>
+            <li>Comunicar informações importantes relacionadas com a conta;</li>
+            <li>Resolver reclamações e litígios;</li>
+            <li>Cumprir obrigações legais;</li>
+            <li>Proteger os direitos, a privacidade, a segurança e a propriedade da Asiaray, dos seus utilizadores e de terceiros;</li>
+            <li>Garantir a segurança dos sistemas informáticos e da infraestrutura tecnológica.</li>
+          </ul>
+          <p>A Asiaray não utiliza os Dados Pessoais para finalidades incompatíveis com as descritas na presente Política.</p>
+        </div>
+
+        <div>
+          <h2 className="font-bold text-neutral-800 text-sm mb-2">4. Base Legal para o Tratamento dos Dados</h2>
+          <p className="mb-2">Sempre que aplicável, o tratamento dos Dados Pessoais baseia-se numa ou mais das seguintes situações:</p>
+          <ul className="list-disc pl-5 mt-1 space-y-1">
+            <li>Consentimento do utilizador;</li>
+            <li>Execução dos serviços solicitados;</li>
+            <li>Cumprimento de obrigações legais;</li>
+            <li>Proteção dos interesses legítimos da Asiaray;</li>
+            <li>Prevenção de fraude e garantia da segurança operacional.</li>
           </ul>
         </div>
 
         <div>
-          <h2 className="font-bold text-neutral-800 text-sm mb-2">2. Como utilizamos os Dados Pessoais</h2>
-          <p className="mb-2">Utilizamos dados pessoais para os seguintes fins:</p>
-          <ul className="list-disc pl-5 space-y-1">
-            <li>Para identificar os seus contactos que utilizam os nossos Serviços, quando opta por associar os seus contactos;</li>
-            <li>Para processar seus pedidos de levantamentos e prevenir fraude, atividades ilegais ou utilizações indevidas dos nossos Serviços, e para proteger a segurança dos nossos sistemas;</li>
-            <li>Para cumprir obrigações legais e proteger os direitos, a privacidade, a segurança ou a propriedade dos nossos utilizadores, da Asiaray ou de terceiros.</li>
+          <h2 className="font-bold text-neutral-800 text-sm mb-2">5. Verificação de Identidade e Prevenção de Fraude</h2>
+          <p className="mb-2">Para proteger os utilizadores e preservar a integridade da plataforma, a Asiaray poderá realizar verificações adicionais sempre que existam indícios de utilização irregular.</p>
+          <p className="mb-2">Poderemos solicitar documentos ou informações adicionais destinados a confirmar:</p>
+          <ul className="list-disc pl-5 mt-1 space-y-1 mb-2">
+            <li>A identidade do utilizador;</li>
+            <li>A titularidade da conta bancária;</li>
+            <li>A legitimidade das operações financeiras;</li>
+            <li>A autenticidade dos comprovativos apresentados.</li>
           </ul>
+          <p>Estas verificações destinam-se exclusivamente à prevenção de fraude, proteção dos utilizadores e garantia da segurança da plataforma.</p>
         </div>
 
         <div>
-          <h2 className="font-bold text-neutral-800 text-sm mb-2">3. Divulgação de Dados Pessoais</h2>
-          <p className="mb-2">Não divulgaremos os seus Dados Pessoais:</p>
-          <ul className="list-disc pl-5 space-y-2">
-            <li><strong>Nenhum:</strong> Não divulgaremos os seus Dados Pessoas com terceiros.</li>
+          <h2 className="font-bold text-neutral-800 text-sm mb-2">6. Divulgação de Dados Pessoais</h2>
+          <p className="mb-2">A Asiaray respeita a confidencialidade dos Dados Pessoais dos seus utilizadores.</p>
+          <p>Os Dados Pessoais não serão vendidos, alugados ou divulgados a terceiros para fins comerciais.</p>
+        </div>
+
+        <div>
+          <h2 className="font-bold text-neutral-800 text-sm mb-2">7. Conservação dos Dados</h2>
+          <p className="mb-2">Os Dados Pessoais serão conservados apenas durante o período necessário para:</p>
+          <ul className="list-disc pl-5 mt-1 space-y-1 mb-2">
+            <li>Prestar os serviços ao utilizador;</li>
+            <li>Processar operações financeiras;</li>
+            <li>Cumprir obrigações legais;</li>
+            <li>Resolver litígios;</li>
+            <li>Prevenir fraude;</li>
+            <li>Garantir a segurança da plataforma.</li>
           </ul>
+          <p>Quando deixarem de ser necessários, os Dados Pessoais serão eliminados ou anonimizados de forma segura.</p>
         </div>
 
         <div>
-          <h2 className="font-bold text-neutral-800 text-sm mb-2">4. Retenção</h2>
-          <p>
-            Conservaremos os seus Dados Pessoais apenas durante o tempo necessário para lhe prestarmos os nossos Serviços comerciais legítimos, como a resolução de litígios, razões de segurança e proteção ou o cumprimento das nossas obrigações legais.
-          </p>
+          <h2 className="font-bold text-neutral-800 text-sm mb-2">8. Segurança dos Dados</h2>
+          <p className="mb-2">A Asiaray implementa medidas técnicas, administrativas e organizativas destinadas a proteger os Dados Pessoais contra:</p>
+          <ul className="list-disc pl-5 mt-1 space-y-1 mb-4">
+            <li>Acesso não autorizado;</li>
+            <li>Utilização indevida;</li>
+            <li>Perda;</li>
+            <li>Destruição;</li>
+            <li>Divulgação não autorizada;</li>
+            <li>Alteração;</li>
+            <li>Fraude.</li>
+          </ul>
+          <p className="mb-2">Entre estas medidas incluem-se:</p>
+          <ul className="list-disc pl-5 mt-1 space-y-1 mb-2">
+            <li>Controlo de acessos;</li>
+            <li>Sistemas de autenticação;</li>
+            <li>Monitorização contínua das operações;</li>
+            <li>Mecanismos de verificação de segurança;</li>
+            <li>Proteção da infraestrutura tecnológica.</li>
+          </ul>
+          <p>Embora adotemos medidas rigorosas de segurança, nenhum sistema de transmissão ou armazenamento eletrónico pode garantir proteção absoluta.</p>
         </div>
 
         <div>
-          <h2 className="font-bold text-neutral-800 text-sm mb-2">5. Controlo de dados</h2>
-          <p>
-            Os nossos Serviços oferecem ao utilizador um conjunto de controlos sobre os respetivos Dados Pessoais e sobre a forma como são utilizados e retidos. O utilizador pode sempre gerir estas preferências nas definições da própria conta.
-          </p>
+          <h2 className="font-bold text-neutral-800 text-sm mb-2">9. Controlo dos Dados</h2>
+          <p className="mb-2">Os nossos serviços oferecem ao utilizador um conjunto de controlos sobre os respetivos Dados Pessoais e sobre a forma como são utilizados e conservados.</p>
+          <p className="mb-2">Sempre que disponível, o utilizador poderá gerir determinadas informações diretamente através da sua conta.</p>
+          <p>O utilizador poderá solicitar a atualização, correção ou eliminação de determinados Dados Pessoais, sem prejuízo das obrigações legais de conservação que recaem sobre a Asiaray.</p>
         </div>
 
         <div>
-          <h2 className="font-bold text-neutral-800 text-sm mb-2">6. Os seus direitos</h2>
-          <p>
-            Dependendo do local onde vives, podes ter determinados direitos legais em relação aos teus Dados Pessoais, como o direito de aceder, retificar, excluir, restringir ou transferir os teus Dados Pessoais. Podes enviar os teus pedidos para <a href="mailto:asiaraygrupo@asiary.it.com" className="text-blue-600 hover:underline">asiaraygrupo@asiary.it.com</a>.
-          </p>
+          <h2 className="font-bold text-neutral-800 text-sm mb-2">10. Direitos do Titular dos Dados</h2>
+          <p className="mb-2">Dependendo da legislação aplicável, o utilizador poderá exercer os seguintes direitos relativamente aos seus Dados Pessoais:</p>
+          <ul className="list-disc pl-5 mt-1 space-y-1 mb-2">
+            <li>Direito de acesso;</li>
+            <li>Direito de retificação;</li>
+            <li>Direito de atualização;</li>
+            <li>Direito de eliminação;</li>
+            <li>Direito de limitação do tratamento;</li>
+            <li>Direito de oposição;</li>
+            <li>Direito de portabilidade dos dados, quando aplicável.</li>
+          </ul>
+          <p>Os pedidos poderão ser enviados através dos canais oficiais de apoio ao cliente ou para o endereço de correio eletrónico: <a href="mailto:asiaraygrupo@asiary.it.com" className="text-blue-600 hover:underline">asiaraygrupo@asiary.it.com</a></p>
         </div>
 
         <div>
-          <h2 className="font-bold text-neutral-800 text-sm mb-2">7. Crianças</h2>
-          <p>
-            Os nossos serviços não são dirigidos nem se destinam a crianças com menos de 18 anos. Se tiver motivos para acreditar que uma criança com menos de 18 anos nos forneceu Dados Pessoais, envie-nos um e-mail para <a href="mailto:asiaraygrupo@asiary.it.com" className="text-blue-600 hover:underline">asiaraygrupo@asiary.it.com</a>.
-          </p>
+          <h2 className="font-bold text-neutral-800 text-sm mb-2">11. Crianças</h2>
+          <p className="mb-2">Os serviços da Asiaray não são dirigidos nem se destinam a menores de 18 anos.</p>
+          <p className="mb-2">A Asiaray não recolhe conscientemente Dados Pessoais de crianças ou menores de idade.</p>
+          <p>Caso existam motivos para acreditar que um menor de 18 anos forneceu Dados Pessoais à Asiaray, deverá ser enviado um pedido para o endereço <a href="mailto:asiaraygrupo@asiary.it.com" className="text-blue-600 hover:underline">asiaraygrupo@asiary.it.com</a>, para que sejam tomadas as medidas adequadas.</p>
         </div>
 
         <div>
-          <h2 className="font-bold text-neutral-800 text-sm mb-2">8. Segurança</h2>
-          <p>
-            Implementamos medidas técnicas, administrativas e organizativas concebidas para proteger os Dados Pessoais contra perda, utilização indevida e acesso, divulgação ou alteração não autorizados.
-          </p>
+          <h2 className="font-bold text-neutral-800 text-sm mb-2">12. Alterações à Política de Privacidade</h2>
+          <p className="mb-2">A Asiaray poderá atualizar periodicamente a presente Política de Privacidade para refletir alterações legais, técnicas ou operacionais.</p>
+          <p className="mb-2">Sempre que forem efetuadas alterações relevantes, será publicada uma nova versão desta Política, indicando a respetiva data de entrada em vigor.</p>
+          <p>A continuação da utilização dos serviços após a publicação das alterações constitui a aceitação da versão atualizada da presente Política de Privacidade.</p>
         </div>
 
         <div>
-          <h2 className="font-bold text-neutral-800 text-sm mb-2">9. Alterações à política de privacidade</h2>
-          <p>
-            Poderemos atualizar esta política periodicamente. Quando o fizermos, publicaremos uma versão atualizada e a data de entrada em vigor nesta página.
-          </p>
+          <h2 className="font-bold text-neutral-800 text-sm mb-2">13. Controlador do Tratamento dos Dados</h2>
+          <p>A Asiaray Angola e a Asiaray Group são as entidades responsáveis pelo tratamento dos Dados Pessoais dos utilizadores, nos termos descritos na presente Política de Privacidade.</p>
         </div>
 
         <div>
-          <h2 className="font-bold text-neutral-800 text-sm mb-2">10. Controlador de dados</h2>
-          <p>
-            A Asiaray Angola e a Asiaray Group são as responsáveis pelo tratamento dos seus Dados Pessoais, tal como descrito na presente política.
-          </p>
-        </div>
-
-        <div>
-          <h2 className="font-bold text-neutral-800 text-sm mb-2">11. Como entrar em contacto connosco</h2>
-          <p>
-            Contacte o nosso apoio ao cliente oficial caso tenha dúvidas ou questões que não tenham sido abordadas na presente Política de Privacidade.
-          </p>
+          <h2 className="font-bold text-neutral-800 text-sm mb-2">14. Como Entrar em Contacto Connosco</h2>
+          <p className="mb-2">Caso tenha dúvidas, pretenda exercer os seus direitos ou necessite de qualquer esclarecimento relativamente à presente Política de Privacidade, poderá contactar o apoio ao cliente oficial da Asiaray através dos canais oficiais ou do seguinte endereço de correio eletrónico:</p>
+          <p className="mb-2"><a href="mailto:asiaraygrupo@asiary.it.com" className="text-blue-600 hover:underline">asiaraygrupo@asiary.it.com</a></p>
+          <p>A nossa equipa procurará responder aos pedidos com a maior brevidade possível.</p>
         </div>
       </div>
     </ModalBase>
@@ -1509,379 +1659,176 @@ export const CompanyPoliciesModal: React.FC<ModalProps> = ({ isOpen, onClose }) 
       <div className="space-y-6 text-xs text-neutral-600 leading-relaxed font-sans pb-4">
         
         <div>
-          <h1 className="font-extrabold text-neutral-800 text-sm mb-1">Nossas Diretrizes e Políticas</h1>
-          <p className="mt-2">
-            A Asiaray estabelece diretrizes operacionais com foco em segurança, estabilidade financeira, transparência administrativa e continuidade dos serviços disponibilizados pela empresa. As políticas abaixo definem os critérios aplicáveis às operações de depósitos, aquisição de produtos, retiradas, funcionamento das equipas e utilização dos serviços WS.
-          </p>
+          <h2 className="font-bold text-neutral-800 text-sm mb-2">1. Introdução</h2>
+          <p className="mb-2">Bem-vindo à Asiaray. Estes Termos de Utilização (“Termos”) regulam a utilização dos nossos serviços, aplicações, website e plataformas digitais (coletivamente designados por “Serviços”).</p>
+          <p>Ao criar uma conta ou utilizar qualquer Serviço da Asiaray, o utilizador declara ter lido, compreendido e aceitado estes Termos na íntegra, bem como a nossa Política de Privacidade. Caso não concorde com qualquer disposição, não deve criar conta nem utilizar os Serviços.</p>
         </div>
 
-        <hr className="border-neutral-200" />
-
         <div>
-          <h1 className="font-extrabold text-neutral-800 text-sm mb-1">Termos de Utilização Gerais</h1>
-          <p className="mt-2">
-            Estes Termos de Utilização aplicam-se ao seu uso da plataforma Asiaray, serviços WS e outras ferramentas da Asiaray para indivíduos, juntamente com quaisquer aplicações de software e websites associados (coletivamente, "Serviços"). Estes Termos constituem um acordo entre o utilizador e a Asiaray, e incluem os nossos Termos de Serviço e disposições importantes para a resolução de litígios através de arbitragem. Ao utilizar os nossos Serviços, o utilizador concorda com estes Termos.
-          </p>
-          <p className="mt-2">
-            Os nossos Termos Comerciais regem a utilização dos nossos serviços WS. A nossa Política de Privacidade explica como recolhemos e utilizamos os dados pessoais. Embora não faça parte dos presentes Termos, é um documento importante que o utilizador deve ler.
-          </p>
-        </div>
-
-        <hr className="border-neutral-200" />
-
-        <div>
-          <h1 className="font-extrabold text-neutral-800 text-sm mb-1">Quem somos</h1>
-          <p className="mt-2">
-            A Asiaray Mídia Grupo, Lda é uma empresa de publicidade, gestão de espaços de mídia e soluções tecnológicas digitais. A nossa missão é garantir que os nossos serviços beneficiem a comunidade global através de sistemas estáveis de comissões, publicidade integrada e parcerias estratégicas.
-          </p>
-        </div>
-
-        <hr className="border-neutral-200" />
-
-        <div>
-          <h1 className="font-extrabold text-neutral-800 text-sm mb-1">Registo e Acesso</h1>
-          <p className="mt-2">
-            <strong>Idade mínima:</strong> O utilizador deve ter pelo menos 18 anos de idade ou a idade mínima exigida no seu país para consentir a utilização dos Serviços. Se o utilizador tiver menos de 18 anos, deve ter a autorização dos pais ou do tutor legal para utilizar os Serviços.
-          </p>
-          <p className="mt-2">
-            <strong>Registo:</strong> O utilizador deve fornecer informações exatas e completas para se registar numa conta e utilizar os nossos Serviços. O utilizador não pode partilhar as credenciais da sua conta nem disponibilizá-las a terceiros e é responsável por todas as atividades que ocorram na sua conta. Se o utilizador criar uma conta ou utilizar os Serviços em nome de outra pessoa ou entidade, deve ter poderes para aceitar estes Termos em seu nome.
-          </p>
-        </div>
-
-        <hr className="border-neutral-200" />
-
-        <div>
-          <h1 className="font-extrabold text-neutral-800 text-sm mb-1">Utilização dos nossos Serviços</h1>
-          <p className="mt-2">
-            <strong>O que pode fazer:</strong> Sujeito à conformidade com estes Termos, o utilizador pode aceder e utilizar os nossos Serviços. Ao utilizar os nossos Serviços, o utilizador deve cumprir todas as leis aplicáveis, bem como qualquer outra documentação, diretrizes ou políticas que lhe disponibilizemos.
-          </p>
-          <p className="mt-2">
-            <strong>O que não pode fazer:</strong> O utilizador não pode utilizar os nossos Serviços para qualquer atividade ilegal, prejudicial ou abusiva. Por exemplo, o utilizador não pode:
-          </p>
+          <h2 className="font-bold text-neutral-800 text-sm mb-2">2. Definições</h2>
           <ul className="list-disc pl-5 mt-1 space-y-1">
-            <li>Utilizar os nossos Serviços de uma forma que infrinja, se aproprie indevidamente ou viole os direitos de alguém.</li>
-            <li>Modificar, copiar, alugar, vender ou distribuir qualquer um dos nossos Serviços sem autorização expressa.</li>
-            <li>Tentar ou ajudar alguém a fazer engenharia reversa, descompilar ou descobrir o código fonte ou componentes subjacentes dos nossos Serviços, incluindo os nossos modelos, algoritmos ou sistemas de processamento.</li>
-            <li>Extrair automática ou programaticamente dados ou Resultados dos nossos sistemas.</li>
-            <li>Interferir com ou perturbar os nossos Serviços, incluindo contornar quaisquer limites ou restrições de taxas ou contornar quaisquer medidas de proteção ou mitigações de segurança que colocamos nos nossos Serviços.</li>
-            <li>Utilizar os nossos dados ou infraestrutura para desenvolver modelos que concorram com a Asiaray.</li>
-          </ul>
-          <p className="mt-2">
-            <strong>Software:</strong> Os nossos Serviços podem permitir-lhe transferir software, como aplicações móveis (APK), que podem ser atualizadas automaticamente para garantir que está a utilizar a versão mais recente. O nosso software pode incluir software de código aberto regido pelas suas próprias licenças.
-          </p>
-          <p className="mt-2">
-            <strong>Domínios empresariais:</strong> Se o utilizador criar uma conta utilizando um endereço de e-mail pertencente a uma organização (por exemplo, a sua entidade patronal), essa conta pode ser adicionada à conta empresarial que a organização tem connosco, caso em que o administrador poderá monitorizar e controlar a sua conta.
-          </p>
-          <p className="mt-2">
-            <strong>Serviços de terceiros:</strong> Os nossos serviços podem incluir software, produtos ou serviços de terceiros ("Serviços de Terceiros") e algumas partes dos nossos Serviços podem incluir resultados desses serviços. Os Serviços de Terceiros e os Resultados de Terceiros estão sujeitos aos seus próprios termos e não somos responsáveis por eles.
-          </p>
-
-        </div>
-
-        <hr className="border-neutral-200" />
-
-        <div>
-          <h1 className="font-extrabold text-neutral-800 text-sm mb-1">Produtos WS e Ativação de Serviços</h1>
-          <p className="mt-2">
-            A Asiaray disponibiliza diferentes categorias de produtos e serviços digitais identificados por níveis WS (WS1, WS2, WS3, entre outros). Cada nível corresponde a um plano operacional específico dentro da estrutura operacional da empresa.
-          </p>
-          <p className="mt-2">
-            Após a ativação de um produto WS, o utilizador passa a ter acesso às tarefas, funcionalidades e benefícios associados ao plano adquirido, podendo receber bonificações e comissões conforme as regras internas e o desempenho operacional da conta.
-          </p>
-          <p className="mt-2">
-            Os valores aplicados pelos utilizadores destinam-se à ativação dos serviços, manutenção operacional, processamento tecnológico, gestão administrativa, publicidade digital e sustentabilidade das operações da empresa.
-          </p>
-          
-          {p.products && p.products.length > 0 && (
-            <div className="mt-3 space-y-2">
-              <h3 className="font-bold text-neutral-700">Pacotes Disponíveis:</h3>
-              <div className="grid grid-cols-1 gap-2">
-                {p.products.sort((a: any, b: any) => Number(a.price) - Number(b.price)).map((prod: any) => (
-                  <div key={prod.id} className="bg-slate-50 border border-slate-200 p-2 rounded flex justify-between items-center">
-                    <span className="font-bold text-neutral-800">{prod.name}</span>
-                    <div className="text-right">
-                      <div className="text-[11px] font-bold text-[#1e88e5]">KZ {Number(prod.price).toLocaleString('pt-AO')}</div>
-                      <div className="text-[10px] text-neutral-500">Renda Diária: KZ {Number(prod.daily_income).toLocaleString('pt-AO')}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        <hr className="border-neutral-200" />
-
-        <div>
-          <h1 className="font-extrabold text-neutral-800 text-sm mb-1">Conteúdo</h1>
-          <p className="mt-2">
-            <strong>O seu conteúdo:</strong> O utilizador pode fornecer dados aos Serviços ("Contribuições") e receber resultados dos Serviços com base nas Contribuições ("Resultados"). As Contribuições e os Resultados são coletivamente "Conteúdo". O utilizador é responsável pelo Conteúdo, incluindo a garantia de que este não viola qualquer lei aplicável ou estes Termos.
-          </p>
-          <p className="mt-2">
-            <strong>Propriedade do conteúdo:</strong> Na medida do permitido pela lei aplicável, o utilizador mantém os seus direitos de propriedade sobre as Contribuições e é proprietário dos Resultados. Por meio destes Termos, cedemos ao utilizador todos os nossos direitos, títulos e interesses, se os houver, no e sobre os Resultados.
-          </p>
-          <p className="mt-2">
-            <strong>Similaridade de conteúdo:</strong> Devido à natureza dos nossos Serviços e das redes de processamento de informações em geral, os resultados podem não ser únicos e outros utilizadores podem receber resultados semelhantes dos nossos Serviços.
-          </p>
-          <p className="mt-2">
-            <strong>A nossa utilização do conteúdo:</strong> Podemos utilizar o Conteúdo para fornecer, manter, desenvolver e melhorar os nossos Serviços, cumprir a legislação aplicável, aplicar os nossos termos e políticas e manter os nossos Serviços seguros.
-          </p>
-          <p className="mt-2">
-            <strong>Exatidão:</strong> A tecnologia e os sistemas de transações digitais são campos em constante evolução. Dada a natureza probabilística e operacional, a utilização dos nossos Serviços pode, em algumas situações específicas de rede, resultar em atrasos ou Resultados que não refletem de imediato as operações. O utilizador deve avaliar a exatidão e adequação dos Resultados para o seu caso de utilização antes de partilhar informações no suporte ou nas redes da empresa.
-          </p>
-        </div>
-
-        <hr className="border-neutral-200" />
-
-        <div>
-          <h1 className="font-extrabold text-neutral-800 text-sm mb-1">Política de Reembolso Programado</h1>
-          <p className="mt-2">
-            A Asiaray poderá disponibilizar programas internos de reembolso promocional ou retorno programado, sujeitos ao cumprimento integral das condições estabelecidas pela empresa.
-          </p>
-          <p className="mt-2">
-            O reembolso do valor investido poderá ocorrer após um período mínimo de até <strong>210 dias corridos</strong>, desde que:
-          </p>
-          <ul className="list-disc pl-5 mt-1 space-y-1">
-            <li>a conta permaneça ativa e regular;</li>
-            <li>não existam violações das políticas internas;</li>
-            <li>o utilizador mantenha os requisitos operacionais definidos pela empresa;</li>
-            <li>a equipa vinculada atinjiu 100 subordinados vips os critérios mínimos de atividade exigidos, incluindo o número mínimo de investidores ativos.</li>
-          </ul>
-          <p className="mt-2">
-            A empresa reserva-se o direito de analisar, validar ou recusar qualquer solicitação de reembolso caso identifique irregularidades operacionais, inconsistências cadastrais ou incumprimento das diretrizes internas.
-          </p>
-        </div>
-
-        <hr className="border-neutral-200" />
-
-        <div>
-          <h1 className="font-extrabold text-neutral-800 text-sm mb-1">Políticas de Recarga e Depósito</h1>
-          <p className="mt-2">
-            Para ativação dos produtos e serviços WS, os utilizadores poderão efetuar depósitos através dos métodos oficialmente disponibilizados pela empresa.
-          </p>
-          <h2 className="font-bold text-neutral-700 mt-2 mb-1">Métodos Aceites</h2>
-          <ul className="list-disc pl-5 mt-1 space-y-1">
-            <li>Moeda Local (AOA/KZ);</li>
-            <li>USDT (Rede TRC20).</li>
-          </ul>
-          <h2 className="font-bold text-neutral-700 mt-2 mb-1">Limites Operacionais</h2>
-          <ul className="list-disc pl-5 mt-1 space-y-1">
-            <li><strong>Depósito mínimo:</strong> 8000 AOA (Kwanzas);</li>
-            <li><strong>Depósito máximo:</strong> 3.000.000 AOA (Kwanzas).</li>
-          </ul>
-          <p className="mt-2">
-            Todos os depósitos estão sujeitos à verificação interna, validação de segurança e confirmação financeira antes da disponibilização do saldo na conta do utilizador.
-          </p>
-          <p className="mt-2">
-            A empresa poderá solicitar comprovativos adicionais sempre que necessário para fins de conformidade e segurança financeira.
-          </p>
-        </div>
-
-        <hr className="border-neutral-200" />
-
-        <div>
-          <h1 className="font-extrabold text-neutral-800 text-sm mb-1">Contas Pagas e Faturação</h1>
-          <p className="mt-2">
-            <strong>Faturação:</strong> Se o utilizador adquirir quaisquer Serviços pagando pela ativação de pacotes WS, fornecerá informações de transações completas e precisas, incluindo um método de pagamento válido. O utilizador é responsável por todos os custos bancários e processamento. Se o pagamento não puder ser verificado, poderemos suspender o seu acesso aos nossos Serviços até que a validação seja concluída.
-          </p>
-          <p className="mt-2">
-            <strong>Cancelamento:</strong> O utilizador pode optar por desativar o plano ou deixar de efetuar tarefas a qualquer momento. Os valores aplicados para ativação de planos não são reembolsáveis, exceto de acordo com a nossa Política de Reembolso Programado ou quando exigido por lei.
-          </p>
-          <p className="mt-2">
-            <strong>Alterações:</strong> Podemos alterar os preços e rendimentos dos nossos pacotes WS ocasionalmente. Se alterarmos as taxas das nossas subscrições ou pacotes, avisaremos o utilizador através da nossa aplicação ou canais oficiais.
-          </p>
-        </div>
-
-        <hr className="border-neutral-200" />
-
-        <div>
-          <h1 className="font-extrabold text-neutral-800 text-sm mb-1">Políticas de Retirada</h1>
-          <p className="mt-2">
-            A Asiaray processa retiradas através das informações bancárias registadas pelo utilizador junto da empresa.
-          </p>
-          <h2 className="font-bold text-neutral-700 mt-2 mb-1">Limites de Retirada</h2>
-          <ul className="list-disc pl-5 mt-1 space-y-1">
-            <li><strong>Valor mínimo por retirada:</strong> 2000 AOA (Kwanzas);</li>
-            <li><strong>Limite máximo por operação:</strong> 100.000 AOA (Kwanzas).</li>
-          </ul>
-          <p className="mt-2">
-            O prazo de processamento poderá variar conforme:
-          </p>
-          <ul className="list-disc pl-5 mt-1 space-y-1">
-            <li>validação de segurança;</li>
-            <li>horários bancários;</li>
-            <li>volume operacional;</li>
-            <li>processamento das instituições financeiras.</li>
-          </ul>
-          <p className="mt-2">
-            O crédito poderá ocorrer entre 24 e 72 horas úteis, dependendo das condições operacionais e bancárias.
-          </p>
-        </div>
-
-        <hr className="border-neutral-200" />
-
-        <div>
-          <h1 className="font-extrabold text-neutral-800 text-sm mb-1">Taxas Operacionais</h1>
-          <p className="mt-2">
-            A Asiaray aplica políticas de sustentabilidade financeira destinadas à manutenção da infraestrutura tecnológica, segurança operacional, processamento de pagamentos, gestão administrativa, publicidade digital e estabilidade contínua dos seus serviços.
-          </p>
-          <h2 className="font-bold text-neutral-700 mt-2 mb-1">Taxa de Retirada</h2>
-          <p className="mt-2">
-            As retiradas realizadas pelos utilizadores estão sujeitas a uma taxa operacional de 50% sobre o valor solicitado.
-          </p>
-          <p className="mt-2">
-            As taxas operacionais cobradas sobre determinadas operações têm como objetivo:
-          </p>
-          <ul className="list-disc pl-5 mt-1 space-y-1">
-            <li>garantir a sustentabilidade financeira da empresa;</li>
-            <li>assegurar a continuidade dos serviços e operações digitais;</li>
-            <li>reforçar os sistemas internos de segurança e proteção financeira;</li>
-            <li>suportar custos administrativos, tecnológicos e operacionais;</li>
-            <li>manter a estabilidade do sistema de pagamentos e processamento;</li>
-            <li>fortalecer os programas de publicidade e expansão da empresa;</li>
-            <li>reduzir riscos operacionais e atividades irregulares;</li>
-            <li>contribuir para a manutenção e crescimento da estrutura empresarial a longo prazo.</li>
-          </ul>
-          <p className="mt-2">
-            A empresa declara que parte significativa da sua sustentabilidade provém das atividades publicitárias, serviços digitais e mecanismos operacionais internos.
-          </p>
-        </div>
-
-        <hr className="border-neutral-200" />
-
-        <div>
-          <h1 className="font-extrabold text-neutral-800 text-sm mb-1">Política de Equipas e Expansão de Rede</h1>
-          <p className="mt-2">
-            A Asiaray disponibiliza um sistema estruturado de expansão de equipa através de códigos de convite personalizados, permitindo aos utilizadores desenvolver a sua rede de forma organizada e transparente.
-          </p>
-          <p className="mt-2">
-            Sempre que um novo membro realiza o registo utilizando um código de convite válido e efetua a ativação de um produto WS, o sistema poderá gerar bonificações automáticas ao utilizador responsável pela indicação, de acordo com os níveis de comissão definidos pela empresa.
-          </p>
-          <h2 className="font-bold text-neutral-700 mt-2 mb-1">Estrutura de Bonificações por Nível</h2>
-          <ul className="list-disc pl-5 mt-1 space-y-1">
-            <li><strong>Nível 1 (Convidados Diretos):</strong> 10% de bonificação;</li>
-            <li><strong>Nível 2:</strong> 5% de bonificação;</li>
-            <li><strong>Nível 3:</strong> 2% de bonificação.</li>
-          </ul>
-          <p className="mt-2">
-            As bonificações são calculadas conforme as operações elegíveis realizadas pelos membros da rede e estão sujeitas às regras internas, validações de segurança e conformidade operacional da empresa.
-          </p>
-          <p className="mt-2">
-            O crescimento e desempenho da equipa poderão influenciar:
-          </p>
-          <ul className="list-disc pl-5 mt-1 space-y-1">
-            <li>níveis de recompensa;</li>
-            <li>bonificações residuais;</li>
-            <li>classificação interna da conta;</li>
-            <li>acesso a campanhas promocionais;</li>
-            <li>benefícios operacionais e programas internos de incentivo.</li>
-          </ul>
-          <p className="mt-2">
-            A empresa reserva-se o direito de limitar, suspender ou cancelar bonificações em casos de atividades suspeitas, manipulação de rede, fraude, utilização de múltiplas contas ou qualquer violação das políticas internas.
-          </p>
-        </div>
-
-        <hr className="border-neutral-200" />
-
-        <div>
-          <h1 className="font-extrabold text-neutral-800 text-sm mb-1">Cessação e Suspensão</h1>
-          <p className="mt-2">
-            <strong>Cessação:</strong> O utilizador é livre de deixar de utilizar os nossos Serviços em qualquer altura. Reservamo-nos o direito de suspender ou terminar o seu acesso aos nossos Serviços ou de desativar a sua conta se determinarmos que:
-          </p>
-          <ul className="list-disc pl-5 mt-1 space-y-1">
-            <li>O utilizador violou estes Termos ou as nossas Diretrizes de Utilização.</li>
-            <li>Temos de o fazer para cumprir a lei.</li>
-            <li>A sua utilização dos nossos Serviços pode causar riscos ou danos à Asiaray, aos nossos utilizadores ou a qualquer outra pessoa.</li>
-          </ul>
-          <p className="mt-2">
-            <strong>Interrupção dos Serviços:</strong> Podemos decidir descontinuar ou suspender temporariamente os nossos Serviços por motivos de atualização do sistema ou manutenção técnica, garantindo a aviso prévio sempre que possível.
-          </p>
-        </div>
-
-        <hr className="border-neutral-200" />
-
-        <div>
-          <h1 className="font-extrabold text-neutral-800 text-sm mb-1">Exclusão de Garantias</h1>
-          <p className="mt-2 uppercase font-semibold text-neutral-700">
-            Os nossos serviços são fornecidos "tal como estão". Exceto na medida em que seja proibido por lei, nós e as nossas empresas associadas não damos quaisquer garantias (expressas, implícitas ou estatutárias) relativamente aos serviços e exoneramo-nos de todas as garantias, incluindo garantias de comercialização, adequação a um determinado fim, qualidade satisfatória ou segurança das operações contra interrupções. O utilizador aceita que qualquer utilização dos nossos serviços é feita por sua conta e risco.
-          </p>
-        </div>
-
-        <hr className="border-neutral-200" />
-
-        <div>
-          <h1 className="font-extrabold text-neutral-800 text-sm mb-1">Limitação da Responsabilidade</h1>
-          <p className="mt-2 uppercase font-semibold text-neutral-700">
-            Nem nós nem nenhuma das nossas afiliadas ou parceiros será responsável por quaisquer danos indiretos, acidentais ou consequenciais, incluindo danos por perda de lucros, interrupção de negócios ou perda de dados. A nossa responsabilidade agregada ao abrigo destes termos não excederá o maior valor entre o montante pago pelo utilizador pelo serviço que deu origem à reclamação durante os 12 meses anteriores ou cem dólares ($100).
-          </p>
-        </div>
-
-        <hr className="border-neutral-200" />
-
-        <div>
-          <h1 className="font-extrabold text-neutral-800 text-sm mb-1">Resolução de Litígios</h1>
-          <p className="mt-2">
-            <strong>Arbitragem Obrigatória:</strong> O utilizador e a Asiaray concordam em resolver quaisquer reclamações decorrentes ou relacionadas com estes Termos ou com os nossos Serviços através de arbitragem final e vinculativa perante um árbitro neutro.
-          </p>
-          <p className="mt-2">
-            <strong>Resolução amigável de litígios:</strong> Gostaríamos de compreender e tentar resolver as suas preocupações antes de uma ação judicial formal. Antes de apresentar uma reclamação formal, ambos concordamos em tentar resolver o litígio de forma amigável no prazo de 60 dias através de negociação direta ou canais de apoio oficiais.
-          </p>
-          <p className="mt-2">
-            <strong>Renúncia a Ações Coletivas:</strong> O utilizador e a Asiaray concordam que os litígios devem ser apresentados apenas numa base individual e não podem ser apresentados como queixosos ou membros de um grupo em qualquer ação coletiva ou representativa.
-          </p>
-        </div>
-
-        <hr className="border-neutral-200" />
-
-        <div>
-          <h1 className="font-extrabold text-neutral-800 text-sm mb-1">Reclamações sobre Propriedade Intelectual</h1>
-          <p className="mt-2">
-            Se considerar que os seus direitos de propriedade intelectual foram violados, envie uma notificação por escrito para a administração ou canais de apoio do grupo Asiaray para que possamos analisar e remover conteúdos infratores de imediato.
-          </p>
-        </div>
-
-        <hr className="border-neutral-200" />
-
-        <div>
-          <h1 className="font-extrabold text-neutral-800 text-sm mb-1">Conformidade e Segurança</h1>
-          <p className="mt-2">
-            A Asiaray mantém políticas internas rigorosas de conformidade, segurança digital e monitorização operacional, com o objetivo de proteger os utilizadores e garantir estabilidade contínua dos seus serviços.
-          </p>
-          <p className="mt-2">
-            A empresa reserva-se o direito de:
-          </p>
-          <ul className="list-disc pl-5 mt-1 space-y-1">
-            <li>analisar atividades suspeitas;</li>
-            <li>solicitar verificação adicional de identidade;</li>
-            <li>bloquear operações consideradas irregulares;</li>
-            <li>suspender ou encerrar contas que violem os termos internos;</li>
-            <li>alterar limites operacionais, políticas financeiras ou critérios de elegibilidade sempre que necessário para garantir segurança e sustentabilidade dos serviços.</li>
+            <li><strong>Asiaray / Nós / Nosso:</strong> refere-se à Asiaray Angola e Asiaray Group, suas afiliadas e operadores da plataforma.</li>
+            <li><strong>Utilizador:</strong> qualquer pessoa física maior de 18 anos que cria conta e utiliza os Serviços.</li>
+            <li><strong>Conta:</strong> perfil criado pelo utilizador na plataforma.</li>
+            <li><strong>WS:</strong> produtos/serviços de rede, investimento ou programas de expansão mencionados na plataforma.</li>
+            <li><strong>Levantamento:</strong> pedido de transferência de fundos da conta Asiaray para conta bancária do utilizador.</li>
+            <li><strong>Depósito:</strong> transferência de fundos para a conta Asiaray.</li>
           </ul>
         </div>
 
-        <hr className="border-neutral-200" />
+        <div>
+          <h2 className="font-bold text-neutral-800 text-sm mb-2">3. Quem Somos</h2>
+          <p>A Asiaray é uma plataforma que visa proporcionar ferramentas transparentes para gestão, investimento e acompanhamento de atividades de rede. Operamos com o compromisso de segurança, transparência e conformidade legal.</p>
+        </div>
 
         <div>
-          <h1 className="font-extrabold text-neutral-800 text-sm mb-1">Condições Gerais</h1>
-          <p className="mt-2">
-            <strong>Cessão:</strong> O utilizador não pode ceder ou transferir quaisquer direitos ou obrigações ao abrigo dos presentes Termos. Nós podemos transferir os nossos direitos ou obrigações a qualquer sucessor ou empresa associada ao nosso grupo operacional.
-          </p>
-          <p className="mt-2">
-            <strong>Alterações a estes Termos:</strong> Estamos a trabalhar continuamente para desenvolver e melhorar os nossos Serviços. Poderemos atualizar estes Termos ou os nossos Serviços em conformidade. Se as alterações tiverem um impacto adverso substancial, notificá-lo-emos com antecedência. A utilização continuada dos Serviços significa a aceitação dos novos termos.
-          </p>
-          <p className="mt-2">
-            <strong>Acordo integral:</strong> Estes termos contêm o acordo integral entre o utilizador e a Asiaray relativamente à utilização da plataforma e substituem quaisquer acordos anteriores.
-          </p>
-          <p className="mt-2">
-            <strong>Lei aplicável:</strong> A lei da República de Angola e/ou a lei local da sede do grupo regerá estes Termos, com exceção de conflitos de leis.
-          </p>
-          
-          <div className="mt-4 p-3 bg-slate-100 border-l-4 border-[#1e88e5] rounded-lg">
-            <p className="text-[11px] font-semibold text-slate-700 italic">
-              Ao utilizar os serviços da Asiaray, o utilizador declara concordar integralmente com todas as políticas, diretrizes e termos operacionais estabelecidos pela empresa.
-            </p>
-          </div>
+          <h2 className="font-bold text-neutral-800 text-sm mb-2">4. Elegibilidade</h2>
+          <p>Os Serviços são destinados exclusivamente a pessoas com idade igual ou superior a 18 anos, residentes em jurisdições onde a utilização seja legal. É proibida a utilização por menores, pessoas sancionadas ou em jurisdições restritas.</p>
         </div>
+
+        <div>
+          <h2 className="font-bold text-neutral-800 text-sm mb-2">5. Registo e Acesso à Conta</h2>
+          <ul className="list-disc pl-5 mt-1 space-y-1">
+            <li>Para aceder aos Serviços é obrigatório criar uma conta fornecendo número de telefone válido.</li>
+            <li>O utilizador é responsável por manter a confidencialidade da sua palavra-passe e de todas as atividades realizadas na sua conta.</li>
+            <li>A Asiaray reserva-se o direito de recusar ou encerrar contas a qualquer momento, sem aviso prévio, por violação destes Termos.</li>
+          </ul>
+        </div>
+
+        <div>
+          <h2 className="font-bold text-neutral-800 text-sm mb-2">6. Utilização dos Serviços</h2>
+          <p className="mb-2">O utilizador compromete-se a utilizar os Serviços apenas para fins lícitos e em conformidade com estes Termos. É proibido:</p>
+          <ul className="list-disc pl-5 mt-1 space-y-1">
+            <li>Usar a plataforma para atividades ilegais, fraude, branqueamento de capitais ou spam;</li>
+            <li>Tentar obter acesso não autorizado a sistemas da Asiaray;</li>
+            <li>Interferir no funcionamento normal da plataforma;</li>
+            <li>Fornecer informações falsas ou enganosas.</li>
+          </ul>
+        </div>
+
+        <div>
+          <h2 className="font-bold text-neutral-800 text-sm mb-2">7. Produtos e Serviços WS</h2>
+          <p>Os produtos e serviços WS seguem regras específicas detalhadas na plataforma. O utilizador deve ler atentamente as condições de cada produto antes de participar. A Asiaray não garante rendimentos ou resultados específicos.</p>
+        </div>
+
+        <div>
+          <h2 className="font-bold text-neutral-800 text-sm mb-2">8. Conteúdo do Utilizador</h2>
+          <p>O utilizador é o único responsável pelo conteúdo que publica ou envia (incluindo capturas de comprovativos de depósito). Ao submeter conteúdo, concede à Asiaray licença mundial, não exclusiva e gratuita para usar, armazenar e exibir esse conteúdo na prestação dos Serviços.</p>
+        </div>
+
+        <div>
+          <h2 className="font-bold text-neutral-800 text-sm mb-2">9. Direitos e Responsabilidades do Utilizador</h2>
+          <ul className="list-disc pl-5 mt-1 space-y-1">
+            <li>Manter os dados da conta atualizados;</li>
+            <li>Cumprir todas as leis aplicáveis;</li>
+            <li>Reportar imediatamente qualquer uso não autorizado da sua conta;</li>
+            <li>Abster-se de comportamentos abusivos ou que prejudiquem outros utilizadores ou a plataforma.</li>
+          </ul>
+        </div>
+
+        <div>
+          <h2 className="font-bold text-neutral-800 text-sm mb-2">10. Direitos da Asiaray</h2>
+          <p className="mb-2">Reservamo-nos o direito de:</p>
+          <ul className="list-disc pl-5 mt-1 space-y-1">
+            <li>Modificar, suspender ou interromper qualquer parte dos Serviços;</li>
+            <li>Remover conteúdo que viole estes Termos;</li>
+            <li>Realizar verificações de identidade e anti-fraude;</li>
+            <li>Cooperar com autoridades competentes quando exigido por lei.</li>
+          </ul>
+        </div>
+
+        <div>
+          <h2 className="font-bold text-neutral-800 text-sm mb-2">11. Política de Depósitos</h2>
+          <ul className="list-disc pl-5 mt-1 space-y-1">
+            <li>Os depósitos devem ser realizados através dos canais oficiais indicados na plataforma.</li>
+            <li>O utilizador deve enviar comprovativos claros (capturas de ecrã) para validação.</li>
+            <li>A Asiaray não se responsabiliza por depósitos efetuados em contas erradas ou fora dos canais oficiais.</li>
+          </ul>
+        </div>
+
+        <div>
+          <h2 className="font-bold text-neutral-800 text-sm mb-2">12. Política de Levantamentos</h2>
+          <ul className="list-disc pl-5 mt-1 space-y-1">
+            <li>Os pedidos de levantamento são processados mediante verificação de dados bancários (IBAN válido em nome do titular da conta).</li>
+            <li>A Asiaray pode solicitar documentos adicionais para prevenir fraude.</li>
+            <li>Os prazos de processamento dependem do método escolhido e de verificações internas.</li>
+            <li>Levantamentos só são permitidos para fundos disponíveis e não bloqueados por regras operacionais.</li>
+          </ul>
+        </div>
+
+        <div>
+          <h2 className="font-bold text-neutral-800 text-sm mb-2">13. Taxas Operacionais</h2>
+          <p>As taxas aplicáveis a depósitos, levantamentos, serviços WS e outras operações estão claramente indicadas na plataforma e podem ser atualizadas periodicamente. O utilizador é responsável pelo pagamento das taxas devidas.</p>
+        </div>
+
+        <div>
+          <h2 className="font-bold text-neutral-800 text-sm mb-2">14. Política de Equipas e Expansão da Rede</h2>
+          <p>A expansão de rede (quando aplicável) deve respeitar as regras de recrutamento ético e legal. É proibida a utilização de práticas enganosas, pressão indevida ou falsas promessas de ganhos.</p>
+        </div>
+
+        <div>
+          <h2 className="font-bold text-neutral-800 text-sm mb-2">15. Contas Pagas e Faturação</h2>
+          <p>Quando aplicável, as contas pagas ou subscrições são renovadas automaticamente até serem canceladas pelo utilizador, respeitando os prazos de cancelamento indicados.</p>
+        </div>
+
+        <div>
+          <h2 className="font-bold text-neutral-800 text-sm mb-2">16. Suspensão e Encerramento de Contas</h2>
+          <p className="mb-2">A Asiaray pode suspender ou encerrar contas imediatamente, sem aviso prévio, em caso de:</p>
+          <ul className="list-disc pl-5 mt-1 space-y-1">
+            <li>Violação destes Termos;</li>
+            <li>Suspeita de fraude ou atividade ilegal;</li>
+            <li>Inatividade prolongada;</li>
+            <li>Exigência legal ou regulatória.</li>
+          </ul>
+        </div>
+
+        <div>
+          <h2 className="font-bold text-neutral-800 text-sm mb-2">17. Exclusão de Garantias</h2>
+          <p>Os Serviços são fornecidos “no estado em que se encontram”. A Asiaray não oferece quaisquer garantias, expressas ou implícitas, quanto à continuidade, precisão, fiabilidade ou ausência de erros na plataforma.</p>
+        </div>
+
+        <div>
+          <h2 className="font-bold text-neutral-800 text-sm mb-2">18. Limitação da Responsabilidade</h2>
+          <p>Na medida máxima permitida por lei, a Asiaray não será responsável por danos indiretos, incidentais, consequenciais, perda de lucros ou danos resultantes da utilização ou impossibilidade de utilização dos Serviços.</p>
+        </div>
+
+        <div>
+          <h2 className="font-bold text-neutral-800 text-sm mb-2">19. Resolução de Litígios</h2>
+          <p>Qualquer disputa será resolvida preferencialmente por via amigável. Na impossibilidade, os litígios serão submetidos aos tribunais competentes de Angola.</p>
+        </div>
+
+        <div>
+          <h2 className="font-bold text-neutral-800 text-sm mb-2">20. Propriedade Intelectual</h2>
+          <p>Todo o conteúdo, marcas, logos, software e materiais da Asiaray são propriedade exclusiva da Asiaray ou dos seus licenciadores. É proibida a cópia, modificação ou utilização não autorizada.</p>
+        </div>
+
+        <div>
+          <h2 className="font-bold text-neutral-800 text-sm mb-2">21. Conformidade e Segurança</h2>
+          <p>O utilizador compromete-se a cumprir todas as leis anti-branqueamento, contra-terrorismo e proteção de dados aplicáveis. A Asiaray implementa medidas de segurança, mas não garante proteção absoluta contra todas as ameaças.</p>
+        </div>
+
+        <div>
+          <h2 className="font-bold text-neutral-800 text-sm mb-2">22. Alterações aos Termos</h2>
+          <p>Podemos atualizar estes Termos periodicamente. A versão atualizada será publicada com a data de entrada em vigor. A continuação da utilização dos Serviços após a publicação constitui aceitação dos novos Termos.</p>
+        </div>
+
+        <div>
+          <h2 className="font-bold text-neutral-800 text-sm mb-2">23. Lei Aplicável</h2>
+          <p>Estes Termos regem-se pela legislação de Angola.</p>
+        </div>
+
+        <div>
+          <h2 className="font-bold text-neutral-800 text-sm mb-2">24. Disposições Gerais</h2>
+          <ul className="list-disc pl-5 mt-1 space-y-1 mb-2">
+            <li>Se qualquer disposição for considerada inválida, as restantes permanecem em vigor.</li>
+            <li>Estes Termos constituem o acordo integral entre o utilizador e a Asiaray.</li>
+            <li>Qualquer notificação será enviada para o e-mail ou telefone registado na conta.</li>
+            <li>Contacto: <a href="mailto:asiaraygrupo@asiary.it.com" className="text-blue-600 hover:underline">asiaraygrupo@asiary.it.com</a></li>
+          </ul>
+          <p className="mt-4 font-semibold text-neutral-800">Ao utilizar a Asiaray, o utilizador confirma que leu e aceita estes Termos de Utilização e a Política de Privacidade.</p>
+        </div>
+        
+        <div className="pt-10 pb-4 text-center text-neutral-400 italic">Fim do documento.</div>
 
       </div>
     </ModalBase>

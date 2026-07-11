@@ -3,6 +3,246 @@ import { useApp } from '../context/AppContext';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import logoImg from '../../assets/logo.asiaarys.png';
 
+const RegistrationPolicyModal: React.FC<{ isOpen: boolean, onClose: () => void, onAccept: () => void }> = ({ isOpen, onClose, onAccept }) => {
+  const [isScrolledToBottom, setIsScrolledToBottom] = useState(false);
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+    if (scrollHeight - scrollTop <= clientHeight + 10) {
+      setIsScrolledToBottom(true);
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
+      <div 
+        className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300"
+        aria-hidden="true"
+        onClick={onClose}
+      />
+      <div className="relative w-full max-w-[400px] max-h-[90vh] bg-white rounded-[16px] shadow-2xl flex flex-col font-sans overflow-hidden animate-in fade-in zoom-in-95">
+        
+        {/* Header */}
+        <div className="flex items-center justify-between py-3.5 px-4 border-b border-neutral-100">
+          <span className="text-[16px] font-bold text-neutral-800 tracking-tight">Políticas da Empresa</span>
+          <button 
+            onClick={onClose}
+            className="text-neutral-400 hover:text-neutral-600 focus:outline-none p-0.5 cursor-pointer"
+            aria-label="Fechar"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-[20px] w-[20px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Content */}
+        <div 
+          className="px-5 py-5 overflow-y-auto"
+          onScroll={handleScroll}
+        >
+          <div className="space-y-6 text-[13px] text-neutral-600 leading-relaxed font-sans pb-4 select-text">
+            <div>
+              <h2 className="font-bold text-neutral-800 text-sm mb-2">1. Introdução</h2>
+              <p className="mb-2">Bem-vindo à Asiaray. Estes Termos de Utilização (“Termos”) regulam a utilização dos nossos serviços, aplicações, website e plataformas digitais (coletivamente designados por “Serviços”).</p>
+              <p>Ao criar uma conta ou utilizar qualquer Serviço da Asiaray, o utilizador declara ter lido, compreendido e aceitado estes Termos na íntegra, bem como a nossa Política de Privacidade. Caso não concorde com qualquer disposição, não deve criar conta nem utilizar os Serviços.</p>
+            </div>
+
+            <div>
+              <h2 className="font-bold text-neutral-800 text-sm mb-2">2. Definições</h2>
+              <ul className="list-disc pl-5 mt-1 space-y-1">
+                <li><strong>Asiaray / Nós / Nosso:</strong> refere-se à Asiaray Angola e Asiaray Group, suas afiliadas e operadores da plataforma.</li>
+                <li><strong>Utilizador:</strong> qualquer pessoa física maior de 18 anos que cria conta e utiliza os Serviços.</li>
+                <li><strong>Conta:</strong> perfil criado pelo utilizador na plataforma.</li>
+                <li><strong>WS:</strong> produtos/serviços de rede, investimento ou programas de expansão mencionados na plataforma.</li>
+                <li><strong>Levantamento:</strong> pedido de transferência de fundos da conta Asiaray para conta bancária do utilizador.</li>
+                <li><strong>Depósito:</strong> transferência de fundos para a conta Asiaray.</li>
+              </ul>
+            </div>
+
+            <div>
+              <h2 className="font-bold text-neutral-800 text-sm mb-2">3. Quem Somos</h2>
+              <p>A Asiaray é uma plataforma que visa proporcionar ferramentas transparentes para gestão, investimento e acompanhamento de atividades de rede. Operamos com o compromisso de segurança, transparência e conformidade legal.</p>
+            </div>
+
+            <div>
+              <h2 className="font-bold text-neutral-800 text-sm mb-2">4. Elegibilidade</h2>
+              <p>Os Serviços são destinados exclusivamente a pessoas com idade igual ou superior a 18 anos, residentes em jurisdições onde a utilização seja legal. É proibida a utilização por menores, pessoas sancionadas ou em jurisdições restritas.</p>
+            </div>
+
+            <div>
+              <h2 className="font-bold text-neutral-800 text-sm mb-2">5. Registo e Acesso à Conta</h2>
+              <ul className="list-disc pl-5 mt-1 space-y-1">
+                <li>Para aceder aos Serviços é obrigatório criar uma conta fornecendo número de telefone válido.</li>
+                <li>O utilizador é responsável por manter a confidencialidade da sua palavra-passe e de todas as atividades realizadas na sua conta.</li>
+                <li>A Asiaray reserva-se o direito de recusar ou encerrar contas a qualquer momento, sem aviso prévio, por violação destes Termos.</li>
+              </ul>
+            </div>
+
+            <div>
+              <h2 className="font-bold text-neutral-800 text-sm mb-2">6. Utilização dos Serviços</h2>
+              <p className="mb-2">O utilizador compromete-se a utilizar os Serviços apenas para fins lícitos e em conformidade com estes Termos. É proibido:</p>
+              <ul className="list-disc pl-5 mt-1 space-y-1">
+                <li>Usar a plataforma para atividades ilegais, fraude, branqueamento de capitais ou spam;</li>
+                <li>Tentar obter acesso não autorizado a sistemas da Asiaray;</li>
+                <li>Interferir no funcionamento normal da plataforma;</li>
+                <li>Fornecer informações falsas ou enganosas.</li>
+              </ul>
+            </div>
+
+            <div>
+              <h2 className="font-bold text-neutral-800 text-sm mb-2">7. Produtos e Serviços WS</h2>
+              <p>Os produtos e serviços WS seguem regras específicas detalhadas na plataforma. O utilizador deve ler atentamente as condições de cada produto antes de participar. A Asiaray não garante rendimentos ou resultados específicos.</p>
+            </div>
+
+            <div>
+              <h2 className="font-bold text-neutral-800 text-sm mb-2">8. Conteúdo do Utilizador</h2>
+              <p>O utilizador é o único responsável pelo conteúdo que publica ou envia (incluindo capturas de comprovativos de depósito). Ao submeter conteúdo, concede à Asiaray licença mundial, não exclusiva e gratuita para usar, armazenar e exibir esse conteúdo na prestação dos Serviços.</p>
+            </div>
+
+            <div>
+              <h2 className="font-bold text-neutral-800 text-sm mb-2">9. Direitos e Responsabilidades do Utilizador</h2>
+              <ul className="list-disc pl-5 mt-1 space-y-1">
+                <li>Manter os dados da conta atualizados;</li>
+                <li>Cumprir todas as leis aplicáveis;</li>
+                <li>Reportar imediatamente qualquer uso não autorizado da sua conta;</li>
+                <li>Abster-se de comportamentos abusivos ou que prejudiquem outros utilizadores ou a plataforma.</li>
+              </ul>
+            </div>
+
+            <div>
+              <h2 className="font-bold text-neutral-800 text-sm mb-2">10. Direitos da Asiaray</h2>
+              <p className="mb-2">Reservamo-nos o direito de:</p>
+              <ul className="list-disc pl-5 mt-1 space-y-1">
+                <li>Modificar, suspender ou interromper qualquer parte dos Serviços;</li>
+                <li>Remover conteúdo que viole estes Termos;</li>
+                <li>Realizar verificações de identidade e anti-fraude;</li>
+                <li>Cooperar com autoridades competentes quando exigido por lei.</li>
+              </ul>
+            </div>
+
+            <div>
+              <h2 className="font-bold text-neutral-800 text-sm mb-2">11. Política de Depósitos</h2>
+              <ul className="list-disc pl-5 mt-1 space-y-1">
+                <li>Os depósitos devem ser realizados através dos canais oficiais indicados na plataforma.</li>
+                <li>O utilizador deve enviar comprovativos claros (capturas de ecrã) para validação.</li>
+                <li>A Asiaray não se responsabiliza por depósitos efetuados em contas erradas ou fora dos canais oficiais.</li>
+              </ul>
+            </div>
+
+            <div>
+              <h2 className="font-bold text-neutral-800 text-sm mb-2">12. Política de Levantamentos</h2>
+              <ul className="list-disc pl-5 mt-1 space-y-1">
+                <li>Os pedidos de levantamento são processados mediante verificação de dados bancários (IBAN válido em nome do titular da conta).</li>
+                <li>A Asiaray pode solicitar documentos adicionais para prevenir fraude.</li>
+                <li>Os prazos de processamento dependem do método escolhido e de verificações internas.</li>
+                <li>Levantamentos só são permitidos para fundos disponíveis e não bloqueados por regras operacionais.</li>
+              </ul>
+            </div>
+
+            <div>
+              <h2 className="font-bold text-neutral-800 text-sm mb-2">13. Taxas Operacionais</h2>
+              <p>As taxas aplicáveis a depósitos, levantamentos, serviços WS e outras operações estão claramente indicadas na plataforma e podem ser atualizadas periodicamente. O utilizador é responsável pelo pagamento das taxas devidas.</p>
+            </div>
+
+            <div>
+              <h2 className="font-bold text-neutral-800 text-sm mb-2">14. Política de Equipas e Expansão da Rede</h2>
+              <p>A expansão de rede (quando aplicável) deve respeitar as regras de recrutamento ético e legal. É proibida a utilização de práticas enganosas, pressão indevida ou falsas promessas de ganhos.</p>
+            </div>
+
+            <div>
+              <h2 className="font-bold text-neutral-800 text-sm mb-2">15. Contas Pagas e Faturação</h2>
+              <p>Quando aplicável, as contas pagas ou subscrições são renovadas automaticamente até serem canceladas pelo utilizador, respeitando os prazos de cancelamento indicados.</p>
+            </div>
+
+            <div>
+              <h2 className="font-bold text-neutral-800 text-sm mb-2">16. Suspensão e Encerramento de Contas</h2>
+              <p className="mb-2">A Asiaray pode suspender ou encerrar contas imediatamente, sem aviso prévio, em caso de:</p>
+              <ul className="list-disc pl-5 mt-1 space-y-1">
+                <li>Violação destes Termos;</li>
+                <li>Suspeita de fraude ou atividade ilegal;</li>
+                <li>Inatividade prolongada;</li>
+                <li>Exigência legal ou regulatória.</li>
+              </ul>
+            </div>
+
+            <div>
+              <h2 className="font-bold text-neutral-800 text-sm mb-2">17. Exclusão de Garantias</h2>
+              <p>Os Serviços são fornecidos “no estado em que se encontram”. A Asiaray não oferece quaisquer garantias, expressas ou implícitas, quanto à continuidade, precisão, fiabilidade ou ausência de erros na plataforma.</p>
+            </div>
+
+            <div>
+              <h2 className="font-bold text-neutral-800 text-sm mb-2">18. Limitação da Responsabilidade</h2>
+              <p>Na medida máxima permitida por lei, a Asiaray não será responsável por danos indiretos, incidentais, consequenciais, perda de lucros ou danos resultantes da utilização ou impossibilidade de utilização dos Serviços.</p>
+            </div>
+
+            <div>
+              <h2 className="font-bold text-neutral-800 text-sm mb-2">19. Resolução de Litígios</h2>
+              <p>Qualquer disputa será resolvida preferencialmente por via amigável. Na impossibilidade, os litígios serão submetidos aos tribunais competentes de Angola.</p>
+            </div>
+
+            <div>
+              <h2 className="font-bold text-neutral-800 text-sm mb-2">20. Propriedade Intelectual</h2>
+              <p>Todo o conteúdo, marcas, logos, software e materiais da Asiaray são propriedade exclusiva da Asiaray ou dos seus licenciadores. É proibida a cópia, modificação ou utilização não autorizada.</p>
+            </div>
+
+            <div>
+              <h2 className="font-bold text-neutral-800 text-sm mb-2">21. Conformidade e Segurança</h2>
+              <p>O utilizador compromete-se a cumprir todas as leis anti-branqueamento, contra-terrorismo e proteção de dados aplicáveis. A Asiaray implementa medidas de segurança, mas não garante proteção absoluta contra todas as ameaças.</p>
+            </div>
+
+            <div>
+              <h2 className="font-bold text-neutral-800 text-sm mb-2">22. Alterações aos Termos</h2>
+              <p>Podemos atualizar estes Termos periodicamente. A versão atualizada será publicada com a data de entrada em vigor. A continuação da utilização dos Serviços após a publicação constitui aceitação dos novos Termos.</p>
+            </div>
+
+            <div>
+              <h2 className="font-bold text-neutral-800 text-sm mb-2">23. Lei Aplicável</h2>
+              <p>Estes Termos regem-se pela legislação de Angola.</p>
+            </div>
+
+            <div>
+              <h2 className="font-bold text-neutral-800 text-sm mb-2">24. Disposições Gerais</h2>
+              <ul className="list-disc pl-5 mt-1 space-y-1 mb-2">
+                <li>Se qualquer disposição for considerada inválida, as restantes permanecem em vigor.</li>
+                <li>Estes Termos constituem o acordo integral entre o utilizador e a Asiaray.</li>
+                <li>Qualquer notificação será enviada para o e-mail ou telefone registado na conta.</li>
+                <li>Contacto: <a href="mailto:asiaraygrupo@asiary.it.com" className="text-blue-600 hover:underline">asiaraygrupo@asiary.it.com</a></li>
+              </ul>
+              <p className="mt-4 font-semibold text-neutral-800">Ao utilizar a Asiaray, o utilizador confirma que leu e aceita estes Termos de Utilização e a Política de Privacidade.</p>
+            </div>
+            
+            <div className="pt-10 pb-4 text-center text-neutral-400 italic">Fim do documento.</div>
+          </div>
+        </div>
+
+        {/* Footer with disabled/enabled button */}
+        <div className="px-5 py-4 border-t border-neutral-100 bg-neutral-50/50">
+          <button
+            type="button"
+            disabled={!isScrolledToBottom}
+            onClick={() => {
+              if (isScrolledToBottom) {
+                onAccept();
+                onClose();
+              }
+            }}
+            className={`w-full h-10 font-bold text-[13px] rounded-[8px] transition-all flex items-center justify-center cursor-pointer select-none ${
+              isScrolledToBottom 
+                ? 'bg-[#1e88e5] hover:bg-[#1565c0] text-white shadow-sm' 
+                : 'bg-neutral-200 text-neutral-400 cursor-not-allowed'
+            }`}
+          >
+            Concordar com os Termos
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export const LoginScreen: React.FC = () => {
   const { login, registerUser, showLoading, hideLoading, addToast } = useApp();
   
@@ -23,6 +263,7 @@ export const LoginScreen: React.FC = () => {
   const [termosAceitos, setTermosAceitos] = useState<boolean>(false);
   const [showLoginPopup, setShowLoginPopup] = useState<boolean>(false);
   const [popupCountdown, setPopupCountdown] = useState<number>(6);
+  const [showPolicyModal, setShowPolicyModal] = useState<boolean>(false);
   
   const [captchaText, setCaptchaText] = useState<string>('FyPAE');
 
@@ -287,9 +528,10 @@ export const LoginScreen: React.FC = () => {
             </div>
 
             {/* Termos de Uso */}
-            <div className="flex items-center gap-2 px-1 select-none cursor-pointer" onClick={() => setTermosAceitos(!termosAceitos)}>
+            <div className="flex items-start gap-2 px-1 select-none mt-2">
               <div 
-                className={`w-[18px] h-[18px] flex shrink-0 items-center justify-center rounded-[3px] transition-colors border-2 ${termosAceitos ? 'bg-[#3b82f6] border-[#3b82f6]' : 'bg-transparent border-[#eab308]'}`}
+                className={`w-[18px] h-[18px] mt-0.5 flex shrink-0 items-center justify-center rounded-[3px] transition-colors border-2 cursor-pointer ${termosAceitos ? 'bg-[#3b82f6] border-[#3b82f6]' : 'bg-transparent border-[#eab308]'}`}
+                onClick={() => setTermosAceitos(!termosAceitos)}
               >
                 {termosAceitos && (
                   <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
@@ -297,8 +539,11 @@ export const LoginScreen: React.FC = () => {
                   </svg>
                 )}
               </div>
-              <span className="text-[12px] text-gray-600">
-                Concordo com os Termos de Uso e a Política de Privacidade
+              <span className="text-[12px] text-gray-600 leading-tight">
+                Concordo com os{' '}
+                <span className="text-blue-600 underline cursor-pointer hover:text-blue-800 font-medium" onClick={() => setShowPolicyModal(true)}>Termos de Uso</span>
+                {' '}e a{' '}
+                <span className="text-blue-600 underline cursor-pointer hover:text-blue-800 font-medium" onClick={() => setShowPolicyModal(true)}>Política de Privacidade</span>
               </span>
             </div>
 
@@ -462,6 +707,13 @@ export const LoginScreen: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Registration Policies Modal */}
+      <RegistrationPolicyModal 
+        isOpen={showPolicyModal} 
+        onClose={() => setShowPolicyModal(false)} 
+        onAccept={() => setTermosAceitos(true)} 
+      />
     </div>
   );
 };
