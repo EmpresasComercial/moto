@@ -56,86 +56,99 @@ export const MinhasFinancasModal: React.FC<MinhasFinancasModalProps> = ({ isOpen
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[50] bg-[#f5f5f5] flex flex-col font-sans animate-fadeIn" id="modal-container-minha-financa">
+    <div className="fixed inset-0 z-[50] bg-[#f4f6f9] flex flex-col font-sans animate-fadeIn" id="modal-container-minha-financa">
       {/* Header */}
-      <div className="bg-white px-4 py-3 flex items-center justify-between border-b border-gray-200 select-none" style={{ height: '48px' }}>
+      <div className="bg-white flex items-center px-2 py-3 border-b border-neutral-200 select-none">
         <button 
           id="financa-modal-close-btn"
           onClick={onClose} 
-          className="text-neutral-500 hover:text-neutral-800 select-none cursor-pointer focus:outline-none flex items-center p-1"
+          className="w-10 h-10 flex items-center justify-center text-[#475569] active:bg-gray-100 rounded-full focus:outline-none"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-[20px] w-[20px] text-neutral-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.4}>
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-[22px] w-[22px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <span className="text-[15px] font-semibold text-neutral-800 tracking-tight text-center flex-1 translate-x-[-10px]">Minha Finança</span>
+        <div className="flex-1 text-center text-[17px] font-normal text-[#111827]">
+          Minha Finança
+        </div>
         <button
           onClick={() => setShowValues(!showValues)}
-          className="text-neutral-500 p-1 cursor-pointer"
+          className="w-10 h-10 flex items-center justify-center text-neutral-500 active:bg-gray-100 rounded-full focus:outline-none"
         >
           {showValues ? <Eye size={18} /> : <EyeOff size={18} />}
         </button>
       </div>
 
       {/* Body */}
-      <div className="flex-1 overflow-y-auto no-scrollbar bg-white">
-        <div className="grid grid-cols-2 divide-x divide-y divide-neutral-100 border-b border-neutral-100">
+      <div className="flex-1 overflow-y-auto bg-[#f4f6f9] pb-10">
+        
+        <div className="bg-[#edf2f7] px-4 py-2 border-b border-gray-100 select-none mt-3">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-500">
+            Resumo Financeiro
+          </span>
+        </div>
+
+        <div className="flex flex-col bg-white border-b border-gray-150">
 
           {/* Total Depositado */}
-          <div className="py-5 px-3 text-center flex flex-col justify-center items-center gap-1.5 h-[100px] select-none">
-            <div className="h-[30px] flex items-center justify-center">
-              <img src={totalDepositadoIcon} className="w-[26px] h-[26px] object-contain" alt="Total Depositado" />
+          <div className="flex items-center justify-between px-4 py-3.5 border-b border-gray-100 last:border-b-0">
+            <div className="flex items-center gap-3">
+              <img src={totalDepositadoIcon} className="w-[20px] h-[20px] object-contain opacity-70" alt="Total Depositado" />
+              <span className="text-[13px] font-normal text-[#2d3748]">Total Depositado</span>
             </div>
-            <span className="text-[11px] font-normal text-neutral-500">Total Depositado</span>
             {loading ? (
               <div className="h-4 w-20 bg-neutral-200 rounded animate-pulse"></div>
             ) : (
-              <span className="text-[13px] font-bold text-green-600">KZ {maskValue(data?.total_depositado)}</span>
+              <span className="text-[13px] font-normal text-[#2d3748]">KZ {maskValue(data?.total_depositado)}</span>
             )}
           </div>
 
           {/* Total Retirado */}
-          <div className="py-5 px-3 text-center flex flex-col justify-center items-center gap-1.5 h-[100px] select-none">
-            <div className="h-[30px] flex items-center justify-center">
-              <img src={totalRetiradaIcon} className="w-[26px] h-[26px] object-contain" alt="Total Retirado" />
+          <div className="flex items-center justify-between px-4 py-3.5 border-b border-gray-100 last:border-b-0">
+            <div className="flex items-center gap-3">
+              <img src={totalRetiradaIcon} className="w-[20px] h-[20px] object-contain opacity-70" alt="Total Retirado" />
+              <span className="text-[13px] font-normal text-[#2d3748]">Total Retirado</span>
             </div>
-            <span className="text-[11px] font-normal text-neutral-500">Total Retirado</span>
             {loading ? (
               <div className="h-4 w-20 bg-neutral-200 rounded animate-pulse"></div>
             ) : (
-              <span className="text-[13px] font-bold text-red-500">KZ {maskValue(data?.total_retirado)}</span>
+              <span className="text-[13px] font-normal text-[#2d3748]">KZ {maskValue(data?.total_retirado)}</span>
             )}
           </div>
 
           {/* Renda de Tarefas */}
-          <div className="py-5 px-3 text-center flex flex-col justify-center items-center gap-1.5 h-[100px] select-none">
-            <div className="h-[30px] flex items-center justify-center">
-              <img src={deRendaIcon} className="w-[26px] h-[26px] object-contain" alt="Renda Tarefas" />
+          <div className="flex items-center justify-between px-4 py-3.5 border-b border-gray-100 last:border-b-0">
+            <div className="flex items-center gap-3">
+              <img src={deRendaIcon} className="w-[20px] h-[20px] object-contain opacity-70" alt="Renda Tarefas" />
+              <div className="flex flex-col">
+                <span className="text-[13px] font-normal text-[#2d3748]">Renda Tarefas</span>
+                {!loading && (
+                  <span className="text-[10px] text-neutral-400 mt-0.5">{maskInt(data?.quantidade_tarefas)} tarefas</span>
+                )}
+              </div>
             </div>
-            <span className="text-[11px] font-normal text-neutral-500">Renda Tarefas</span>
             {loading ? (
               <div className="h-4 w-20 bg-neutral-200 rounded animate-pulse"></div>
             ) : (
-              <span className="text-[13px] font-bold text-blue-600">KZ {maskValue(data?.ganho_tarefas)}</span>
-            )}
-            {!loading && (
-              <span className="text-[9px] text-neutral-400">{maskInt(data?.quantidade_tarefas)} tarefas</span>
+              <span className="text-[13px] font-normal text-[#2d3748]">KZ {maskValue(data?.ganho_tarefas)}</span>
             )}
           </div>
 
           {/* Bónus Convite */}
-          <div className="py-5 px-3 text-center flex flex-col justify-center items-center gap-1.5 h-[100px] select-none">
-            <div className="h-[30px] flex items-center justify-center">
-              <img src={ganhoConviteIcon} className="w-[26px] h-[26px] object-contain" alt="Bónus Convite" />
+          <div className="flex items-center justify-between px-4 py-3.5 border-b border-gray-100 last:border-b-0">
+            <div className="flex items-center gap-3">
+              <img src={ganhoConviteIcon} className="w-[20px] h-[20px] object-contain opacity-70" alt="Bónus Convite" />
+              <div className="flex flex-col">
+                <span className="text-[13px] font-normal text-[#2d3748]">Bónus Convite</span>
+                {!loading && (
+                  <span className="text-[10px] text-neutral-400 mt-0.5">{maskInt(data?.quantidade_convidados)} convidados</span>
+                )}
+              </div>
             </div>
-            <span className="text-[11px] font-normal text-neutral-500">Bónus Convite</span>
             {loading ? (
               <div className="h-4 w-20 bg-neutral-200 rounded animate-pulse"></div>
             ) : (
-              <span className="text-[13px] font-bold text-orange-500">KZ {maskValue(data?.bonus_convite)}</span>
-            )}
-            {!loading && (
-              <span className="text-[9px] text-neutral-400">{maskInt(data?.quantidade_convidados)} convidados</span>
+              <span className="text-[13px] font-normal text-[#2d3748]">KZ {maskValue(data?.bonus_convite)}</span>
             )}
           </div>
 

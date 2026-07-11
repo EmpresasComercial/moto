@@ -437,7 +437,7 @@ function MainAppLayout() {
                             <p>{splashMessage}</p>
                           ) : (
                             <>
-                              <p className="mb-3 font-semibold text-slate-900">Documento n.º 20230501701</p>
+                              <p className="mb-3 font-semibold text-slate-900">Documento n.º 20260701601</p>
                               <p className="mb-3">Relativamente ao apoio total da empresa à rápida expansão do mercado angolano, a primeira decisão é: convidar outras pessoas para trabalhar, podendo o convidante como gestor obter um bónus de 10% do seguinte salário do empregado.</p>
                               <p className="mb-3">Exemplo: O seu equipe tem 100 pessoas, todos no WS5, quanto dinheiro você pode ganhar todos os dias com isso.</p>
                               <p className="text-xs text-slate-400">Leia com atenção e siga as regras de convite para garantir as melhores recompensas.</p>
