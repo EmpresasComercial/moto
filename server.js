@@ -1,6 +1,8 @@
+import 'dotenv/config';
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { supabaseProxy } from './api/gateway.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -8,12 +10,16 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-// Serve static assets with long-term caching
+// ── Secure Proxy ──────────────────────────────────────────────────────────────
+// All /api/data/* requests are forwarded to the real backend server-side.
+// The client never sees the real URL, provider, or API key.
+app.use('/api/data', supabaseProxy);
+
+// ── Static Assets ─────────────────────────────────────────────────────────────
 app.use(express.static(path.join(__dirname, 'dist'), {
   maxAge: '1y',
   etag: true,
   setHeaders: (res, filePath) => {
-    // index.html should not be cached long term
     if (filePath.endsWith('index.html')) {
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     } else {
@@ -22,11 +28,15 @@ app.use(express.static(path.join(__dirname, 'dist'), {
   }
 }));
 
-// Fallback all routes to index.html for Single Page App (SPA) routers
+// ── SPA Fallback ──────────────────────────────────────────────────────────────
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server is running on port ${PORT}`);
+// ── Start ─────────────────────────────────────────────────────────────────────
+const server = app.listen(PORT, '0.0.0.0', () => {
+  console.log(`[server] Running on port ${PORT}`);
 });
+
+// WebSocket upgrade for Supabase Realtime (channels, presence, broadcast)
+server.on('upgrade', supabaseProxy.upgrade);

@@ -1,9 +1,14 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 
-export default defineConfig(() => {
+const DUMMY_KEY = 'proxy-secured';
+
+export default defineConfig(({ mode }) => {
+  // Load .env variables (server-side only — never bundled into the client)
+  const env = loadEnv(mode, process.cwd(), '');
+
   return {
     plugins: [react(), tailwindcss()],
     resolve: {
@@ -17,6 +22,31 @@ export default defineConfig(() => {
       hmr: process.env.DISABLE_HMR !== 'true',
       // Disable file watching when DISABLE_HMR is true to save CPU during agent edits.
       watch: process.env.DISABLE_HMR === 'true' ? null : {},
+
+      // ── Dev Proxy ────────────────────────────────────────────────────────────
+      // Intercepts /api/data/* in development and forwards to the real backend
+      // with the real credentials injected server-side — invisible to the browser.
+      proxy: {
+        '/api/data': {
+          target: env.SUPABASE_URL,
+          changeOrigin: true,
+          ws: true, // WebSocket for Realtime
+          rewrite: (p) => p.replace(/^\/api\/data/, ''),
+          configure: (proxy) => {
+            proxy.on('proxyReq', (proxyReq) => {
+              // Inject the real API key
+              proxyReq.setHeader('apikey', env.SUPABASE_ANON_KEY);
+
+              // Replace the dummy Authorization with the real anon key
+              // (only for unauthenticated requests — real JWTs are left untouched)
+              const auth = proxyReq.getHeader('Authorization');
+              if (auth === `Bearer ${DUMMY_KEY}`) {
+                proxyReq.setHeader('Authorization', `Bearer ${env.SUPABASE_ANON_KEY}`);
+              }
+            });
+          }
+        }
+      }
     },
     build: {
       outDir: 'dist',

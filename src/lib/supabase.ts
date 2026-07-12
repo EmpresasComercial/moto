@@ -1,7 +1,16 @@
 import { createClient } from '@supabase/supabase-js';
 
-const SUPABASE_URL = 'https://fycskldchqqqohgvioal.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5Y3NrbGRjaHFxcW9oZ3Zpb2FsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY5MDQxOTMsImV4cCI6MjA4MjQ4MDE5M30.vC5GkVPi9mZwkSNQG_ajVcRnWN8pyYGD0xQbl8Uhco0';
+// ── Proxy URL ──────────────────────────────────────────────────────────────────
+// The client talks to /api/data/* (a completely neutral path).
+// The server proxy (server.js in prod / Vite dev server) intercepts these requests,
+// rewrites the path to the real backend, and injects the real credentials server-side.
+// The browser NEVER sees the real provider URL or API key.
+const SUPABASE_URL = typeof window !== 'undefined'
+  ? `${window.location.origin}/api/data`
+  : 'http://localhost:3000/api/data';
+
+// Dummy placeholder — the real anon key is injected server-side by the proxy.
+const SUPABASE_ANON_KEY = 'proxy-secured';
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   db: { schema: 'api' }
@@ -34,16 +43,17 @@ export const checkInternetConnectivity = async (timeoutMs = 4000): Promise<boole
   const controller = new AbortController();
   const timeout = window.setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const response = await fetch(INTERNET_CHECK_URL, {
+    // The URL is now same-origin (/api/data/auth/v1) so we don't need no-cors.
+    // Any HTTP response (even 401) confirms internet connectivity — only a network
+    // error (thrown exception) means we're actually offline.
+    await fetch(INTERNET_CHECK_URL, {
       method: 'HEAD',
       cache: 'no-cache',
-      mode: 'no-cors',
       signal: controller.signal
     });
-    const isConnected = response.ok || response.type === 'opaque';
-    lastConnectivityResult = isConnected;
+    lastConnectivityResult = true;
     lastConnectivityCheckTime = now;
-    return isConnected;
+    return true;
   } catch {
     const isOnline = navigator.onLine;
     lastConnectivityResult = isOnline;
