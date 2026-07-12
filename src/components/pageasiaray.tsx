@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import logoImg from '../../assets/logo.asiaarys.png';
 
 const RegistrationPolicyModal: React.FC<{ isOpen: boolean, onClose: () => void, onAccept: () => void }> = ({ isOpen, onClose, onAccept }) => {
   const [isScrolledToBottom, setIsScrolledToBottom] = useState(false);
@@ -401,7 +400,7 @@ export const LoginScreen: React.FC = () => {
     >
       {/* Logo */}
       <div className="flex items-center justify-center py-6 bg-white border-b border-gray-100 select-none">
-        <img src={logoImg} alt="Asiaray Group" className="h-[80px] object-contain" />
+        <img src="/asiaray-logo-leve.webp" alt="Asiaray Group" className="h-[80px] object-contain" />
       </div>
 
 
