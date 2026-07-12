@@ -117,7 +117,7 @@ export const RetirarPage: React.FC = () => {
   return (
     <div className="fixed inset-0 z-[60] bg-white flex flex-col font-sans max-w-md mx-auto border-x border-slate-200">
       
-      {/* Header bar */}
+
       <div className="bg-[#e9eff6] px-4 py-3 flex items-center justify-between border-b border-slate-200 select-none h-12">
         <button 
           onClick={() => {
@@ -134,15 +134,10 @@ export const RetirarPage: React.FC = () => {
         </span>
       </div>
 
-      {/* Main Area */}
-      <div className="flex-1 overflow-y-auto bg-white flex flex-col no-scrollbar">
-        
-        {/* Step 1: Input amount */}
+
         {step === 'amount' && (
           <div className="flex flex-col flex-1 justify-between overflow-hidden">
-            {/* Scrollable Content Area */}
             <div className="flex-1 overflow-y-auto no-scrollbar pb-4">
-              {/* Gateway Card (Grey block) */}
               <div 
                 onClick={() => navigate('/meu', { state: { openMyInfoModal: true, selectBankSection: true } })}
                 className="bg-[#f0f3f6] p-4 flex flex-col justify-between border-b border-slate-200 cursor-pointer hover:bg-slate-100/80 transition-colors"
@@ -162,13 +157,13 @@ export const RetirarPage: React.FC = () => {
                 </span>
               </div>
 
-              {/* Input area (White block) */}
+
               <div className="p-5 flex flex-col">
                 <span className="text-[14px] font-bold text-neutral-800 mb-2">
                   Montante de retirada:
                 </span>
 
-                {/* Big Currency input */}
+
                 <div className="flex items-baseline border-b border-slate-200 pb-3 mb-6 mt-2">
                   <span className="text-[34px] font-semibold text-neutral-900 mr-3 select-none">KZ</span>
                   <input 
@@ -181,9 +176,7 @@ export const RetirarPage: React.FC = () => {
                   />
                 </div>
 
-                {/* Wallet options Checkboxes */}
                 <div className="space-y-4">
-                  {/* Option 1: Pocket money */}
                   <label className="flex items-center justify-between cursor-pointer select-none">
                     <div className="flex items-center gap-3">
                       <input 
@@ -197,7 +190,7 @@ export const RetirarPage: React.FC = () => {
                     <span className="text-[13px] text-neutral-800">KZ{pocketBalance}</span>
                   </label>
 
-                  {/* Option 2: Task wallet */}
+
                   <label className="flex items-center justify-between cursor-pointer select-none">
                     <div className="flex items-center gap-3">
                       <input 
@@ -214,7 +207,7 @@ export const RetirarPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Fixed Virtual Keypad at the bottom of the page */}
+
             <div className="bg-[#f0f3f6] border-t border-slate-200 p-2 grid grid-cols-3 gap-1 select-none">
               {['1','2','3','4','5','6','7','8','9'].map(val => (
                 <button
@@ -251,10 +244,8 @@ export const RetirarPage: React.FC = () => {
           </div>
         )}
 
-        {/* Step 2: Tips Overlay / View */}
         {step === 'tips' && (
           <div className="flex flex-col flex-1 bg-white relative">
-            {/* Background Content (Disabled/Blurred Amount View) */}
             <div className="opacity-40 pointer-events-none flex flex-col flex-1">
               <div className="bg-[#f0f3f6] p-4 flex flex-col">
                 <div className="flex justify-between items-center text-neutral-800 font-bold text-[13px]">
@@ -267,10 +258,8 @@ export const RetirarPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Bottom sheet style / Center style Tips Modal precisely matching Image 2 */}
             <div className="absolute inset-0 bg-black/40 z-10 flex items-center justify-center px-4">
               <div className="bg-white w-full max-w-[340px] rounded-2xl shadow-xl flex flex-col overflow-hidden animate-fadeIn pb-5 pt-3">
-                {/* Tip Header */}
                 <div className="px-4 py-2 flex items-center justify-between border-b border-slate-100">
                   <button 
                     onClick={() => setStep('amount')}
@@ -282,7 +271,6 @@ export const RetirarPage: React.FC = () => {
                   <div className="w-5"></div>
                 </div>
 
-                {/* Tips List */}
                 <div className="p-4 space-y-3 text-[12px] text-neutral-600 leading-normal text-left font-medium">
                   <p>1. Hora de chegada: 0-72 horas;</p>
                   <p>2. Diferentes canais de pagamento podem ter taxas de serviço;</p>
@@ -290,7 +278,6 @@ export const RetirarPage: React.FC = () => {
                   <p>4. Se a retirada for rejeitada, seus fundos serão devolvidos para a carteira correspondente e você poderá retirar novamente.</p>
                 </div>
 
-                {/* Tip Buttons */}
                 <div className="px-4 pt-3 flex gap-3">
                   <button
                     onClick={() => setStep('amount')}
@@ -310,11 +297,9 @@ export const RetirarPage: React.FC = () => {
           </div>
         )}
 
-        {/* Step 3: PIN Input view precisely matching Image 3 */}
         {step === 'pin' && (
           <div className="flex flex-col flex-1 bg-white relative justify-between">
             
-            {/* Top info summary */}
             <div className="p-4 flex flex-col items-center">
               <span className="text-[12px] text-neutral-500 font-bold mb-1">
                 Canal de Pagamento: {displayBank} (...{lastFourDigits})
@@ -323,7 +308,6 @@ export const RetirarPage: React.FC = () => {
                 KZ {amount.toLocaleString('pt-AO')}
               </span>
 
-              {/* Commission stats table */}
               <div className="w-full bg-[#f8fafc] border border-slate-100 rounded-xl p-4 text-[12px] text-neutral-600 space-y-2 mb-6 shadow-sm">
                 <div className="flex justify-between">
                   <span>Comissão da plataforma:</span>
@@ -343,7 +327,6 @@ export const RetirarPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* 4 Digit PIN Fields */}
               <div className="flex gap-2 justify-center w-full max-w-[240px] my-3">
                 {[...Array(4)].map((_, i) => (
                   <div 
@@ -359,7 +342,6 @@ export const RetirarPage: React.FC = () => {
                 ))}
               </div>
 
-              {/* Forgot link */}
               <button 
                 onClick={() => addToast('Entre em contato com o suporte para redefinir sua senha de pagamento.', 'info')}
                 className="text-[11px] text-[#1e88e5] mt-4 font-bold focus:outline-none hover:underline cursor-pointer"
@@ -368,7 +350,6 @@ export const RetirarPage: React.FC = () => {
               </button>
             </div>
 
-            {/* Custom On-Screen Numeric Keyboard */}
             <div className="bg-[#f0f3f6] border-t border-slate-200 p-2 grid grid-cols-3 gap-1 select-none">
               {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map(val => (
                 <button
