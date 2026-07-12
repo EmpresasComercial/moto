@@ -30,18 +30,53 @@ export default defineConfig(({ mode }) => {
         '/api/data': {
           target: env.SUPABASE_URL,
           changeOrigin: true,
-          ws: true, // WebSocket for Realtime
+          ws: true,
           rewrite: (p) => p.replace(/^\/api\/data/, ''),
           configure: (proxy) => {
+            // Headers that reveal the provider — stripped from outgoing requests
             proxy.on('proxyReq', (proxyReq) => {
-              // Inject the real API key
               proxyReq.setHeader('apikey', env.SUPABASE_ANON_KEY);
-
-              // Replace the dummy Authorization with the real anon key
-              // (only for unauthenticated requests — real JWTs are left untouched)
               const auth = proxyReq.getHeader('Authorization');
               if (auth === `Bearer ${DUMMY_KEY}`) {
                 proxyReq.setHeader('Authorization', `Bearer ${env.SUPABASE_ANON_KEY}`);
+              }
+              proxyReq.removeHeader('x-client-info');
+              proxyReq.removeHeader('x-supabase-api-version');
+            });
+
+            // Headers that reveal the provider — stripped from incoming responses
+            const REMOVE = [
+              'sb-project-ref', 'sb-gateway-version', 'sb-auth-user-id',
+              'sb-auth-session-id', 'sb-auth-refresh-token-prefix', 'sb-request-id',
+              'sb-edge-region', 'x-sb-edge-region', 'x-served-by',
+              'x-supabase-api-version', 'x-deno-execution-id',
+              'x-envoy-attempt-count', 'x-envoy-upstream-service-time',
+              'endpoint-load-metrics',
+            ];
+            proxy.on('proxyRes', (proxyRes) => {
+              REMOVE.forEach(h => { delete proxyRes.headers[h]; });
+
+              // Clean headers that list allowed names — remove Supabase-specific terms
+              const cleanHeaderList = (headerName) => {
+                const val = proxyRes.headers[headerName];
+                if (!val) return;
+                const cleaned = String(val).split(',').map(h => h.trim())
+                  .filter(h => !['x-client-info', 'apikey'].includes(h.toLowerCase())
+                    && !h.toLowerCase().includes('supabase'))
+                  .join(', ');
+                if (cleaned) proxyRes.headers[headerName] = cleaned;
+                else delete proxyRes.headers[headerName];
+              };
+              cleanHeaderList('access-control-expose-headers');
+              cleanHeaderList('access-control-allow-headers');
+
+              // Strip set-cookie headers that contain supabase.co domain
+              const cookies = proxyRes.headers['set-cookie'];
+              if (cookies) {
+                const list = Array.isArray(cookies) ? cookies : [cookies];
+                const safe = list.filter(c => !c.toLowerCase().includes('supabase.co'));
+                if (safe.length > 0) proxyRes.headers['set-cookie'] = safe;
+                else delete proxyRes.headers['set-cookie'];
               }
             });
           }
