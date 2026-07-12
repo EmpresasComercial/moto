@@ -134,7 +134,7 @@ export const RetirarPage: React.FC = () => {
         </span>
       </div>
 
-
+      <div className="flex-1 overflow-y-auto bg-white flex flex-col no-scrollbar">
         {step === 'amount' && (
           <div className="flex flex-col flex-1 justify-between overflow-hidden">
             <div className="flex-1 overflow-y-auto no-scrollbar pb-4">
