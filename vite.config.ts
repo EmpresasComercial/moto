@@ -79,6 +79,15 @@ export default defineConfig(({ mode }) => {
                 else delete proxyRes.headers['set-cookie'];
               }
             });
+
+            // Handle network drops gracefully
+            proxy.on('error', (err, _req, res) => {
+              console.warn(`[Proxy Warning] Falha na rede ao conectar ao Supabase: ${err.message}`);
+              if (res && !res.headersSent) {
+                res.writeHead(502, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Falha temporária de rede com o servidor.' }));
+              }
+            });
           }
         }
       }
