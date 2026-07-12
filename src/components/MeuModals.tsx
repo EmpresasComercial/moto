@@ -1269,178 +1269,237 @@ const FaqSection: React.FC<{ title: string }> = ({ title }) => (
   </div>
 );
 
+// ─── Helper: highlight numbers in blue ────────────────────────────────────────
+const hn = (text: string): React.ReactNode => {
+  const parts = text.split(/(\d[\d.,:/]*(?:\s*(?:Kz|h\d{2}|%))?|\d+(?:\/\d+)+)/g);
+  return (
+    <>
+      {parts.map((part, i) =>
+        /^\d/.test(part)
+          ? <span key={i} className="text-[#2563eb] font-semibold">{part}</span>
+          : part
+      )}
+    </>
+  );
+};
+
+// ─── FAQ DATA ─────────────────────────────────────────────────────────────────
+const faqData: { section: string; question: string; answerText: string; answerNode: React.ReactNode }[] = [
+  // Sobre retiradas
+  { section: 'Sobre retiradas', question: 'Qual é o valor mínimo para realizar uma retirada?', answerText: 'O valor mínimo permitido para retirada é de 2.000 Kz.', answerNode: <p>O valor mínimo permitido para retirada é de {hn('2.000 Kz')}.</p> },
+  { section: 'Sobre retiradas', question: 'Qual é o valor máximo permitido para retirada?', answerText: 'O valor máximo de retirada é de 100.000 Kz.', answerNode: <p>O valor máximo de retirada é de {hn('100.000 Kz')}.</p> },
+  { section: 'Sobre retiradas', question: 'Qual é o horário disponível para realizar retiradas?', answerText: 'As retiradas são processadas diariamente das 10h00 às 16h00 (horário de Angola).', answerNode: <p>As retiradas são processadas diariamente das {hn('10h00')} às {hn('16h00')} (horário de Angola).</p> },
+  { section: 'Sobre retiradas', question: 'O que é necessário para realizar uma retirada?', answerText: 'Para efetuar uma retirada, o utilizador deve possuir uma compra pelo menos de um WS1 e ativo, uma conta bancária gravada e PIN de retirada gravada.', answerNode: <p>Para efetuar uma retirada, o utilizador deve possuir uma compra pelo menos de um {hn('WS1')} e ativo, uma conta bancária gravada e PIN de retirada gravada.</p> },
+  { section: 'Sobre retiradas', question: 'Existe alguma taxa aplicada nas retiradas?', answerText: 'Sim. Cada retirada possui uma taxa de 50%. O utilizador recebe 50% do valor solicitado, enquanto os outros 50% são destinados à cobertura de taxas operacionais e manutenção da estabilidade do projeto.', answerNode: <p>Sim. Cada retirada possui uma taxa de {hn('50%')}. O utilizador recebe {hn('50%')} do valor solicitado, enquanto os outros {hn('50%')} são destinados à cobertura de taxas operacionais e manutenção da estabilidade do projeto.</p> },
+  { section: 'Sobre retiradas', question: 'Quanto tempo demora uma retirada?', answerText: 'Cada retirada passa por três etapas: Pendente, Transformação, Sucesso. Caso a retirada não seja concluída dentro de 0 - 72 horas, contacte o suporte.', answerNode: <><p className="mb-2">Cada retirada passa por três etapas:</p><ol className="list-decimal pl-4 space-y-1"><li>Pendente – solicitação recebida e em análise;</li><li>Transformação – transferência em andamento;</li><li>Sucesso – retirada concluída.</li></ol><p className="mt-2">Caso a retirada não seja concluída dentro de {hn('0')} - {hn('72')} horas, contacte o suporte.</p></> },
+  { section: 'Sobre retiradas', question: 'O que acontece se uma retirada for rejeitada?', answerText: 'O valor será automaticamente devolvido à conta do utilizador, aplicando-se uma taxa de 4% sobre o valor devolvido.', answerNode: <p>O valor será automaticamente devolvido à conta do utilizador, aplicando-se uma taxa de {hn('4%')} sobre o valor devolvido.</p> },
+  { section: 'Sobre retiradas', question: 'A empresa responsabiliza-se por transferências para contas erradas?', answerText: 'Não. A empresa não se responsabiliza pela perda de fundos enviados para contas incorretas. É responsabilidade do utilizador confirmar corretamente os dados antes de concluir uma operação.', answerNode: <p>Não. A empresa não se responsabiliza pela perda de fundos enviados para contas incorretas. É responsabilidade do utilizador confirmar corretamente os dados antes de concluir uma operação.</p> },
+  // Sobre recargas e depósitos
+  { section: 'Sobre recargas e depósitos', question: 'Qual é o horário para realizar recargas?', answerText: 'As recargas são realizadas diariamente das 10h00 às 22h00 (horário de Angola).', answerNode: <p>As recargas são realizadas diariamente das {hn('10h00')} às {hn('22h00')} (horário de Angola).</p> },
+  { section: 'Sobre recargas e depósitos', question: 'Como enviar o comprovativo de pagamento?', answerText: 'Após efetuar o pagamento, envie o comprovativo ao gerente responsável através do WhatsApp para validação.', answerNode: <p>Após efetuar o pagamento, envie o comprovativo ao gerente responsável através do WhatsApp para validação.</p> },
+  { section: 'Sobre recargas e depósitos', question: 'Quais métodos de depósito são aceites?', answerText: 'Criptomoedas - USDT. Depósitos em conta bancária - Kwanzas.', answerNode: <ul className="list-disc pl-4 space-y-1"><li>Criptomoedas - USDT</li><li>Depósitos em conta bancária - Kwanzas</li></ul> },
+  { section: 'Sobre recargas e depósitos', question: 'Qual é o valor mínimo de depósito?', answerText: 'O valor mínimo de depósito para USDT ou AOA é de 8.000 Kz.', answerNode: <p>O valor mínimo de depósito para USDT ou AOA é de {hn('8.000 Kz')}.</p> },
+  { section: 'Sobre recargas e depósitos', question: 'Qual é o valor máximo de depósito?', answerText: 'O valor máximo permitido para depósito para USDT ou AOA é de 3.000.000 Kz.', answerNode: <p>O valor máximo permitido para depósito para USDT ou AOA é de {hn('3.000.000 Kz')}.</p> },
+  // Sobre a equipa e convites
+  { section: 'Sobre a equipa e convites', question: 'Como funciona o sistema de equipa?', answerText: 'Ao convidar novos utilizadores através do seu link exclusivo, constrói uma equipa em três níveis: Primeiro nível, Segundo nível, Terceiro nível.', answerNode: <><p className="mb-2">Ao convidar novos utilizadores através do seu link exclusivo, constrói uma equipa em três níveis:</p><ul className="list-disc pl-4 space-y-1"><li>Primeiro nível</li><li>Segundo nível</li><li>Terceiro nível</li></ul></> },
+  { section: 'Sobre a equipa e convites', question: 'Qual é a recompensa por convidar novos utilizadores?', answerText: 'Recebe 25Kz por cadastro direto bem-sucedido. Válido para os primeiros 10 cadastros diretos.', answerNode: <><p>Recebe {hn('25Kz')} por cadastro direto bem-sucedido.</p><p className="mt-1">Válido para os primeiros {hn('10')} cadastros diretos.</p></> },
+  { section: 'Sobre a equipa e convites', question: 'Como funcionam as recompensas dos três níveis?', answerText: '1.º nível: 10% sobre os investimentos dos subordinados diretos. 2.º nível: 5% sobre os investimentos deste nível. 3.º nível: 2% sobre os investimentos deste nível.', answerNode: <ul className="list-disc pl-4 space-y-1"><li>{hn('1')}.º nível: {hn('10%')} sobre os investimentos dos subordinados diretos.</li><li>{hn('2')}.º nível: {hn('5%')} sobre os investimentos deste nível.</li><li>{hn('3')}.º nível: {hn('2%')} sobre os investimentos deste nível.</li></ul> },
+  // Sobre compras de WS
+  { section: 'Sobre compras de WS', question: 'Preciso comprar os produtos numa ordem específica?', answerText: 'Não. Pode adquirir qualquer WS disponível, independentemente de já ter comprado outros anteriormente.', answerNode: <p>Não. Pode adquirir qualquer WS disponível, independentemente de já ter comprado outros anteriormente.</p> },
+  { section: 'Sobre compras de WS', question: 'Quantas vezes posso comprar o mesmo produto?', answerText: 'Cada produto só pode ser adquirido uma vez por utilizador.', answerNode: <p>Cada produto só pode ser adquirido uma vez por utilizador.</p> },
+  { section: 'Sobre compras de WS', question: 'Como funciona o rendimento dos WS?', answerText: 'Os lucros gerados pelos produtos WS são creditados automaticamente na sua conta todos os dias (a cada 24 horas após a compra), não sendo necessário esperar que o prazo de validade termine para ver o seu saldo aumentar.', answerNode: <p>Os lucros gerados pelos produtos WS são creditados automaticamente na sua conta todos os dias (a cada {hn('24')} horas após a compra), não sendo necessário esperar que o prazo de validade termine para ver o seu saldo aumentar.</p> },
+  { section: 'Sobre compras de WS', question: 'É possível cancelar a compra de um WS e receber o valor de volta?', answerText: 'Não. Uma vez confirmada a aquisição de um WS, a transação torna-se irreversível e o valor não poderá ser reembolsado. Pedimos que tenha a certeza da compra antes de prosseguir.', answerNode: <p>Não. Uma vez confirmada a aquisição de um WS, a transação torna-se irreversível e o valor não poderá ser reembolsado. Pedimos que tenha a certeza da compra antes de prosseguir.</p> },
+  { section: 'Sobre compras de WS', question: 'O que acontece após o WS expirar?', answerText: 'Após a expiração, pode adquirir outro WS para continuar a participar e receber os respetivos benefícios.', answerNode: <p>Após a expiração, pode adquirir outro WS para continuar a participar e receber os respetivos benefícios.</p> },
+  // Sobre suporte
+  { section: 'Sobre suporte', question: 'Como entrar em contacto com o suporte?', answerText: 'Na aplicação: Definições → Suporte → Contactar. Na página de login: clicar em Entrar pelo WhatsApp.', answerNode: <ol className="list-decimal pl-4 space-y-1"><li>Na aplicação: Definições → Suporte → Contactar.</li><li>Na página de login: clicar em Entrar pelo WhatsApp.</li></ol> },
+  // Sobre a empresa
+  { section: 'Sobre a empresa', question: 'Quando a empresa foi lançada?', answerText: 'A empresa Asiaray Group Midia, Lda, em Angola foi lançada aos 01/07/2026.', answerNode: <p>A empresa Asiaray Group Midia, Lda, em Angola foi lançada aos {hn('01/07/2026')}.</p> },
+  // Outras dúvidas
+  { section: 'Outras dúvidas', question: 'Esqueci-me da minha senha ou PIN. Como posso recuperar?', answerText: 'Para recuperar a sua senha ou o PIN de pagamento, deve entrar em contacto direto com o nosso suporte através do WhatsApp. O nosso atendimento irá orientar no processo seguro de recuperação.', answerNode: <p>Para recuperar a sua senha ou o PIN de pagamento, deve entrar em contacto direto com o nosso suporte através do WhatsApp. O nosso atendimento irá orientar no processo seguro de recuperação.</p> },
+  { section: 'Outras dúvidas', question: 'Posso criar mais do que uma conta no mesmo telemóvel?', answerText: 'Não. É estritamente proibido criar múltiplas contas utilizando o mesmo dispositivo. A violação desta regra resulta no bloqueio imediato de todas as contas envolvidas e no congelamento dos fundos.', answerNode: <p>Não. É estritamente proibido criar múltiplas contas utilizando o mesmo dispositivo. A violação desta regra resulta no bloqueio imediato de todas as contas envolvidas e no congelamento dos fundos.</p> },
+  { section: 'Outras dúvidas', question: 'Posso associar a mesma conta bancária ou USDT a mais de um perfil Asiaray?', answerText: 'Não é possível. Para garantir a segurança de todos e evitar fraudes, cada conta bancária ou carteira USDT só pode ser vinculada a um único perfil de utilizador na nossa plataforma.', answerNode: <p>Não é possível. Para garantir a segurança de todos e evitar fraudes, cada conta bancária ou carteira USDT só pode ser vinculada a um único perfil de utilizador na nossa plataforma.</p> },
+  { section: 'Outras dúvidas', question: 'Existem outras formas de ganhar dinheiro além de convidar e comprar WS?', answerText: 'Sim! Além de convidar novos membros e adquirir produtos WS, poderá participar em eventos, receber bónus diários ou de check-in, completar tarefas da plataforma e resgatar códigos promocionais (Cupons) disponibilizados pela empresa no canal oficial.', answerNode: <p>Sim! Além de convidar novos membros e adquirir produtos WS, poderá participar em eventos, receber bónus diários ou de check-in, completar tarefas da plataforma e resgatar códigos promocionais (Cupons) disponibilizados pela empresa no canal oficial.</p> },
+  { section: 'Outras dúvidas', question: 'Preciso obrigatoriamente começar pelo primeiro WS?', answerText: 'Não. Pode escolher qualquer WS disponível conforme a sua preferência.', answerNode: <p>Não. Pode escolher qualquer WS disponível conforme a sua preferência.</p> },
+  { section: 'Outras dúvidas', question: 'Posso continuar a utilizar a plataforma depois que um WS expirar?', answerText: 'Sim. Após a expiração, adquira um novo WS para continuar a utilizar os serviços.', answerNode: <p>Sim. Após a expiração, adquira um novo WS para continuar a utilizar os serviços.</p> },
+];
+
 export const RulesModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
   const { setIsFullScreenActive } = useApp();
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const [isSearchOpen, setIsSearchOpen] = React.useState(false);
+  const [showNoResultsModal, setShowNoResultsModal] = React.useState(false);
+  const searchInputRef = React.useRef<HTMLInputElement>(null);
+
   React.useEffect(() => {
     if (isOpen) setIsFullScreenActive(true);
     return () => setIsFullScreenActive(false);
   }, [isOpen, setIsFullScreenActive]);
 
+  // Focus input when search opens
+  React.useEffect(() => {
+    if (isSearchOpen && searchInputRef.current) {
+      setTimeout(() => searchInputRef.current?.focus(), 100);
+    }
+  }, [isSearchOpen]);
+
+  // Derived: filtered FAQ items
+  const normalizedQuery = searchQuery.trim().toLowerCase();
+  const filteredItems = normalizedQuery.length < 2
+    ? null
+    : faqData.filter(item =>
+      item.question.toLowerCase().includes(normalizedQuery) ||
+      item.answerText.toLowerCase().includes(normalizedQuery)
+    );
+
+  // When filter has results=0, show WhatsApp modal
+  React.useEffect(() => {
+    if (filteredItems !== null && filteredItems.length === 0) {
+      setShowNoResultsModal(true);
+    } else {
+      setShowNoResultsModal(false);
+    }
+  }, [filteredItems]);
+
+  const handleOpenSearch = () => {
+    setIsSearchOpen(true);
+    setSearchQuery('');
+  };
+
+  const handleCloseSearch = () => {
+    setIsSearchOpen(false);
+    setSearchQuery('');
+    setShowNoResultsModal(false);
+  };
+
+  // Group items by section (only used when not searching)
+  const sections = Array.from(new Set(faqData.map(item => item.section)));
+
   return (
     <div className="fixed inset-0 z-[50] flex flex-col font-sans animate-fadeIn bg-[#f4f6f9]">
-      {/* Header — matches SupportScreen exactly */}
+      {/* Header */}
       <div className="bg-white flex items-center px-2 py-3 border-b border-neutral-200 select-none">
         <button
           type="button"
-          onClick={onClose}
+          onClick={isSearchOpen ? handleCloseSearch : onClose}
           className="w-10 h-10 flex items-center justify-center text-[#475569] active:bg-gray-100 rounded-full"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-[22px] w-[22px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <div className="flex-1 text-center pr-10 text-[17px] font-normal text-[#111827]">
-          Perguntas Frequentes
+
+        {/* Title or Search Input */}
+        <div className="flex-1 flex items-center">
+          {isSearchOpen ? (
+            <input
+              ref={searchInputRef}
+              type="text"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              placeholder="Pesquisar pergunta ou palavra-chave..."
+              className="flex-1 text-[14px] text-neutral-800 bg-transparent outline-none placeholder:text-neutral-400 px-1"
+            />
+          ) : (
+            <div className="flex-1 text-center pr-10 text-[17px] font-normal text-[#111827]">
+              Perguntas Frequentes
+            </div>
+          )}
         </div>
+
+        {/* Search icon / Close X */}
+        {isSearchOpen ? (
+          <button
+            type="button"
+            onClick={handleCloseSearch}
+            className="w-10 h-10 flex items-center justify-center text-[#475569] active:bg-gray-100 rounded-full"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-[20px] w-[20px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={handleOpenSearch}
+            className="w-10 h-10 flex items-center justify-center text-[#475569] active:bg-gray-100 rounded-full"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-[20px] w-[20px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+            </svg>
+          </button>
+        )}
       </div>
 
       {/* Scrollable Body */}
       <div className="flex-1 overflow-y-auto pb-10 select-text">
 
-        <div className="bg-white">
-          <FaqSection title="Sobre retiradas" />
-          <div className="flex flex-col">
-            <FaqItem
-              question="Qual é o valor mínimo para realizar uma retirada?"
-              answer={<p>O valor mínimo permitido para retirada é de 2.000 Kz.</p>}
-            />
-            <FaqItem
-              question="Qual é o valor máximo permitido para retirada?"
-              answer={<p>O valor máximo de retirada é de 100.000 Kz.</p>}
-            />
-            <FaqItem
-              question="Qual é o horário disponível para realizar retiradas?"
-              answer={<p>As retiradas são processadas diariamente das 10h00 às 16h00 (horário de Angola).</p>}
-            />
-            <FaqItem
-              question="O que é necessário para realizar uma retirada?"
-              answer={<p>Para efetuar uma retirada, o utilizador deve possuir pelo menos um WS ativo no processo de recarga.</p>}
-            />
-            <FaqItem
-              question="Existe alguma taxa aplicada nas retiradas?"
-              answer={<p>Sim. Cada retirada possui uma taxa de 50%. O utilizador recebe 50% do valor solicitado, enquanto os outros 50% são destinados à cobertura de taxas operacionais e manutenção da estabilidade do projeto.</p>}
-            />
-            <FaqItem
-              question="Quanto tempo demora uma retirada?"
-              answer={<>
-                <p className="mb-2">Cada retirada passa por três etapas:</p>
-                <ol className="list-decimal pl-4 space-y-1">
-                  <li>Pendente – solicitação recebida e em análise;</li>
-                  <li>Em processamento – transferência em andamento;</li>
-                  <li>Sucesso – retirada concluída.</li>
-                </ol>
-                <p className="mt-2">Caso a retirada não seja concluída dentro de 24 horas, contacte o suporte.</p>
-              </>}
-            />
-            <FaqItem
-              question="O que acontece se uma retirada for rejeitada?"
-              answer={<p>O valor será automaticamente devolvido à conta do utilizador, aplicando-se uma taxa de 4% sobre o valor devolvido.</p>}
-            />
-            <FaqItem
-              question="A empresa responsabiliza-se por transferências para contas erradas?"
-              answer={<p>Não. A empresa não se responsabiliza pela perda de fundos enviados para contas incorretas. É responsabilidade do utilizador confirmar corretamente os dados antes de concluir uma operação.</p>}
-            />
+        {/* SEARCH RESULTS MODE */}
+        {filteredItems !== null ? (
+          <div className="bg-white mt-3">
+            <div className="bg-[#edf2f7] px-4 py-2 border-b border-gray-100">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-500">
+                {filteredItems.length} resultado{filteredItems.length !== 1 ? 's' : ''} encontrado{filteredItems.length !== 1 ? 's' : ''}
+              </span>
+            </div>
+            <div className="flex flex-col">
+              {filteredItems.map((item, idx) => (
+                <FaqItem key={idx} question={item.question} answer={item.answerNode} />
+              ))}
+            </div>
           </div>
-        </div>
-
-        <div className="bg-white mt-3">
-          <FaqSection title="Sobre recargas e depósitos" />
-          <div className="flex flex-col">
-            <FaqItem
-              question="Qual é o horário para realizar recargas?"
-              answer={<p>As recargas são realizadas diariamente das 10h00 às 22h00 (horário de Angola).</p>}
-            />
-            <FaqItem
-              question="Como enviar o comprovativo de pagamento?"
-              answer={<p>Após efetuar o pagamento, envie o comprovativo ao gerente responsável através do WhatsApp para validação.</p>}
-            />
-            <FaqItem
-              question="Quais métodos de depósito são aceites?"
-              answer={<ul className="list-disc pl-4 space-y-1"><li>Criptomoedas</li><li>Depósitos em conta bancária</li></ul>}
-            />
-            <FaqItem
-              question="Qual é o valor mínimo de depósito?"
-              answer={<p>O valor mínimo de depósito é de 8.000 Kz.</p>}
-            />
-            <FaqItem
-              question="Qual é o valor máximo de depósito?"
-              answer={<p>O valor máximo permitido para depósito é de 3.000.000 Kz.</p>}
-            />
-          </div>
-        </div>
-
-        <div className="bg-white mt-3">
-          <FaqSection title="Sobre a equipa e convites" />
-          <div className="flex flex-col">
-            <FaqItem
-              question="Como funciona o sistema de equipa?"
-              answer={<><p className="mb-2">Ao convidar novos utilizadores através do seu link exclusivo, constrói uma equipa em três níveis:</p><ul className="list-disc pl-4 space-y-1"><li>Primeiro nível</li><li>Segundo nível</li><li>Terceiro nível</li></ul></>}
-            />
-            <FaqItem
-              question="Qual é a recompensa por convidar novos utilizadores?"
-              answer={<><p>Recebe 100 Kz por cadastro direto bem-sucedido.</p><p className="mt-1">Válido para os primeiros 10 cadastros diretos.</p></>}
-            />
-            <FaqItem
-              question="Como funcionam as recompensas dos três níveis?"
-              answer={<ul className="list-disc pl-4 space-y-1"><li>1.º nível: 10% sobre os investimentos dos subordinados diretos.</li><li>2.º nível: 5% sobre os investimentos deste nível.</li><li>3.º nível: 3% sobre os investimentos deste nível.</li></ul>}
-            />
-          </div>
-        </div>
-
-        <div className="bg-white mt-3">
-          <FaqSection title="Sobre compras de WS" />
-          <div className="flex flex-col">
-            <FaqItem
-              question="Preciso comprar os produtos numa ordem específica?"
-              answer={<p>Não. Pode adquirir qualquer WS disponível, independentemente de já ter comprado outros anteriormente.</p>}
-            />
-            <FaqItem
-              question="Quantas vezes posso comprar o mesmo produto?"
-              answer={<p>Cada produto só pode ser adquirido uma vez por utilizador.</p>}
-            />
-            <FaqItem
-              question="O que acontece após o WS expirar?"
-              answer={<p>Após a expiração, pode adquirir outro WS para continuar a participar e receber os respetivos benefícios.</p>}
-            />
-          </div>
-        </div>
-
-        <div className="bg-white mt-3">
-          <FaqSection title="Sobre suporte" />
-          <div className="flex flex-col">
-            <FaqItem
-              question="Como entrar em contacto com o suporte?"
-              answer={<ol className="list-decimal pl-4 space-y-1"><li>Na aplicação: Definições → Suporte → Contactar.</li><li>Na página de login: clicar em Entrar pelo WhatsApp.</li></ol>}
-            />
-          </div>
-        </div>
-
-        <div className="bg-white mt-3">
-          <FaqSection title="Sobre a empresa" />
-          <div className="flex flex-col">
-            <FaqItem
-              question="Quando a empresa foi lançada?"
-              answer={<p>A empresa foi lançada em julho de 2016.</p>}
-            />
-          </div>
-        </div>
-
-        <div className="bg-white mt-3">
-          <FaqSection title="Outras dúvidas" />
-          <div className="flex flex-col">
-            <FaqItem
-              question="Preciso obrigatoriamente começar pelo primeiro WS?"
-              answer={<p>Não. Pode escolher qualquer WS disponível conforme a sua preferência.</p>}
-            />
-            <FaqItem
-              question="Posso continuar a utilizar a plataforma depois que um WS expirar?"
-              answer={<p>Sim. Após a expiração, adquira um novo WS para continuar a utilizar os serviços.</p>}
-            />
-          </div>
-        </div>
-
+        ) : (
+          /* NORMAL MODE — grouped by section */
+          sections.map(section => (
+            <div key={section} className="bg-white mt-3">
+              <FaqSection title={section} />
+              <div className="flex flex-col">
+                {faqData.filter(item => item.section === section).map((item, idx) => (
+                  <FaqItem key={idx} question={item.question} answer={item.answerNode} />
+                ))}
+              </div>
+            </div>
+          ))
+        )}
       </div>
+
+      {/* No Results WhatsApp Modal */}
+      {showNoResultsModal && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+          <div
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm"
+            aria-hidden="true"
+            onClick={() => { setShowNoResultsModal(false); handleCloseSearch(); }}
+          />
+          <div className="relative z-10 bg-white rounded-2xl w-full max-w-[270px] overflow-hidden flex flex-col shadow-xl border border-neutral-100/50 animate-scaleIn">
+            <div className="px-5 py-6 text-center">
+              <p className="text-[14px] font-bold text-neutral-800 leading-snug mb-1">
+                Não encontrámos a sua resposta.
+              </p>
+              <p className="text-[12px] text-neutral-500 leading-snug">
+                Entre no grupo de WhatsApp do <span className="text-[#2563eb] font-semibold">grupo de venda</span> para obter ajuda do suporte.
+              </p>
+            </div>
+            <div className="border-t border-neutral-100 flex">
+              <button
+                type="button"
+                onClick={() => { setShowNoResultsModal(false); handleCloseSearch(); }}
+                className="flex-1 py-3 text-[14px] font-normal text-neutral-500 hover:bg-neutral-50 active:bg-neutral-100 border-r border-neutral-100 focus:outline-none transition-colors cursor-pointer"
+              >
+                Entendi
+              </button>
+              <a
+                href="https://chat.whatsapp.com/KuvqmnwRitGIJi5PsYqt4W"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 py-3 text-[14px] font-bold text-[#2563eb] hover:bg-neutral-50 active:bg-neutral-100 focus:outline-none transition-colors cursor-pointer text-center"
+              >
+                Ir para WhatsApp
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
