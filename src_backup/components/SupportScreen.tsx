@@ -31,6 +31,7 @@ export const SupportScreen: React.FC = () => {
           localStorage.setItem('asiaray_support_msg', newMsg);
         }
       } catch {
+        // silent
       } finally {
         hideLoading();
       }
@@ -68,7 +69,7 @@ export const SupportScreen: React.FC = () => {
   return (
     <div className="pb-24 bg-[#f4f6f9] min-h-screen animate-fadeIn font-sans select-none">
       
-
+      {/* Header */}
       <div className="bg-white flex items-center px-2 py-3 border-b border-neutral-200">
         <button 
           type="button" 
@@ -82,7 +83,9 @@ export const SupportScreen: React.FC = () => {
         </div>
       </div>
 
+      {/* Support Links Section */}
       <div className="bg-white mt-3">
+        {/* Title Bar */}
         <div className="bg-[#edf2f7] px-4 py-2 border-b border-gray-100">
           <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-500">
             Canais de Atendimento
@@ -91,7 +94,7 @@ export const SupportScreen: React.FC = () => {
 
         <div className="flex flex-col">
           
-
+          {/* Link 1: Grupo */}
           <div className="bg-white border-b border-gray-100 last:border-b-0">
             <a 
               href="#" 
@@ -107,7 +110,7 @@ export const SupportScreen: React.FC = () => {
             </a>
           </div>
 
-
+          {/* Link 2: Gerente */}
           <div className="bg-white border-b border-gray-100 last:border-b-0">
             <a 
               href="#" 

@@ -1,9 +1,15 @@
 import { createClient } from '@supabase/supabase-js';
 
+// ── Proxy URL ──────────────────────────────────────────────────────────────────
+// The client talks to /api/data/* (a completely neutral path).
+// The server proxy (server.js in prod / Vite dev server) intercepts these requests,
+// rewrites the path to the real backend, and injects the real credentials server-side.
+// The browser NEVER sees the real provider URL or API key.
 const SUPABASE_URL = typeof window !== 'undefined'
   ? `${window.location.origin}/api/data`
   : 'http://localhost:3000/api/data';
 
+// Dummy placeholder — the real anon key is injected server-side by the proxy.
 const SUPABASE_ANON_KEY = 'proxy-secured';
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
@@ -12,6 +18,9 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
 
 export const GATEWAY_URL = `${SUPABASE_URL}/functions/v1/gateway`;
 
+/**
+ * Helper: Returns the current access token.
+ */
 export const getAccessToken = async (): Promise<string | null> => {
   const { data } = await supabase.auth.getSession();
   return data.session?.access_token ?? null;
@@ -34,7 +43,9 @@ export const checkInternetConnectivity = async (timeoutMs = 4000): Promise<boole
   const controller = new AbortController();
   const timeout = window.setTimeout(() => controller.abort(), timeoutMs);
   try {
-
+    // The URL is now same-origin (/api/data/auth/v1) so we don't need no-cors.
+    // Any HTTP response (even 401) confirms internet connectivity — only a network
+    // error (thrown exception) means we're actually offline.
     await fetch(INTERNET_CHECK_URL, {
       method: 'HEAD',
       cache: 'no-cache',

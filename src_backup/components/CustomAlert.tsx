@@ -10,6 +10,7 @@ export const CustomAlert: React.FC = () => {
 
   const { message, title, type, onConfirm } = alertConfig;
 
+  // Choose colors/icons based on type
   const getHeaderStyle = () => {
     switch (type) {
       case 'success':
@@ -69,6 +70,7 @@ export const CustomAlert: React.FC = () => {
           className="bg-white w-full max-w-[340px] rounded-[16px] border border-neutral-200 shadow-lg flex flex-col overflow-hidden text-center"
           id="custom-alert-card"
         >
+          {/* Header com ícone */}
           <div className="pt-6 pb-3 flex flex-col items-center gap-2">
             <div className={`h-12 w-12 rounded-full flex items-center justify-center ${config.bg}`}>
               {config.icon}
@@ -78,12 +80,14 @@ export const CustomAlert: React.FC = () => {
             </h3>
           </div>
 
+          {/* Mensagem */}
           <div className="px-6 py-3 max-h-[240px] overflow-y-auto no-scrollbar">
             <p className="whitespace-pre-line text-sm text-slate-700 font-sans leading-relaxed">
               {message}
             </p>
           </div>
 
+          {/* Botões */}
           <div className="mt-2 border-t border-neutral-100 bg-neutral-50 p-4 flex gap-2 justify-center">
             {type === 'confirm' ? (
               <>

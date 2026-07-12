@@ -24,7 +24,7 @@ export const CustomSpinner: React.FC = () => {
             className="bg-white/90 backdrop-blur-md rounded-2xl p-6 shadow-2xl border border-neutral-100/50 flex flex-col items-center gap-4 max-w-[210px] w-full text-center"
             id="global-spinner-box"
           >
-
+            {/* Pure CSS spinner - no image dependency, never freezes */}
             <div className="flex flex-col items-center gap-2">
               <div
                 className="h-10 w-10 rounded-full border-[3px] border-slate-200 border-t-[3px] border-t-blue-500"

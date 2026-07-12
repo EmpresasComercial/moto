@@ -85,6 +85,7 @@ export const WSTab: React.FC = () => {
   useEffect(() => {
     if (isSessionExpired) return;
     loadProducts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSessionExpired]);
 
   const visualMap: Record<string, { dailyTasks: number; bgStyle: string; btnColor: string }> = {
@@ -144,10 +145,10 @@ export const WSTab: React.FC = () => {
   return (
     <div id="member-tab-container" className="pb-24 bg-neutral-50 min-h-screen">
       
-
+      {/* 1. Yellow convex dome header background */}
       <div className="relative w-full h-[160px] bg-gradient-to-b from-[#ffea30] to-[#f5cb14] flex flex-col items-center justify-center pt-2">
         
-
+        {/* User Info positioned inside the yellow zone */}
         <div className="text-center space-y-1.5 z-10 -mt-4">
           <div className="text-[16px] font-black tracking-widest text-[#1c1c1a]/95 select-all uppercase drop-shadow-sm">
             {user.level}
@@ -162,11 +163,11 @@ export const WSTab: React.FC = () => {
           </div>
         </div>
 
-
+        {/* The arched white wave clipping of the yellow area */}
         <div className="absolute bottom-0 left-0 right-0 h-10 bg-neutral-50 rounded-t-[140%]" />
       </div>
 
-
+      {/* 2. Motivational Headings block */}
       <div className="relative px-4 flex flex-col items-center text-center pb-6">
         <div className="mt-2 select-none space-y-1">
           <h2 className="text-lg font-black text-neutral-800 tracking-wide">
@@ -178,7 +179,7 @@ export const WSTab: React.FC = () => {
         </div>
       </div>
 
-
+      {/* 3. Horizontal wavy reflection list of tiers (WS1, WS2, WS3...) */}
       <div className="px-4 space-y-4" id="member-tiers-list">
         {tiers.map((tier) => {
           const isPurchased = purchasedNames.has(tier.level.toUpperCase());
@@ -190,6 +191,7 @@ export const WSTab: React.FC = () => {
               className={`relative w-full h-[120px] rounded-[24px] border-2 border-white/95 overflow-hidden flex flex-col justify-between p-4 text-slate-800 shadow-none transition-all ${isPurchased ? 'cursor-default' : 'cursor-pointer active:scale-[0.98]'}`}
               id={`tier-card-${tier.level}`}
             >
+              {/* Top Row: VIP name and target price badge */}
               <div className="flex justify-between items-start">
                 <div className="pl-2">
                   <h3 className="text-3xl font-display font-black tracking-widest leading-none">
@@ -200,6 +202,7 @@ export const WSTab: React.FC = () => {
                   </p>
                 </div>
 
+                {/* Right side: check icon if purchased, buy button if not */}
                 <div className="pr-1 pt-1">
                   {isPurchased ? (
                     <div
@@ -224,6 +227,7 @@ export const WSTab: React.FC = () => {
                 </div>
               </div>
 
+              {/* Bottom Row: Darkened translucent footer strip inside card */}
               <div className="absolute bottom-0 left-0 right-0 bg-black/15 py-1.5 px-6 flex justify-between items-center text-[11px] font-bold select-none border-t border-white/5">
                 <span className="tracking-wide">
                   {tier.dailyTasks} tarefa por dia

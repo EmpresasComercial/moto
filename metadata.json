@@ -1,6 +1,5 @@
 {
   "name": "Asiaray",
-  "description": "Plataforma de tarefas Asiaray - Ganhe recompensas completando tarefas diárias de mídia social e acompanhe seus rendimentos em Kwanza (AOA/KZ).",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

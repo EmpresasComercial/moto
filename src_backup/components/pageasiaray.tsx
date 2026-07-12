@@ -404,16 +404,16 @@ export const LoginScreen: React.FC = () => {
         <img src={logoImg} alt="Asiaray Group" className="h-[80px] object-contain" />
       </div>
 
-
+      {/* Content */}
       <div className="flex-1 p-3 space-y-4 bg-white overflow-y-auto">
 
         {currentView === 'cadastro' ? (
           <form onSubmit={handleSubmitCadastro} className="space-y-4" id="form-cadastro-asiaray">
             
-
+            {/* Input fields box */}
             <div className="border border-gray-200 bg-white rounded-sm overflow-hidden">
               
-
+              {/* Phone */}
               <div className="border-b border-gray-200">
                 <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">Número de Telefone</div>
                 <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] border-t border-gray-200">
@@ -428,7 +428,7 @@ export const LoginScreen: React.FC = () => {
                 </div>
               </div>
 
-
+              {/* Senha */}
               <div className="border-b border-gray-200">
                 <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">Senha <span className="text-gray-400 font-normal">(mín. 6 caracteres)</span></div>
                 <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] border-t border-gray-200 flex items-center gap-1">
