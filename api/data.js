@@ -1,9 +1,11 @@
 /**
- * api/data.js — Vercel Serverless Proxy (CommonJS)
+ * api/data.js — Vercel Serverless Proxy
  *
  * Intercepts all /api/data/* requests from the browser.
  * Injects the real Supabase credentials server-side.
  * The client only ever sees /api/data — never the real URL or provider.
+ *
+ * NOTE: This file uses ESM (export) syntax because package.json has "type": "module".
  */
 
 const STRIP_RESPONSE_HEADERS = [
@@ -31,14 +33,14 @@ const SKIP_REQUEST_HEADERS = [
   'x-supabase-api-version',
 ];
 
-module.exports.config = {
+export const config = {
   api: {
     bodyParser: false,
     externalResolver: true,
   },
 };
 
-module.exports.default = async function handler(req, res) {
+export default async function handler(req, res) {
   const SUPABASE_URL = process.env.SUPABASE_URL;
   const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
 
@@ -47,19 +49,22 @@ module.exports.default = async function handler(req, res) {
     return;
   }
 
-  // Vercel rewrites /api/data/(.*) to /api/data?_path=$1
-  const rawQuery = req.url.split('?')[1] || '';
+  // Vercel rewrites /api/data/(.*) → /api/data?_path=$1
+  // req.url here is e.g. "/api/data?_path=auth%2Fv1%2Ftoken&grant_type=password"
+  const rawQuery = (req.url || '').split('?')[1] || '';
   const searchParams = new URLSearchParams(rawQuery);
   const pathParam = searchParams.get('_path') || '';
 
-  // Remove _path, forward the rest as query string to Supabase
+  // Remove _path, forward the rest as query to Supabase
   searchParams.delete('_path');
   const remainingQuery = searchParams.toString();
 
   const supabasePath = remainingQuery ? `${pathParam}?${remainingQuery}` : pathParam;
   const targetUrl = `${SUPABASE_URL}/${supabasePath}`;
 
-  // Build forwarded headers — strip internal/revealing headers
+  console.log('[proxy] →', req.method, targetUrl);
+
+  // Build forwarded headers
   const forwardHeaders = {};
   for (const [key, value] of Object.entries(req.headers)) {
     if (!SKIP_REQUEST_HEADERS.includes(key.toLowerCase())) {
@@ -67,10 +72,8 @@ module.exports.default = async function handler(req, res) {
     }
   }
 
-  // Inject real API key
   forwardHeaders['apikey'] = SUPABASE_ANON_KEY;
 
-  // Replace dummy Authorization with real anon key for unauthenticated requests
   if (forwardHeaders['authorization'] === 'Bearer proxy-secured') {
     forwardHeaders['authorization'] = `Bearer ${SUPABASE_ANON_KEY}`;
   }
@@ -96,7 +99,6 @@ module.exports.default = async function handler(req, res) {
 
     res.status(response.status);
 
-    // Forward response headers, stripping sensitive ones
     response.headers.forEach((value, key) => {
       if (!STRIP_RESPONSE_HEADERS.includes(key.toLowerCase())) {
         if (
@@ -125,4 +127,4 @@ module.exports.default = async function handler(req, res) {
     console.error('[proxy] Error:', err.message);
     res.status(502).json({ error: 'Service temporarily unavailable.' });
   }
-};
+}
