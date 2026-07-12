@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/api/data/(.*)", "destination": "/api/data?_path=$1" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}

@@ -47,9 +47,15 @@ export default async function handler(req, res) {
     return;
   }
 
-  // Strip /api/data prefix to get the real Supabase path + query string
-  // req.url = '/api/data/auth/v1/token?grant_type=password'
-  const supabasePath = req.url.replace(/^\/api\/data\/?/, '');
+  // Vercel rewrites all /api/data/(.*) to /api/data?_path=$1
+  const searchParams = new URLSearchParams(req.url.split('?')[1] || '');
+  const pathParam = searchParams.get('_path') || '';
+  
+  // Remove _path from query string to forward the rest to Supabase
+  searchParams.delete('_path');
+  const remainingQuery = searchParams.toString();
+  
+  const supabasePath = remainingQuery ? `${pathParam}?${remainingQuery}` : pathParam;
   const targetUrl = `${SUPABASE_URL}/${supabasePath}`;
 
   // Build forwarded headers — strip internal/revealing headers
