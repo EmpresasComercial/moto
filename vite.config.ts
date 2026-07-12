@@ -28,17 +28,17 @@ export default defineConfig(({ mode }) => {
       // with the real credentials injected server-side — invisible to the browser.
       proxy: {
         '/api/data': {
-          target: env.SUPABASE_URL,
+          target: env.VITE_SUPABASE_URL || env.SUPABASE_URL,
           changeOrigin: true,
           ws: true,
           rewrite: (p) => p.replace(/^\/api\/data/, ''),
           configure: (proxy) => {
             // Headers that reveal the provider — stripped from outgoing requests
             proxy.on('proxyReq', (proxyReq) => {
-              proxyReq.setHeader('apikey', env.SUPABASE_ANON_KEY);
+              proxyReq.setHeader('apikey', env.VITE_SUPABASE_ANON_KEY || env.SUPABASE_ANON_KEY);
               const auth = proxyReq.getHeader('Authorization');
               if (auth === `Bearer ${DUMMY_KEY}`) {
-                proxyReq.setHeader('Authorization', `Bearer ${env.SUPABASE_ANON_KEY}`);
+                proxyReq.setHeader('Authorization', `Bearer ${env.VITE_SUPABASE_ANON_KEY || env.SUPABASE_ANON_KEY}`);
               }
               proxyReq.removeHeader('x-client-info');
               proxyReq.removeHeader('x-supabase-api-version');
