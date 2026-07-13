@@ -183,7 +183,7 @@ serve(async (req) => {
     }
 
     if (!roleAllowed(userRole, op)) {
-      return json(403, { success: false, error: "Sem permissão para esta operação" });
+      return json(403, { success: false, error: "Pedido inválido. Tente novamente." });
     }
 
     let result: RpcResult;
