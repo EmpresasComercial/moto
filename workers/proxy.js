@@ -61,7 +61,7 @@ export default {
         'sb-edge-region', 'x-sb-edge-region', 'x-served-by',
         'x-supabase-api-version', 'x-deno-execution-id',
         'x-envoy-attempt-count', 'x-envoy-upstream-service-time',
-        'endpoint-load-metrics',
+        'endpoint-load-metrics', 'set-cookie',
       ];
       const responseHeaders = new Headers();
       for (const [key, value] of upstreamResponse.headers.entries()) {

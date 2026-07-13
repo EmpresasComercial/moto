@@ -140,9 +140,13 @@ serve(async (req) => {
     }
 
     const user = userData.user;
-    const userRole = String(
+    let userRole = String(
       user.app_metadata?.role ?? user.user_metadata?.role ?? "user",
     ).toLowerCase();
+
+    if (userRole === "authenticated") {
+      userRole = "user";
+    }
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
