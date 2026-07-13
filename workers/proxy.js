@@ -28,7 +28,14 @@ export default {
 
       // Strip /api/data prefix → get the real Supabase path
       const supabasePath = url.pathname.replace(/^\/api\/data\/?/, '');
-      const targetUrl = `${SUPABASE_URL}/${supabasePath}${url.search}`;
+      
+      // Replace dummy apikey in query string for WebSocket/Realtime requests
+      let search = url.search;
+      if (search.includes('apikey=proxy-secured')) {
+        search = search.replace('apikey=proxy-secured', `apikey=${SUPABASE_ANON_KEY}`);
+      }
+      
+      const targetUrl = `${SUPABASE_URL}/${supabasePath}${search}`;
 
       // Build forwarded headers
       const SKIP = ['host', 'connection', 'transfer-encoding', 'x-client-info', 'x-supabase-api-version'];
