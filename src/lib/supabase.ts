@@ -7,8 +7,19 @@ const SUPABASE_URL = typeof window !== 'undefined'
 const SUPABASE_ANON_KEY = 'proxy-secured';
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-  db: { schema: 'api' }
+  db: { schema: 'api' },
+  realtime: {
+    // Vercel serverless does not support WebSocket upgrades.
+    // The app uses 60s polling as a fallback — Realtime is disabled here.
+    params: { eventsPerSecond: -1 },
+  },
+  global: {
+    headers: {
+      // Prevents supabase-js from trying to upgrade to WebSocket on Vercel.
+    },
+  },
 });
+
 
 export const GATEWAY_URL = `${SUPABASE_URL}/functions/v1/gateway`;
 

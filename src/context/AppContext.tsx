@@ -504,35 +504,51 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }, 500);
     };
 
-    const channel = supabase
-      .channel(`realtime_db_changes_${user.id}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'profiles',
-          filter: `id=eq.${user.id}`,
-        },
-        (payload) => handleRealtimeChange('profile', payload)
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'tarefas_diarias',
-          filter: `user_id=eq.${user.id}`,
-        },
-        (payload) => handleRealtimeChange('tarefa', payload)
-      )
-      .subscribe();
+    let channel: any = null;
+    try {
+      // Realtime via WebSocket — works on Cloudflare/Render.
+      // On Vercel serverless, WebSockets are not supported; the catch block
+      // silently falls back to the 60s polling interval above.
+      channel = supabase
+        .channel(`realtime_db_changes_${user.id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'profiles',
+            filter: `id=eq.${user.id}`,
+          },
+          (payload) => handleRealtimeChange('profile', payload)
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'tarefas_diarias',
+            filter: `user_id=eq.${user.id}`,
+          },
+          (payload) => handleRealtimeChange('tarefa', payload)
+        )
+        .subscribe((status: string, err: any) => {
+          if (err) {
+            // WebSocket failed (e.g. Vercel) — polling fallback is active, ignore.
+            console.warn('[Realtime] WebSocket unavailable, using polling fallback.');
+          }
+        });
+    } catch {
+      // Silently ignore — polling fallback covers data freshness.
+    }
 
     return () => {
       if (realtimeDebounceRef.current) clearTimeout(realtimeDebounceRef.current);
-      supabase.removeChannel(channel);
+      if (channel) {
+        try { supabase.removeChannel(channel); } catch {}
+      }
     };
   }, [isLoggedIn, user?.id, isSessionExpired]);
+
 
   useEffect(() => {
     const handleForceLogout = (e: Event) => {
