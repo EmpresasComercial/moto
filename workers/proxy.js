@@ -26,17 +26,49 @@ export default {
 
       const isWebSocket = request.headers.get('upgrade') === 'websocket';
 
-      let targetUrl;
       if (isWebSocket) {
         const wsBase = SUPABASE_URL.replace(/^https:\/\//, 'wss://').replace(/^http:\/\//, 'ws://');
-        targetUrl = `${wsBase}/${supabasePath}${search}`;
-      } else {
-        targetUrl = `${SUPABASE_URL}/${supabasePath}${search}`;
+        const targetUrl = `${wsBase}/${supabasePath}${search}`;
+
+        const SKIP_WS = ['host', 'transfer-encoding', 'x-client-info', 'x-supabase-api-version'];
+        const wsHeaders = {};
+        for (const [key, value] of request.headers.entries()) {
+          if (!SKIP_WS.includes(key.toLowerCase())) {
+            wsHeaders[key] = value;
+          }
+        }
+        wsHeaders['apikey'] = SUPABASE_ANON_KEY;
+        if (wsHeaders['authorization'] === 'Bearer proxy-secured') {
+          wsHeaders['authorization'] = `Bearer ${SUPABASE_ANON_KEY}`;
+        }
+
+        const [client, server] = Object.values(new WebSocketPair());
+        const upstream = new WebSocket(targetUrl, { headers: wsHeaders });
+
+        server.accept();
+
+        upstream.addEventListener('message', (event) => {
+          try { server.send(event.data); } catch {}
+        });
+        server.addEventListener('message', (event) => {
+          try { upstream.send(event.data); } catch {}
+        });
+        upstream.addEventListener('close', (event) => {
+          try { server.close(event.code, event.reason); } catch {}
+        });
+        server.addEventListener('close', (event) => {
+          try { upstream.close(event.code, event.reason); } catch {}
+        });
+        upstream.addEventListener('error', () => {
+          try { server.close(1011, 'upstream error'); } catch {}
+        });
+
+        return new Response(null, { status: 101, webSocket: client });
       }
 
-      const SKIP = ['host', 'transfer-encoding', 'x-client-info', 'x-supabase-api-version'];
-      if (!isWebSocket) SKIP.push('connection');
+      const targetUrl = `${SUPABASE_URL}/${supabasePath}${search}`;
 
+      const SKIP = ['host', 'connection', 'transfer-encoding', 'x-client-info', 'x-supabase-api-version'];
       const forwardHeaders = new Headers();
       for (const [key, value] of request.headers.entries()) {
         if (!SKIP.includes(key.toLowerCase())) {
@@ -45,7 +77,6 @@ export default {
       }
 
       forwardHeaders.set('apikey', SUPABASE_ANON_KEY);
-
       if (forwardHeaders.get('authorization') === 'Bearer proxy-secured') {
         forwardHeaders.set('authorization', `Bearer ${SUPABASE_ANON_KEY}`);
       }
@@ -56,10 +87,6 @@ export default {
         body: ['GET', 'HEAD'].includes(request.method) ? undefined : request.body,
         redirect: 'follow',
       });
-
-      if (isWebSocket) {
-        return upstreamResponse;
-      }
 
       const STRIP_RESP = [
         'sb-project-ref', 'sb-gateway-version', 'sb-auth-user-id',
