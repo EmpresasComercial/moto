@@ -55,6 +55,12 @@ export default async function handler(req, res) {
   const searchParams = new URLSearchParams(rawQuery);
   const pathParam = searchParams.get('_path') || '';
 
+  // Return healthy for health checks
+  if (pathParam === 'health' || pathParam === 'health/') {
+    res.status(200).send('Healthy');
+    return;
+  }
+
   // Remove _path, forward the rest as query to Supabase
   searchParams.delete('_path');
   const remainingQuery = searchParams.toString();
