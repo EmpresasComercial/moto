@@ -24,9 +24,19 @@ export default {
         search = search.replace('apikey=proxy-secured', `apikey=${SUPABASE_ANON_KEY}`);
       }
 
-      const targetUrl = `${SUPABASE_URL}/${supabasePath}${search}`;
+      const isWebSocket = request.headers.get('upgrade') === 'websocket';
 
-      const SKIP = ['host', 'connection', 'transfer-encoding', 'x-client-info', 'x-supabase-api-version'];
+      let targetUrl;
+      if (isWebSocket) {
+        const wsBase = SUPABASE_URL.replace(/^https:\/\//, 'wss://').replace(/^http:\/\//, 'ws://');
+        targetUrl = `${wsBase}/${supabasePath}${search}`;
+      } else {
+        targetUrl = `${SUPABASE_URL}/${supabasePath}${search}`;
+      }
+
+      const SKIP = ['host', 'transfer-encoding', 'x-client-info', 'x-supabase-api-version'];
+      if (!isWebSocket) SKIP.push('connection');
+
       const forwardHeaders = new Headers();
       for (const [key, value] of request.headers.entries()) {
         if (!SKIP.includes(key.toLowerCase())) {
@@ -46,6 +56,10 @@ export default {
         body: ['GET', 'HEAD'].includes(request.method) ? undefined : request.body,
         redirect: 'follow',
       });
+
+      if (isWebSocket) {
+        return upstreamResponse;
+      }
 
       const STRIP_RESP = [
         'sb-project-ref', 'sb-gateway-version', 'sb-auth-user-id',
