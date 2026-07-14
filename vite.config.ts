@@ -10,7 +10,41 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
 
   return {
-    plugins: [react(), tailwindcss()],
+    plugins: [
+      react(), 
+      tailwindcss(),
+      {
+        // ── Intercetação local (npm run dev) F-07 ────────────────────────────
+        // O proxy do Vite consome as requisições antes do Cloudflare Worker.
+        // Precisamos simular a conversão do "phone" para "email" localmente.
+        name: 'local-auth-proxy-body',
+        configureServer(server) {
+          server.middlewares.use((req, res, next) => {
+            if (req.url?.includes('/api/data/auth/v1/') && req.method === 'POST') {
+              let body = '';
+              req.on('data', chunk => body += chunk);
+              req.on('end', () => {
+                try {
+                  let bodyObj = JSON.parse(body);
+                  if (bodyObj.phone && !bodyObj.email) {
+                    bodyObj.email = `${bodyObj.phone}@user.com`;
+                    delete bodyObj.phone;
+                  } else if (bodyObj.email && typeof bodyObj.email === 'string' && !bodyObj.email.includes('@')) {
+                    bodyObj.email = `${bodyObj.email}@user.com`;
+                  }
+                  req.rawBody = JSON.stringify(bodyObj);
+                } catch (e) {
+                  req.rawBody = body;
+                }
+                next();
+              });
+            } else {
+              next();
+            }
+          });
+        }
+      }
+    ],
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
@@ -34,7 +68,7 @@ export default defineConfig(({ mode }) => {
           rewrite: (p) => p.replace(/^\/api\/data/, ''),
           configure: (proxy) => {
             // Headers that reveal the provider — stripped from outgoing requests
-            proxy.on('proxyReq', (proxyReq) => {
+            proxy.on('proxyReq', (proxyReq, req: any) => {
               proxyReq.setHeader('apikey', env.VITE_SUPABASE_ANON_KEY || env.SUPABASE_ANON_KEY);
               const auth = proxyReq.getHeader('Authorization');
               if (auth === `Bearer ${DUMMY_KEY}`) {
@@ -42,6 +76,12 @@ export default defineConfig(({ mode }) => {
               }
               proxyReq.removeHeader('x-client-info');
               proxyReq.removeHeader('x-supabase-api-version');
+
+              // Se interceptámos e consumimos o stream do body, escrever de volta!
+              if (req.rawBody) {
+                proxyReq.setHeader('Content-Length', Buffer.byteLength(req.rawBody));
+                proxyReq.write(req.rawBody);
+              }
             });
 
             // Headers that reveal the provider — stripped from incoming responses
