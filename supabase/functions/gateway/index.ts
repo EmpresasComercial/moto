@@ -41,7 +41,6 @@ const OP_RULES: Record<number, OperationRule> = {
 };
 
 const MAX_BODY_BYTES = 5242880; // 5MB para suportar imagens em base64
-const MAX_TOKEN_AGE_SECONDS = 1800; // 30 minutos
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -92,19 +91,16 @@ function assertTokenFresh(token: string) {
   const payload = decodeJwtPayload(token);
   const now = Math.floor(Date.now() / 1000);
 
-  const iat = payload.iat;
   const exp = payload.exp;
 
-  if (typeof iat !== "number" || typeof exp !== "number") {
+  if (typeof exp !== "number") {
     throw new Error("Sessão inválida. Por favor, inicie sessão novamente.");
   }
 
+  // Apenas verificamos se o token expirou (campo exp gerido pelo Supabase Auth).
+  // Não limitamos por idade de iat — isso causava rejeição de sessões válidas após 30 min.
   if (now >= exp) {
     throw new Error("SESSION_EXPIRED: A sua sessão expirou. Por favor, inicie sessão novamente.");
-  }
-
-  if (now - iat > MAX_TOKEN_AGE_SECONDS) {
-    throw new Error("SESSION_EXPIRED: A sua sessão expirou (mais de 30 minutos). Por favor, inicie sessão novamente.");
   }
 }
 

@@ -1074,7 +1074,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (!gw) return; // session expired or no token
       const { resp, resData: res } = gw;
       if (!resp.ok || res?.success === false) {
-         addToast("Erro ao carregar dados do perfil. Tente novamente mais tarde.", "error");
+        // Falha silenciosa — o utilizador não deve ver este erro em background.
+        // Se a sessão expirou, o gatewayFetch já despacha o evento force-logout.
+        return;
       }
       if (res?.success && res?.result) {
         // result can be an array (RETURNS TABLE) or single object
