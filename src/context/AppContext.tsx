@@ -347,18 +347,36 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
+  // Contador de tentativas falhadas de login (em memória, não persiste)
+  const loginAttemptsRef = React.useRef<number>(0);
+  const loginBlockedUntilRef = React.useRef<number>(0);
+
   // Try loading from localStorage
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => {
     return localStorage.getItem('asiaray_logged') === 'true';
   });
 
+  // SEGURANÇA F-06: Campos sensíveis (paymentPin, bankAccount, holderName, idChaveUnica)
+  // NÃO são persistidos no localStorage. São mantidos apenas em memória (estado React)
+  // e recarregados do servidor após cada login/refresh.
   const [user, setUser] = useState<UserProfile>(() => {
     const saved = localStorage.getItem('asiaray_user');
     if (saved) {
       const parsed = JSON.parse(saved) as UserProfile;
       return {
-        ...parsed,
-        bankName: normalizeBankName(parsed.bankName)
+        phone: parsed.phone || '',
+        id: parsed.id || '',
+        level: parsed.level || 'WS0',
+        creditScore: parsed.creditScore || 100,
+        inviteCode: parsed.inviteCode || '',
+        bankName: normalizeBankName(parsed.bankName),
+        // Campos sensíveis: NÃO restaurados do localStorage — sempre vazios no arranque
+        bankAccount: '',
+        holderName: '',
+        paymentPin: undefined,
+        idChaveUnica: undefined,
+        bankId: parsed.bankId,
+        createdAt: parsed.createdAt,
       };
     }
     return {
@@ -398,10 +416,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return INITIAL_REFERRALS;
   });
 
-  // Save states instantly to local storage
+  // Persistir no localStorage — EXCLUINDO campos sensíveis
   useEffect(() => {
     localStorage.setItem('asiaray_logged', String(isLoggedIn));
-    localStorage.setItem('asiaray_user', JSON.stringify(user));
+    // SEGURANÇA F-06: Guardar apenas campos não-sensíveis do utilizador
+    const safeUser = {
+      phone: user.phone,
+      id: user.id,
+      level: user.level,
+      creditScore: user.creditScore,
+      inviteCode: user.inviteCode,
+      bankName: user.bankName,
+      bankId: user.bankId,
+      createdAt: user.createdAt,
+      // bankAccount, holderName, paymentPin, idChaveUnica → NUNCA guardados
+    };
+    localStorage.setItem('asiaray_user', JSON.stringify(safeUser));
     localStorage.setItem('asiaray_stats', JSON.stringify(stats));
     localStorage.setItem('asiaray_tasks', JSON.stringify(tasks));
     localStorage.setItem('asiaray_logs', JSON.stringify(logs));
@@ -572,17 +602,37 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Auth: Login real via Supabase Auth
   const login = async (phone: string, pin: string): Promise<boolean> => {
+    // SEGURANÇA F-08: Rate limiting no cliente — backoff exponencial após falhas
+    const now = Date.now();
+    if (now < loginBlockedUntilRef.current) {
+      const secsLeft = Math.ceil((loginBlockedUntilRef.current - now) / 1000);
+      addToast(`Demasiadas tentativas. Aguarde ${secsLeft} segundos.`, 'error');
+      return false;
+    }
+
     if (!(await ensureInternetConnectivity())) {
       return false;
     }
     const cleanPhone = phone.replace(/[^0-9]/g, '');
-    const email = `${cleanPhone}@user.com`;
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
-        email,
+        phone: cleanPhone,
         password: pin
       });
-      if (error) throw new Error(error.message);
+      if (error) {
+        // SEGURANÇA F-08: Incrementar contador e aplicar backoff exponencial
+        loginAttemptsRef.current += 1;
+        const attempts = loginAttemptsRef.current;
+        if (attempts >= 3) {
+          // 3 falhas = 5s, 4 = 10s, 5 = 20s, 6+ = 60s
+          const delayMs = Math.min(60000, 2500 * Math.pow(2, attempts - 2));
+          loginBlockedUntilRef.current = Date.now() + delayMs;
+        }
+        throw new Error(error.message);
+      }
+      // Login bem-sucedido — resetar contador
+      loginAttemptsRef.current = 0;
+      loginBlockedUntilRef.current = 0;
       if (!data.session || !data.user) throw new Error('Sessão não criada');
 
       const token = data.session.access_token;
@@ -653,15 +703,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       throw new Error('Sem conexão de internet. Verifique WiFi ou dados móveis.');
     }
     const cleanPhone = phone.replace(/[^0-9]/g, '');
-    const email = `${cleanPhone}@user.com`;
 
-    // Obter IP do dispositivo
+    // SEGURANÇA F-09: Obter IP via endpoint interno (Cloudflare Worker)
+    // em vez de enviar dados do utilizador a um serviço externo (api.ipify.org)
     let ipAddress = 'unknown';
     try {
-      const res = await fetch('https://api.ipify.org?format=json');
-      const ipData = await res.json();
-      ipAddress = ipData.ip;
-      
+      const res = await fetch('/api/data/health?ip=1', { method: 'GET', cache: 'no-cache' });
+      if (res.ok) {
+        const ipHeader = res.headers.get('x-client-ip');
+        if (ipHeader) ipAddress = ipHeader;
+      }
+
       // Verificar se o IP já atingiu o limite
       if (ipAddress && ipAddress !== 'unknown') {
         const { data: checkData } = await supabase.rpc('check_ip_availability', { p_ip: ipAddress });
@@ -670,12 +722,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           throw new Error('IP excedido');
         }
       }
-    } catch {
-      // silent — ip fetch failed
+    } catch (e: any) {
+      if (e.message === 'IP excedido') throw e;
+      // silent — ip fetch failed, continua sem IP
     }
 
     const { data, error } = await supabase.auth.signUp({
-      email,
+      phone: cleanPhone,
       password: pin,
       options: {
         data: {
@@ -1042,7 +1095,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           bankId: p.bank_id ?? undefined,
           createdAt: p.created_at || new Date().toISOString(),
           level: p.level || prev.level,
-          paymentPin: p.payment_pin || prev.paymentPin,
+          // SEGURANÇA F-10: payment_pin NÃO é guardado no estado do cliente.
+          // A validação do PIN é feita apenas no servidor (gateway op 309/415).
+          // paymentPin mantém o valor anterior em memória (undefined por defeito).
         }));
 
         // Update financial stats with real balance from profiles.balance
@@ -1137,10 +1192,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return { success: false, message: res?.error || 'Erro ao gravar PIN de pagamento.' };
       }
 
-      setUser(prev => ({
-        ...prev,
-        paymentPin: newPin
-      }));
+      // SEGURANÇA F-10: Não guardar o novo PIN no estado do cliente.
+      // O servidor já atualizou — o estado local não precisa do PIN.
 
       return { success: true, message: res?.result?.message || 'PIN de pagamento gravado com sucesso.' };
     } finally {

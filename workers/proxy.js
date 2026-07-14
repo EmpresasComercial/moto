@@ -2,8 +2,57 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
+    // ── Intercetação das rotas de Auth (F-07) ────────────────────────────────
+    // O frontend envia apenas o número de telefone no campo "email".
+    // O proxy acrescenta "@user.com" de forma invisível antes de encaminhar
+    // para o Supabase Auth. O utilizador nunca vê esta transformação no DevTools.
+    const isAuthRoute =
+      url.pathname.startsWith('/api/data/auth/v1/token') ||
+      url.pathname.startsWith('/api/data/auth/v1/signup') ||
+      url.pathname.startsWith('/api/data/auth/v1/recover') ||
+      url.pathname.startsWith('/api/data/auth/v1/user');
+
+    if (isAuthRoute && request.method === 'POST') {
+      let bodyText = '';
+      try {
+        bodyText = await request.text();
+      } catch (_) { /* silent */ }
+
+      let bodyObj;
+      let isJson = false;
+      try {
+        bodyObj = JSON.parse(bodyText);
+        isJson = true;
+      } catch (_) { /* não é JSON, passa adiante sem modificar */ }
+
+      // Se o payload tiver "phone" (e não "email"), o frontend está a tentar fazer login com telefone
+      // Transformamos isso de volta para a estrutura que o Supabase Auth espera (email = phone@user.com)
+      if (isJson && bodyObj && typeof bodyObj.phone === 'string' && !bodyObj.email) {
+        bodyObj.email = `${bodyObj.phone}@user.com`;
+        delete bodyObj.phone;
+        bodyText = JSON.stringify(bodyObj);
+      } else if (isJson && bodyObj && typeof bodyObj.email === 'string' && !bodyObj.email.includes('@')) {
+        // Fallback antigo por segurança
+        bodyObj.email = `${bodyObj.email}@user.com`;
+        bodyText = JSON.stringify(bodyObj);
+      }
+
+      // Recriar o Request com o corpo modificado e continuar para o bloco /api/data/ abaixo
+      request = new Request(request, { body: bodyText });
+    }
+
+    // ── Endpoint de saúde / IP do cliente (F-09) ─────────────────────────────
     if (url.pathname === '/api/data/health') {
-      return new Response('Healthy', { status: 200 });
+      // Devolver IP real do cliente via Cloudflare (sem serviços externos).
+      // O registo lê este header em vez de chamar api.ipify.org.
+      const clientIp =
+        request.headers.get('CF-Connecting-IP') ||
+        request.headers.get('X-Forwarded-For')?.split(',')[0]?.trim() ||
+        'unknown';
+      return new Response('Healthy', {
+        status: 200,
+        headers: { 'x-client-ip': clientIp },
+      });
     }
 
     if (url.pathname.startsWith('/api/data/')) {
@@ -96,6 +145,7 @@ export default {
         'x-envoy-attempt-count', 'x-envoy-upstream-service-time',
         'endpoint-load-metrics', 'set-cookie',
       ];
+
       const responseHeaders = new Headers();
       for (const [key, value] of upstreamResponse.headers.entries()) {
         if (!STRIP_RESP.includes(key.toLowerCase())) {
@@ -103,7 +153,33 @@ export default {
         }
       }
 
-      return new Response(upstreamResponse.body, {
+      let responseBody = upstreamResponse.body;
+
+      // ── Limpeza da resposta de Auth (F-07) ─────────────────────────────────
+      // Se for uma rota de auth, remover o e-mail falso do corpo da resposta
+      if (isAuthRoute && upstreamResponse.headers.get('content-type')?.includes('application/json')) {
+        try {
+          const respText = await upstreamResponse.text();
+          let respObj = JSON.parse(respText);
+
+          // Remover email do objeto user
+          if (respObj && respObj.user && typeof respObj.user.email === 'string') {
+            respObj.user.email = respObj.user.email.replace('@user.com', '');
+          }
+          // Algumas respostas podem devolver diretamente o objeto user
+          if (respObj && typeof respObj.email === 'string' && !respObj.user) {
+            respObj.email = respObj.email.replace('@user.com', '');
+          }
+
+          responseBody = JSON.stringify(respObj);
+          responseHeaders.set('content-length', String(new Blob([responseBody]).size));
+        } catch (_) {
+          // Fallback silencioso
+          responseBody = upstreamResponse.body;
+        }
+      }
+
+      return new Response(responseBody, {
         status: upstreamResponse.status,
         headers: responseHeaders,
       });

@@ -192,7 +192,19 @@ serve(async (req) => {
       case 101: {
         const { data, error } = await supabase.rpc("get_user_profile_v2");
         if (error) throw error;
-        result = data;
+        // SEGURANÇA F-10: Remover payment_pin antes de enviar ao cliente.
+        // O PIN nunca deve sair do servidor — é validado server-side (op 309/415).
+        if (Array.isArray(data)) {
+          result = data.map((row: Record<string, unknown>) => {
+            const { payment_pin: _pin, ...safe } = row as Record<string, unknown>;
+            return safe;
+          });
+        } else if (data && typeof data === "object") {
+          const { payment_pin: _pin, ...safe } = data as Record<string, unknown>;
+          result = safe;
+        } else {
+          result = data;
+        }
         break;
       }
 
