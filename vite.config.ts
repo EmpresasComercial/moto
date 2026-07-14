@@ -81,6 +81,9 @@ export default defineConfig(({ mode }) => {
               if (req.rawBody) {
                 proxyReq.setHeader('Content-Length', Buffer.byteLength(req.rawBody));
                 proxyReq.write(req.rawBody);
+                // Como o stream original já foi consumido, o http-proxy não receberá o evento 'end'.
+                // Fechar o stream manualmente!
+                proxyReq.end();
               }
             });
 
