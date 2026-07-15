@@ -38,7 +38,7 @@ if (!REAL_TARGET || !REAL_API_KEY) {
   );
 }
 
-export const supabaseProxy = createProxyMiddleware({
+export const rawProxy = createProxyMiddleware({
   target: REAL_TARGET,
   changeOrigin: true,
   ws: true,
@@ -103,3 +103,11 @@ export const supabaseProxy = createProxyMiddleware({
     }
   }
 });
+
+export const supabaseProxy = (req, res, next) => {
+  if (req.url?.includes('/rest/v1/') || req.url?.includes('/graphql/v1/')) {
+    res.writeHead(403, { 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify({ error: 'Database direct access is disabled for security reasons.' }));
+  }
+  return rawProxy(req, res, next);
+};

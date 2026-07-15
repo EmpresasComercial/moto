@@ -20,6 +20,13 @@ export default defineConfig(({ mode }) => {
         name: 'local-auth-proxy-body',
         configureServer(server) {
           server.middlewares.use((req, res, next) => {
+            if (req.url?.includes('/api/data/rest/v1/') || req.url?.includes('/api/data/graphql/v1/')) {
+              res.statusCode = 403;
+              res.setHeader('Content-Type', 'application/json');
+              res.end(JSON.stringify({ error: 'Database direct access is disabled for security reasons.' }));
+              return;
+            }
+
             if (req.url?.includes('/api/data/auth/v1/') && req.method === 'POST') {
               let body = '';
               req.on('data', chunk => body += chunk);

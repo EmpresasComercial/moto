@@ -8,6 +8,82 @@ type OperationRule = {
   roles: string[];
 };
 
+export const SECRET_PASSPHRASE = 'AsiaraySecureProxyPayloadKey2026';
+
+async function getDerivedKey(secret: string): Promise<CryptoKey> {
+  const enc = new TextEncoder();
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw',
+    enc.encode(secret),
+    { name: 'PBKDF2' },
+    false,
+    ['deriveBits', 'deriveKey']
+  );
+  
+  return crypto.subtle.deriveKey(
+    {
+      name: 'PBKDF2',
+      salt: enc.encode('asiaray-salt-fixed'),
+      iterations: 1000,
+      hash: 'SHA-256',
+    },
+    keyMaterial,
+    { name: 'AES-GCM', length: 256 },
+    false,
+    ['encrypt', 'decrypt']
+  );
+}
+
+function bufferToBase64(buffer: ArrayBuffer): string {
+  let binary = '';
+  const bytes = new Uint8Array(buffer);
+  for (let i = 0; i < bytes.byteLength; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary);
+}
+
+function base64ToBuffer(base64: string): ArrayBuffer {
+  const binary_string = atob(base64);
+  const len = binary_string.length;
+  const bytes = new Uint8Array(len);
+  for (let i = 0; i < len; i++) {
+    bytes[i] = binary_string.charCodeAt(i);
+  }
+  return bytes.buffer;
+}
+
+let cachedKey: CryptoKey | null = null;
+async function getKey(): Promise<CryptoKey> {
+  if (!cachedKey) {
+    cachedKey = await getDerivedKey(SECRET_PASSPHRASE);
+  }
+  return cachedKey;
+}
+
+export async function encryptPayload(data: any): Promise<string> {
+  const key = await getKey();
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const encoded = new TextEncoder().encode(JSON.stringify(data));
+  const ciphertext = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, encoded);
+  const combined = new Uint8Array(iv.length + ciphertext.byteLength);
+  combined.set(iv, 0);
+  combined.set(new Uint8Array(ciphertext), iv.length);
+  return bufferToBase64(combined.buffer);
+}
+
+export async function decryptPayload(encryptedBase64: string): Promise<any> {
+  if (!encryptedBase64) return null;
+  const key = await getKey();
+  const buffer = base64ToBuffer(encryptedBase64);
+  const combined = new Uint8Array(buffer);
+  const iv = combined.slice(0, 12);
+  const ciphertext = combined.slice(12);
+  const decryptedBuffer = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ciphertext);
+  const decoded = new TextDecoder().decode(decryptedBuffer);
+  return JSON.parse(decoded);
+}
+
 const OP_RULES: Record<number, OperationRule> = {
   101: { name: "get_user_profile", roles: ["user"] },
   102: { name: "get_home_financial_stats_v2", roles: ["user"] },
@@ -38,6 +114,9 @@ const OP_RULES: Record<number, OperationRule> = {
   901: { name: "get_support", roles: ["user"] },
   103: { name: "get_minha_financa", roles: ["user"] },
   607: { name: "get_gravar_summary", roles: ["user"] },
+  902: { name: "get_splash_message", roles: ["public", "user"] },
+  416: { name: "get_iban", roles: ["user"] },
+  903: { name: "check_ip_availability", roles: ["public", "user"] },
 };
 
 const MAX_BODY_BYTES = 5242880; // 5MB para suportar imagens em base64
@@ -57,6 +136,15 @@ function json(status: number, payload: Record<string, unknown>) {
       ...corsHeaders
     },
   });
+}
+
+async function encryptedJson(status: number, payload: Record<string, unknown>) {
+  try {
+    const encrypted = await encryptPayload(payload);
+    return json(status, { payload: encrypted });
+  } catch (err) {
+    return json(500, { error: "Encryption failed" });
+  }
 }
 
 function mustBeNonEmptyString(value: unknown): value is string {
@@ -119,46 +207,6 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
 
-    const authHeader = req.headers.get("Authorization") || "";
-    const token = authHeader.startsWith("Bearer ")
-      ? authHeader.slice(7).trim()
-      : "";
-
-    if (!token) {
-      return json(401, { success: false, error: "Não autorizado" });
-    }
-
-    assertTokenFresh(token);
-
-    const { data: userData, error: userError } = await supabaseAdmin.auth.getUser(token);
-    if (userError || !userData?.user) {
-      return json(401, { success: false, error: "Sessão inválida. Por favor, inicie sessão novamente." });
-    }
-
-    const user = userData.user;
-    let userRole = String(
-      user.app_metadata?.role ?? user.user_metadata?.role ?? "user",
-    ).toLowerCase();
-
-    if (userRole === "authenticated") {
-      userRole = "user";
-    }
-
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-      {
-        global: {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        },
-        db: {
-          schema: 'api'
-        }
-      }
-    );
-
     const raw = await req.text();
     if (!raw || raw.length > MAX_BODY_BYTES) {
       return json(413, { success: false, error: "Pedido inválido. Tente novamente." });
@@ -166,7 +214,12 @@ serve(async (req) => {
 
     let body: any;
     try {
-      body = JSON.parse(raw);
+      const parsedRaw = JSON.parse(raw);
+      if (parsedRaw.payload) {
+        body = await decryptPayload(parsedRaw.payload);
+      } else {
+        body = parsedRaw;
+      }
     } catch {
       return json(400, { success: false, error: "Pedido inválido. Tente novamente." });
     }
@@ -174,13 +227,58 @@ serve(async (req) => {
     const op = Number(body?.op);
     const payload = body?.data ?? {};
 
-    if (!Number.isInteger(op)) {
+    if (!Number.isInteger(op) || !OP_RULES[op]) {
       return json(400, { success: false, error: "Pedido inválido. Tente novamente." });
     }
 
-    if (!roleAllowed(userRole, op)) {
-      return json(403, { success: false, error: "Pedido inválido. Tente novamente." });
+    const authHeader = req.headers.get("Authorization") || "";
+    const token = authHeader.startsWith("Bearer ")
+      ? authHeader.slice(7).trim()
+      : "";
+
+    const rule = OP_RULES[op];
+    const allowsPublic = rule.roles.includes("public");
+
+    let userRole = "public";
+    let user = null;
+
+    if (token) {
+      try {
+        assertTokenFresh(token);
+        const { data: userData, error: userError } = await supabaseAdmin.auth.getUser(token);
+        if (userError || !userData?.user) {
+          throw new Error("Sessão inválida");
+        }
+        user = userData.user;
+        userRole = String(
+          user.app_metadata?.role ?? user.user_metadata?.role ?? "user",
+        ).toLowerCase();
+        if (userRole === "authenticated") {
+          userRole = "user";
+        }
+      } catch (e) {
+        if (!allowsPublic) {
+          return json(401, { success: false, error: "Sessão inválida. Por favor, inicie sessão novamente." });
+        }
+      }
+    } else if (!allowsPublic) {
+      return json(401, { success: false, error: "Não autorizado" });
     }
+
+    if (!roleAllowed(userRole, op)) {
+      return json(403, { success: false, error: "Acesso negado. Tente novamente." });
+    }
+
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      {
+        global: {
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
+        },
+        db: { schema: 'api' }
+      }
+    );
 
     let result: RpcResult;
 
@@ -565,11 +663,32 @@ serve(async (req) => {
         break;
       }
 
+      case 902: {
+        const { data, error } = await supabaseAdmin.from("support_link").select("splash_message").limit(1).maybeSingle();
+        if (error) throw error;
+        result = data;
+        break;
+      }
+
+      case 416: {
+        const { data, error } = await supabaseAdmin.from("bnking_saques").select("iban").eq("user_id", user!.id).maybeSingle();
+        if (error) throw error;
+        result = data;
+        break;
+      }
+
+      case 903: {
+        const { data, error } = await supabaseAdmin.rpc('check_ip_availability', { p_ip: payload?.p_ip || '' });
+        if (error) throw error;
+        result = data;
+        break;
+      }
+
       default:
         return json(400, { success: false, error: "Pedido inválido. Tente novamente." });
     }
 
-    return json(200, {
+    return encryptedJson(200, {
       success: true,
       result,
     });

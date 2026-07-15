@@ -3,7 +3,7 @@ import { useApp } from '../context/AppContext';
 import { X, Copy, Check, QrCode, ClipboardList, Wallet, Sparkles, Building, Landmark, Users, ArrowUpRight, ArrowDownLeft, ShieldCheck, Heart } from 'lucide-react';
 import { LogRecord } from '../types';
 import { EmptyState } from './EmptyState';
-import { GATEWAY_URL, getAccessToken, supabase } from '../lib/supabase';
+import { GATEWAY_URL, getAccessToken, supabase, gatewayCall } from '../lib/supabase';
 
 interface ModalProps {
   isOpen: boolean;
@@ -2231,13 +2231,9 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
     if (isOpen && type === 'retirada' && user?.id) {
       const getRealIban = async () => {
         try {
-          const { data, error } = await supabase
-            .from('bnking_saques')
-            .select('iban')
-            .eq('user_id', user.id)
-            .maybeSingle();
-          if (data?.iban) {
-            setUserIban(data.iban);
+          const res = await gatewayCall(416);
+          if (res?.success && res.result?.iban) {
+            setUserIban(res.result.iban);
           }
         } catch (e) {
           // silent fallback

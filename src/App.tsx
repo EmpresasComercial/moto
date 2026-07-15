@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from './lib/supabase';
+import { supabase, gatewayCall } from './lib/supabase';
 import { AppProvider, useApp } from './context/AppContext';
 import { LoginScreen } from './components/pageasiaray';
 import { HomeTab } from './components/HomeTab';
@@ -194,15 +194,13 @@ function MainAppLayout() {
   useEffect(() => {
     const fetchSplash = async () => {
       try {
-        const { data, error } = await supabase
-          .from('support_link')
-          .select('splash_message')
-          .limit(1)
-          .single();
-        if (!error && data?.splash_message) {
-          setSplashMessage(data.splash_message);
+        const res = await gatewayCall(902, {}, false);
+        if (res?.success && res.result?.splash_message) {
+          setSplashMessage(res.result.splash_message);
         }
-      } catch {}
+      } catch (err) {
+        console.error("Failed to load splash message");
+      }
     };
     fetchSplash();
   }, []);

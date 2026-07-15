@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { Task, UserProfile, FinancialStats, LogRecord, TeamReferral, TaskType } from '../types';
-import { supabase, getAccessToken, GATEWAY_URL, checkInternetConnectivity } from '../lib/supabase';
+import { supabase, getAccessToken, GATEWAY_URL, checkInternetConnectivity, gatewayCall } from '../lib/supabase';
 
 const normalizeBankName = (bankName?: string) => {
   if (!bankName) return 'Banco BAI';
@@ -716,8 +716,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       // Verificar se o IP já atingiu o limite
       if (ipAddress && ipAddress !== 'unknown') {
-        const { data: checkData } = await supabase.rpc('check_ip_availability', { p_ip: ipAddress });
-        if (checkData?.blocked) {
+        const checkData = await gatewayCall(903, { p_ip: ipAddress }, false);
+        if (checkData?.result?.blocked) {
           addToast('Aviso: IP excedido (Já registrou uma conta neste dispositivo)', 'error');
           throw new Error('IP excedido');
         }

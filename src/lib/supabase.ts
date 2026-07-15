@@ -64,34 +64,47 @@ export const checkInternetConnectivity = async (timeoutMs = 4000): Promise<boole
   }
 };
 
-export const gatewayCall = async (op: number, payload: any = {}) => {
+import { encryptPayload, decryptPayload } from './crypto';
+
+export const gatewayCall = async (op: number, payload: any = {}, requireAuth: boolean = true) => {
   const connected = await checkInternetConnectivity();
   if (!connected) {
     throw new Error('Sem conexão de internet. Verifique seus dados móveis ou WiFi.');
   }
   const token = await getAccessToken();
-  if (!token) throw new Error('Sessão inválida');
+  if (requireAuth && !token) throw new Error('Sessão inválida');
+
+  const encryptedBody = await encryptPayload({ op, data: payload });
+
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json'
+  };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
 
   const resp = await fetch(GATEWAY_URL, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify({ op, data: payload })
+    headers,
+    body: JSON.stringify({ payload: encryptedBody })
   });
 
-  const data = await resp.json();
+  const respJson = await resp.json();
   
-  if (resp.status === 401 && data.force_logout) {
+  if (resp.status === 401 && respJson.force_logout) {
     await supabase.auth.signOut();
     window.dispatchEvent(new Event('force-logout'));
     throw new Error('SESSION_EXPIRED');
   }
 
   if (!resp.ok) {
-    throw new Error(data.error || data.message || 'Erro na requisição');
+    throw new Error(respJson.error || respJson.message || 'Erro na requisição');
   }
 
-  return data;
+  if (respJson.payload) {
+    const decrypted = await decryptPayload(respJson.payload);
+    return decrypted;
+  }
+
+  return respJson;
 };
