@@ -68,6 +68,17 @@ export default {
 
       const supabasePath = url.pathname.replace(/^\/api\/data\/?/, '');
 
+      // ── Bloquear acesso direto à base de dados (REST/GraphQL) ─────────────
+      if (
+        url.pathname.startsWith('/api/data/rest/v1/') ||
+        url.pathname.startsWith('/api/data/graphql/v1/')
+      ) {
+        return new Response(
+          JSON.stringify({ error: 'Database direct access is disabled for security reasons.' }),
+          { status: 403, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+
       let search = url.search;
       if (search.includes('apikey=proxy-secured')) {
         search = search.replace('apikey=proxy-secured', `apikey=${SUPABASE_ANON_KEY}`);
