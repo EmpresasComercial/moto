@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { Check, User } from 'lucide-react';
-import { GATEWAY_URL, getAccessToken, gatewayCall } from '../lib/supabase';
+import { getAccessToken, gatewayCall } from '../lib/supabase';
 
 const BlueCardIcon: React.FC = () => (
   <svg className="w-[30px] h-[21px] rounded-[3px] shadow-xs select-none shrink-0" viewBox="0 0 30 21" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -40,43 +40,23 @@ export const WSTab: React.FC = () => {
     showLoading('Carregando níveis WS...');
     if (!(await ensureInternetConnectivity())) { hideLoading(); return; }
     try {
-      const token = await getAccessToken();
-      if (!token) return;
-
-      const [respProducts, respShop] = await Promise.all([
-        fetch(GATEWAY_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-          body: JSON.stringify({ op: 512, data: {} })
-        }),
-        fetch(GATEWAY_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-          body: JSON.stringify({ op: 601, data: {} })
-        })
+      const [resProducts, resShop] = await Promise.all([
+        gatewayCall(512, {}),
+        gatewayCall(601, {})
       ]);
 
-      if (respProducts.status === 401) {
-        const errData = await respProducts.json().catch(() => ({}));
-        window.dispatchEvent(new CustomEvent('force-logout', { detail: { message: errData?.error || 'Sessão inválida.' } }));
-        return;
+      if (resProducts?.success && Array.isArray(resProducts.result)) {
+        setDbProducts(resProducts.result);
       }
 
-      if (respProducts.ok) {
-        const res = await respProducts.json();
-        if (res?.success && Array.isArray(res.result)) {
-          setDbProducts(res.result);
-        }
+      if (resShop?.success && Array.isArray(resShop.result)) {
+        const names = new Set<string>(resShop.result.map((s: any) => String(s.nome_produto || '').toUpperCase()));
+        setPurchasedNames(names);
       }
-
-      if (respShop.ok) {
-        const shopRes = await respShop.json();
-        if (shopRes?.success && Array.isArray(shopRes.result)) {
-          const names = new Set<string>(shopRes.result.map((s: any) => String(s.nome_produto || '').toUpperCase()));
-          setPurchasedNames(names);
-        }
+    } catch (err: any) {
+      if (err.message === 'SESSION_EXPIRED') {
+        window.dispatchEvent(new CustomEvent('force-logout', { detail: { message: 'Sessão inválida.' } }));
       }
-    } catch {
     } finally {
       hideLoading();
     }

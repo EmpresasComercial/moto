@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { Task, UserProfile, FinancialStats, LogRecord, TeamReferral, TaskType } from '../types';
-import { supabase, getAccessToken, GATEWAY_URL, checkInternetConnectivity, gatewayCall } from '../lib/supabase';
+import { supabase, getAccessToken, checkInternetConnectivity, gatewayCall } from '../lib/supabase';
 
 const normalizeBankName = (bankName?: string) => {
   if (!bankName) return 'Banco BAI';
@@ -300,9 +300,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
    * 3. Otherwise returns the parsed JSON body
    */
   const gatewayFetch = async (op: number, data: Record<string, unknown> = {}, loadingMessage: string | false = 'Carregando...'): Promise<any | null> => {
-    // Guard: session already expired — block ALL gateway calls
     if (sessionExpiredRef.current) return null;
-
     if (!(await ensureInternetConnectivity())) {
       return null;
     }
@@ -312,34 +310,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       showLoading(loadingMessage as string);
     }
     try {
-      const token = await getAccessToken();
-      if (!token) return null;
-
-      const resp = await fetch(GATEWAY_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ op, data })
-      });
-
-      const resData = await resp.json().catch(() => ({}));
-
-      // Intercept 401 with force_logout flag from gateway
-      if (resp.status === 401 && resData?.force_logout) {
-        const msg = resData.error || 'A sua sessão expirou por segurança. Por favor, faça login novamente.';
-        window.dispatchEvent(new CustomEvent('force-logout', { detail: { message: msg } }));
-        return null;
-      }
-
-      // Intercept any 401 (even without explicit force_logout)
-      if (resp.status === 401) {
-        window.dispatchEvent(new CustomEvent('force-logout', { detail: { message: resData?.error || 'Sessão inválida. Faça login novamente.' } }));
-        return null;
-      }
-
-      return { resp, resData };
+      const res = await gatewayCall(op, data);
+      return { resp: { ok: res !== null && typeof res === 'object' }, resData: res };
+    } catch (err: any) {
+      return { resp: { ok: false }, resData: { success: false, error: err.message } };
     } finally {
       if (shouldShowLoading) {
         hideLoading();
@@ -641,20 +615,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (!(await ensureInternetConnectivity())) {
           return true;
         }
-        const resp = await fetch(GATEWAY_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({ op: 101, data: {} })
-        });
-        if (resp.ok) {
-          const res = await resp.json();
-          if (res?.success) {
-            const raw = res.result;
-            profileData = Array.isArray(raw) ? raw[0] : raw;
-          }
+        const res = await gatewayCall(101, {});
+        if (res?.success) {
+          const raw = res.result;
+          profileData = Array.isArray(raw) ? raw[0] : raw;
         }
       } catch (_) { /* perfil será carregado depois */ }
 
@@ -762,20 +726,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (!(await ensureInternetConnectivity())) {
           return;
         }
-        const resp = await fetch(GATEWAY_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({ op: 101, data: {} })
-        });
-        if (resp.ok) {
-          const res = await resp.json();
-          if (res?.success) {
-            const raw = res.result;
-            profileData = Array.isArray(raw) ? raw[0] : raw;
-          }
+        const res = await gatewayCall(101, {});
+        if (res?.success) {
+          const raw = res.result;
+          profileData = Array.isArray(raw) ? raw[0] : raw;
         }
       } catch (_) { /* perfil será carregado depois */ }
 

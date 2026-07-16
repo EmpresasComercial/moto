@@ -3,7 +3,7 @@ import { useApp } from '../context/AppContext';
 import { X, Copy, Check, QrCode, ClipboardList, Wallet, Sparkles, Building, Landmark, Users, ArrowUpRight, ArrowDownLeft, ShieldCheck, Heart } from 'lucide-react';
 import { LogRecord } from '../types';
 import { EmptyState } from './EmptyState';
-import { GATEWAY_URL, getAccessToken, supabase, gatewayCall } from '../lib/supabase';
+import { supabase, gatewayCall } from '../lib/supabase';
 
 interface ModalProps {
   isOpen: boolean;
@@ -433,16 +433,9 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
         try {
           // Fire both fetches at the same time
           const policiesPromise = (async () => {
-            const token = await getAccessToken();
-            if (token) {
               try {
-                const resp = await fetch(GATEWAY_URL, {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                  body: JSON.stringify({ op: 512, data: {} })
-                });
-                const res = await resp.json();
-                if (res.success && Array.isArray(res.result)) {
+                const res = await gatewayCall(512, {});
+                if (res?.success && Array.isArray(res.result)) {
                   const prods = res.result;
                   const suggested = Array.from(new Set(prods.filter((p: any) => Number(p.price) > 0).map((p: any) => Number(p.price)))).sort((a: any, b: any) => a - b);
                   setPolicies({
@@ -457,29 +450,20 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
                     products: prods
                   });
                 } else {
-                  // Gateway did not return products — silent fallback
                   setPolicies({ suggested_recharge_kz: [] });
                 }
               } catch {
                 setPolicies({ suggested_recharge_kz: [] });
               }
-            } else {
-              setPolicies({ suggested_recharge_kz: [] });
-            }
           })();
 
           const banksPromise = (async () => {
-            const token = await getAccessToken();
-            if (token) {
-              const resp = await fetch(GATEWAY_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({ op: 207, data: {} })
-              });
-              const res = await resp.json();
-              if (res.success && Array.isArray(res.result)) {
+            try {
+              const res = await gatewayCall(207, {});
+              if (res?.success && Array.isArray(res.result)) {
                 setDbBanks(res.result);
               }
+            } catch {
             }
           })();
 
@@ -545,13 +529,6 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
     showLoading('A submeter pedido de depósito...');
 
     try {
-      const token = await getAccessToken();
-      if (!token) {
-        hideLoading();
-        alert('Sessão expirada. Faça login novamente.');
-        return;
-      }
-
       // Converter o arquivo selecionado para base64
       const fileToBase64 = (file: File): Promise<string> => {
         return new Promise((resolve, reject) => {
@@ -571,16 +548,7 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
         ? { amount_usdt: parseFloat((rechargeAmt / exchangeRate).toFixed(2)), exchange_rate: exchangeRate }
         : { amount: rechargeAmt, bank_name: selectedMethod, iban: currentAddress, comprovante_url: base64Image };
 
-      const resp = await fetch(GATEWAY_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ op: opCode, data: payload })
-      });
-
-      const res = await resp.json();
+      const res = await gatewayCall(opCode, payload);
       hideLoading();
 
       if (res.success && res.result?.success) {
@@ -870,20 +838,9 @@ export const InviteModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
           return;
         }
 
-        const token = await getAccessToken();
-        if (!token) {
-          hideLoading();
-          return;
-        }
-
         try {
-          const res = await fetch(GATEWAY_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-            body: JSON.stringify({ op: 901, data: {} })
-          });
-          const data = await res.json();
-          if (data.success && data.result?.dominio_publicidad) {
+          const data = await gatewayCall(901, {});
+          if (data?.success && data.result?.dominio_publicidad) {
             setDomain(data.result.dominio_publicidad);
           }
         } catch {
@@ -1023,21 +980,9 @@ export const TeamReportModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
           return;
         }
 
-        const token = await getAccessToken();
-        if (!token) {
-          setLoading(false);
-          hideLoading();
-          return;
-        }
-
         try {
-          const res = await fetch(GATEWAY_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-            body: JSON.stringify({ op: 801, data: {} })
-          });
-          const data = await res.json();
-          if (data.success) {
+          const data = await gatewayCall(801, {});
+          if (data?.success) {
             setTeamData(data.result || {});
           }
         } catch {
@@ -1708,15 +1653,8 @@ export const CompanyPoliciesModal: React.FC<ModalProps> = ({ isOpen, onClose }) 
 
   const fetchPolicies = async () => {
     try {
-      const token = await getAccessToken();
-      if (!token) throw new Error("No token");
-      const resp = await fetch(GATEWAY_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ op: 512, data: {} })
-      });
-      const res = await resp.json();
-      if (res.success && Array.isArray(res.result)) {
+      const res = await gatewayCall(512, {});
+      if (res?.success && Array.isArray(res.result)) {
         const prods = res.result;
         const suggested = Array.from(new Set(prods.filter((p: any) => Number(p.price) > 0).map((p: any) => Number(p.price)))).sort((a: any, b: any) => a - b);
         setPolicies({
@@ -1962,39 +1900,22 @@ export const DailyDeclarationModal: React.FC<ModalProps> = ({ isOpen, onClose })
         return;
       }
 
-      const token = await getAccessToken();
-      if (!token) {
-        setLoading(false);
-        hideLoading();
-        return;
-      }
-
       try {
         const [weekRes, prodRes] = await Promise.all([
-          fetch(GATEWAY_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-            body: JSON.stringify({ op: 802, data: {} })
-          }),
-          fetch(GATEWAY_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-            body: JSON.stringify({ op: 512, data: {} })
-          })
+          gatewayCall(802, {}),
+          gatewayCall(512, {})
         ]);
 
-        const weekJson = await weekRes.json();
-        if (weekJson.success && Array.isArray(weekJson.result)) {
-          setWeekData(weekJson.result.map((r: any) => ({
+        if (weekRes?.success && Array.isArray(weekRes.result)) {
+          setWeekData(weekRes.result.map((r: any) => ({
             dia: r.dia,
             day_date: r.day_date,
             total: Number(r.total) || 0
           })));
         }
 
-        const prodJson = await prodRes.json();
-        if (prodJson.success && Array.isArray(prodJson.result)) {
-          setProducts(prodJson.result);
+        if (prodRes?.success && Array.isArray(prodRes.result)) {
+          setProducts(prodRes.result);
         }
       } catch {
         // silent — week data unavailable
@@ -2292,21 +2213,9 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
           return;
         }
 
-        const token = await getAccessToken();
-        if (!token) {
-          setLoading(false);
-          hideLoading();
-          return;
-        }
-
         try {
-          const res = await fetch(GATEWAY_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-            body: JSON.stringify({ op: 605, data: {} })
-          });
-          const data = await res.json();
-          if (data.success) {
+          const data = await gatewayCall(605, {});
+          if (data?.success) {
             setCompletedTasks(data.result || []);
           }
         } catch {
@@ -2334,21 +2243,9 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
           return;
         }
 
-        const token = await getAccessToken();
-        if (!token) {
-          setLoading(false);
-          hideLoading();
-          return;
-        }
-
         try {
-          const res = await fetch(GATEWAY_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-            body: JSON.stringify({ op: 208, data: {} })
-          });
-          const data = await res.json();
-          if (data.success && data.result) {
+          const data = await gatewayCall(208, {});
+          if (data?.success && data.result) {
             const rawKzs = data.result.kzs || [];
             const rawUsdt = data.result.usdt || [];
 

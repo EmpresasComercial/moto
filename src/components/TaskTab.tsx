@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { TaskType } from '../types';
 import { EmptyState } from './EmptyState';
-import { GATEWAY_URL, getAccessToken } from '../lib/supabase';
+import { getAccessToken, gatewayCall } from '../lib/supabase';
 
 interface TaskTabProps {
   selectedCategory: TaskType;
@@ -150,34 +150,15 @@ export const TaskTab: React.FC<TaskTabProps> = ({ selectedCategory, setSelectedC
       showLoading('Carregando itens da loja...');
       if (!(await ensureInternetConnectivity())) { setLoading(false); hideLoading(); return; }
       try {
-        const token = await getAccessToken();
-        if (!token) { setLoading(false); hideLoading(); return; }
-
-        const resp = await fetch(GATEWAY_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({ op: 601, data: {} })
-        });
-
-        if (resp.status === 401) {
-          const errData = await resp.json().catch(() => ({}));
-          const msg = errData?.error || 'Sessão inválida. Faça login novamente.';
-          window.dispatchEvent(new CustomEvent('force-logout', { detail: { message: msg } }));
+        const res = await gatewayCall(601, {});
+        if (res?.success && Array.isArray(res.result)) {
+          setShopItems(res.result);
+        }
+      } catch (err: any) {
+        if (err.message === 'SESSION_EXPIRED') {
           setLoading(false);
           return;
         }
-
-        if (resp.ok) {
-          const res = await resp.json();
-          if (res?.success && Array.isArray(res.result)) {
-            setShopItems(res.result);
-          }
-        }
-      } catch {
-        // silent
       } finally {
         hideLoading();
         setLoading(false);
@@ -212,34 +193,9 @@ export const TaskTab: React.FC<TaskTabProps> = ({ selectedCategory, setSelectedC
     showLoading('Requisitando tarefa...');
 
     try {
-      const token = await getAccessToken();
-      if (!token) { hideLoading(); setClaimingId(null); return; }
+      const res = await gatewayCall(602, { shop_id: shopId });
 
-      const resp = await fetch(GATEWAY_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ op: 602, data: { shop_id: shopId } })
-      });
-
-      if (resp.status === 401) {
-        const errData = await resp.json().catch(() => ({}));
-        window.dispatchEvent(new CustomEvent('force-logout', { detail: { message: errData?.error || 'Sessão inválida.' } }));
-        hideLoading();
-        setClaimingId(null);
-        return;
-      }
-
-      let res;
-      try {
-        res = await resp.json();
-      } catch (e) {
-        res = {};
-      }
-
-      if (resp.ok && res?.success) {
+      if (res?.success) {
         addToast('Tarefa reivindicada com sucesso!', 'success');
         const updatedClaimedTasks = { ...claimedTasks, [shopId]: Date.now() };
         setClaimedTasks(updatedClaimedTasks);
@@ -247,8 +203,13 @@ export const TaskTab: React.FC<TaskTabProps> = ({ selectedCategory, setSelectedC
       } else {
         addToast(res?.error || res?.message || 'Não foi possível reivindicar a tarefa.', 'error');
       }
-    } catch {
-      addToast('Erro de rede. Tente novamente.', 'error');
+    } catch (err: any) {
+      if (err.message === 'SESSION_EXPIRED') {
+        hideLoading();
+        setClaimingId(null);
+        return;
+      }
+      addToast(err.message || 'Erro ao reivindicar a tarefa.', 'error');
     } finally {
       hideLoading();
       setClaimingId(null);

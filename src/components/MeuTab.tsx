@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
-import { supabase, getAccessToken, GATEWAY_URL } from '../lib/supabase';
+import { supabase, getAccessToken, gatewayCall } from '../lib/supabase';
 import { 
   Bell, Settings, User, Copy, ClipboardList, Wallet, Sparkles, 
   Gift, Layers, HelpCircle, UserCheck, Receipt, 
@@ -90,20 +90,10 @@ export const MeuTab: React.FC = () => {
   useEffect(() => {
     const fetchTeamAndNotif = async () => {
       showLoading('Wait...');
-      const token = await getAccessToken();
-      if (!token) {
-        hideLoading();
-        return;
-      }
       try {
         // Fetch Team Stats
-        const respTeam = await fetch(GATEWAY_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-          body: JSON.stringify({ op: 801, data: {} })
-        });
-        const resTeam = await respTeam.json();
-        if (resTeam.success) {
+        const resTeam = await gatewayCall(801, {});
+        if (resTeam?.success) {
           const rawTeam = Array.isArray(resTeam.result) 
             ? resTeam.result 
             : (resTeam.result?.team && Array.isArray(resTeam.result.team) ? resTeam.result.team : []);
@@ -114,13 +104,8 @@ export const MeuTab: React.FC = () => {
         }
 
         // Fetch Notifications Content
-        const respNotif = await fetch(GATEWAY_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-          body: JSON.stringify({ op: 804, data: {} })
-        });
-        const resNotif = await respNotif.json();
-        if (resNotif.success && Array.isArray(resNotif.result)) {
+        const resNotif = await gatewayCall(804, {});
+        if (resNotif?.success && Array.isArray(resNotif.result)) {
           setDbNotificacoes(resNotif.result);
         }
       } catch {

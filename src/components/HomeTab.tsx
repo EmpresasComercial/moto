@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { TaskType } from '../types';
-import { getAccessToken, GATEWAY_URL } from '../lib/supabase';
+import { gatewayCall } from '../lib/supabase';
 
 interface HomeTabProps {
   setActiveTab: (tab: string) => void;
@@ -22,15 +22,8 @@ export const HomeTab: React.FC<HomeTabProps> = ({ setActiveTab, setSelectedTaskC
   useEffect(() => {
     const fetchTeam = async () => {
       try {
-        const token = await getAccessToken();
-        if (!token) return;
-        const resp = await fetch(GATEWAY_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-          body: JSON.stringify({ op: 801, data: {} })
-        });
-        const res = await resp.json();
-        if (res.success) {
+        const res = await gatewayCall(801, {});
+        if (res?.success) {
           const arr = Array.isArray(res.result)
             ? res.result
             : (res.result?.team && Array.isArray(res.result.team) ? res.result.team : []);

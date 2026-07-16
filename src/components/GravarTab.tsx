@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { GATEWAY_URL, getAccessToken } from '../lib/supabase';
+import { gatewayCall } from '../lib/supabase';
 import { useApp } from '../context/AppContext';
 import { motion, AnimatePresence } from 'motion/react';
 import { Task, TaskStatus } from '../types';
@@ -60,16 +60,8 @@ export const GravarTab: React.FC = () => {
   const loadSummary = async () => {
     if (isSessionExpired) return;
     try {
-      const token = await getAccessToken();
-      if (!token) return;
-      const resp = await fetch(GATEWAY_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ op: 607, data: {} })
-      });
-      if (resp.status === 401) return;
-      const res = await resp.json();
-      if (res.success && res.result) {
+      const res = await gatewayCall(607, {});
+      if (res?.success && res.result) {
         setCounts(res.result);
       }
     } catch {}
@@ -80,19 +72,8 @@ export const GravarTab: React.FC = () => {
     showLoading('Carregando tarefas de transformação...');
     if (!(await ensureInternetConnectivity())) { hideLoading(); return; }
     try {
-      const token = await getAccessToken();
-      if (!token) return;
-      const resp = await fetch(GATEWAY_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ op: 604, data: {} })
-      });
-      if (resp.status === 401) {
-        window.dispatchEvent(new CustomEvent('force-logout', { detail: { message: 'Sessão inválida' } }));
-        return;
-      }
-      const res = await resp.json();
-      if (res.success) setAgdTasks(res.result || []);
+      const res = await gatewayCall(604, {});
+      if (res?.success) setAgdTasks(res.result || []);
     } catch {
     } finally {
       hideLoading();
@@ -104,19 +85,8 @@ export const GravarTab: React.FC = () => {
     showLoading('Carregando tarefas concluídas...');
     if (!(await ensureInternetConnectivity())) { hideLoading(); return; }
     try {
-      const token = await getAccessToken();
-      if (!token) return;
-      const resp = await fetch(GATEWAY_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ op: 605, data: {} })
-      });
-      if (resp.status === 401) {
-        window.dispatchEvent(new CustomEvent('force-logout', { detail: { message: 'Sessão inválida' } }));
-        return;
-      }
-      const res = await resp.json();
-      if (res.success) setCompletedTasks(res.result || []);
+      const res = await gatewayCall(605, {});
+      if (res?.success) setCompletedTasks(res.result || []);
     } catch {
     } finally {
       hideLoading();
@@ -128,16 +98,8 @@ export const GravarTab: React.FC = () => {
     showLoading('Carregando tarefas falhadas...');
     if (!(await ensureInternetConnectivity())) { hideLoading(); return; }
     try {
-      const token = await getAccessToken();
-      if (!token) return;
-      const resp = await fetch(GATEWAY_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ op: 606, data: {} })
-      });
-      if (resp.status === 401) return;
-      const res = await resp.json();
-      if (res.success) setFailedTasks(res.result || []);
+      const res = await gatewayCall(606, {});
+      if (res?.success) setFailedTasks(res.result || []);
     } catch {
     } finally {
       hideLoading();
@@ -188,16 +150,9 @@ export const GravarTab: React.FC = () => {
     setSubmitting(true);
     showLoading('Enviando evidências...');
     try {
-      const token = await getAccessToken();
-      if (!token) return;
-      const resp = await fetch(GATEWAY_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ op: 603, data: { tarefa_agd_id: taskId } })
-      });
+      const res = await gatewayCall(603, { tarefa_agd_id: taskId });
       
-      const res = await resp.json();
-      if (res.success) {
+      if (res?.success) {
         window.dispatchEvent(new CustomEvent('show-toast', { detail: { message: 'Tarefa concluída e crédito adicionado!', type: 'success' } }));
         setExpandedId(null);
         setComment('');

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { GATEWAY_URL, getAccessToken } from '../lib/supabase';
+import { gatewayCall } from '../lib/supabase';
 import { useApp } from '../context/AppContext';
 
 interface CuponsPageProps {
@@ -43,15 +43,8 @@ export const CuponsPage: React.FC<CuponsPageProps> = ({ isOpen, onClose }) => {
     if (!(await ensureInternetConnectivity())) return;
     setLoadingHistory(true);
     try {
-      const token = await getAccessToken();
-      if (!token) return;
-      const res = await fetch(GATEWAY_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ op: 803, data: {} }),
-      });
-      const data = await res.json();
-      if (data.success && Array.isArray(data.result)) {
+      const data = await gatewayCall(803, {});
+      if (data?.success && Array.isArray(data.result)) {
         const couponEntries = data.result.filter((r: any) => r.codigo_presente && r.codigo_presente.trim() !== '');
         setRedeemedList(couponEntries);
       }
@@ -79,24 +72,9 @@ export const CuponsPage: React.FC<CuponsPageProps> = ({ isOpen, onClose }) => {
     setSubmitting(true);
     showLoading('A gravar cupão...');
     try {
-      const token = await getAccessToken();
-      if (!token) {
-        addToast('Sessão inválida. Faça login novamente.', 'error');
-        return;
-      }
-      const res = await fetch(GATEWAY_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ op: 701, data: { code: trimmedCode } }),
-      });
-      const data = await res.json();
-      if (res.status === 401 || data.force_logout) {
-        addToast(data.error || 'Sessão expirada. Faça login novamente.', 'error');
-        window.dispatchEvent(new CustomEvent('force-logout', { detail: { message: data.error } }));
-        return;
-      }
+      const data = await gatewayCall(701, { code: trimmedCode });
 
-      if (data.success && data.result?.success) {
+      if (data?.success && data.result?.success) {
         addToast(data.result.message, 'success');
         setCouponCode('');
         loadHistory();
