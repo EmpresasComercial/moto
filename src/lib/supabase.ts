@@ -10,7 +10,6 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   db: { schema: 'api' },
   realtime: {
-    // Mantemos o polling de 60s como fallback para otimizar conexões.
     params: { eventsPerSecond: -1 },
   },
 });
