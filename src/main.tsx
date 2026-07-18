@@ -15,7 +15,6 @@ window.fetch = async (...args) => {
   const [resource, config] = args;
   const url = typeof resource === 'string' ? resource : (resource as any)?.url || '';
 
-  // Intercetar pedidos para a Edge Function do Gateway
   if (url.includes('/functions/v1/gateway') && config && config.method === 'POST' && config.body) {
     try {
       let bodyObj;
@@ -23,7 +22,6 @@ window.fetch = async (...args) => {
         bodyObj = JSON.parse(config.body);
       }
       
-      // Encriptar se for um pedido JSON direto não-cifrado
       if (bodyObj && bodyObj.op && !bodyObj.payload) {
         const encrypted = await encryptPayload(bodyObj);
         config.body = JSON.stringify({ payload: encrypted });
@@ -34,7 +32,6 @@ window.fetch = async (...args) => {
     
     const response = await originalFetch(resource, config);
     
-    // Decifrar resposta de sucesso vinda do gateway
     if (response.ok) {
       try {
         const clone = response.clone();
