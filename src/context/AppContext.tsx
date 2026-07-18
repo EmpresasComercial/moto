@@ -589,10 +589,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
     const cleanPhone = phone.replace(/[^0-9]/g, '');
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        phone: cleanPhone,
-        password: pin
+      const { data: invokeData, error: invokeError } = await supabase.functions.invoke('secure-registration', {
+        body: { action: 'login', phone: cleanPhone, password: pin }
       });
+      
+      const error = invokeError || (invokeData && invokeData.error ? new Error(invokeData.error) : null);
+      const data = invokeData?.data || null;
+
+      if (!error && data?.session) {
+        await supabase.auth.setSession({
+          access_token: data.session.access_token,
+          refresh_token: data.session.refresh_token
+        });
+      }
       if (error) {
         // SEGURANÇA F-08: Incrementar contador e aplicar backoff exponencial
         loginAttemptsRef.current += 1;
@@ -691,17 +700,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       // silent — ip fetch failed, continua sem IP
     }
 
-    const { data, error } = await supabase.auth.signUp({
-      phone: cleanPhone,
-      password: pin,
-      options: {
-        data: {
-          phone: cleanPhone,
-          referred_by: inviteCode || '',
-          ip_address: ipAddress
-        }
-      }
+    const { data: invokeData, error: invokeError } = await supabase.functions.invoke('secure-registration', {
+      body: { action: 'register', phone: cleanPhone, password: pin, inviteCode: inviteCode || '', ipAddress: ipAddress }
     });
+
+    const error = invokeError || (invokeData && invokeData.error ? new Error(invokeData.error) : null);
+    const data = invokeData?.data || null;
+
+    if (!error && data?.session) {
+      await supabase.auth.setSession({
+        access_token: data.session.access_token,
+        refresh_token: data.session.refresh_token
+      });
+    }
 
     if (error) {
       if (error.message.includes('IP excedido')) {
@@ -1164,11 +1175,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showLoading('A processar segurança...');
     try {
       const cleanPhone = user.phone.replace(/[^0-9]/g, '');
-      const email = `${cleanPhone}@user.com`;
-      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password: oldPassword
+      const { data: invokeData, error: invokeError } = await supabase.functions.invoke('secure-registration', {
+        body: { action: 'verify_password', phone: cleanPhone, password: oldPassword }
       });
+      
+      const signInError = invokeError || (invokeData && invokeData.error ? new Error(invokeData.error) : null);
+      const signInData = invokeData?.data || null;
       if (signInError || !signInData.session) {
         return { success: false, message: 'Senha Antiga incorreta.' };
       }

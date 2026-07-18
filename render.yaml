@@ -1,10 +1,9 @@
 services:
-  - type: web
+  - type: static
     name: asiaray-angola
-    runtime: node
-    plan: free
     buildCommand: npm install && npm run build
-    startCommand: node server.js
-    envVars:
-      - key: NODE_ENV
-        value: production
+    publishPath: dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

@@ -1,10 +1,11 @@
 import { createClient } from '@supabase/supabase-js';
 
-const SUPABASE_URL = typeof window !== 'undefined'
-  ? `${window.location.origin}/api/data`
-  : 'http://localhost:3000/api/data';
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 
+  (typeof window !== 'undefined'
+    ? `${window.location.origin}/api/data`
+    : 'http://localhost:3000/api/data');
 
-const SUPABASE_ANON_KEY = 'proxy-secured';
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || 'proxy-secured';
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   db: { schema: 'api' },
@@ -49,6 +50,9 @@ export const checkInternetConnectivity = async (timeoutMs = 4000): Promise<boole
     await fetch(INTERNET_CHECK_URL, {
       method: 'HEAD',
       cache: 'no-cache',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY
+      },
       signal: controller.signal
     });
     lastConnectivityResult = true;

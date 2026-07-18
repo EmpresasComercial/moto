@@ -400,7 +400,7 @@ export const LoginScreen: React.FC = () => {
     >
       {/* Logo */}
       <div className="flex items-center justify-center py-6 bg-white border-b border-gray-100 select-none">
-        <img src="/asiaray-logo-leve.webp" alt="Asiaray Group" className="h-[80px] object-contain" />
+        <img src="/asiaray-logo-leve.webp" alt="Asiaray Group" className="h-[160px] object-contain" />
       </div>
 
 
