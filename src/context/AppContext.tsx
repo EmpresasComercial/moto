@@ -510,9 +510,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     let channel: any = null;
     try {
-      // Realtime via WebSocket — works on Cloudflare/Render.
-      // On Vercel serverless, WebSockets are not supported; the catch block
-      // silently falls back to the 60s polling interval above.
+      // Realtime via WebSocket — funciona no Render.
+      // Se estiver indisponível, faz fallback silencioso para o intervalo de polling de 60s acima.
       channel = supabase
         .channel(`realtime_db_changes_${user.id}`)
         .on(
@@ -537,7 +536,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         )
         .subscribe((status: string, err: any) => {
           if (err) {
-            // WebSocket failed (e.g. Vercel) — polling fallback is active, ignore.
+            // Falha no WebSocket — fallback por polling está ativo, ignorar.
             console.warn('[Realtime] WebSocket unavailable, using polling fallback.');
           }
         });
@@ -677,28 +676,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
     const cleanPhone = phone.replace(/[^0-9]/g, '');
 
-    // SEGURANÇA F-09: Obter IP via endpoint interno (Cloudflare Worker)
-    // em vez de enviar dados do utilizador a um serviço externo (api.ipify.org)
     let ipAddress = 'unknown';
-    try {
-      const res = await fetch('/api/data/health?ip=1', { method: 'GET', cache: 'no-cache' });
-      if (res.ok) {
-        const ipHeader = res.headers.get('x-client-ip');
-        if (ipHeader) ipAddress = ipHeader;
-      }
-
-      // Verificar se o IP já atingiu o limite
-      if (ipAddress && ipAddress !== 'unknown') {
-        const checkData = await gatewayCall(903, { p_ip: ipAddress }, false);
-        if (checkData?.result?.blocked) {
-          addToast('Aviso: IP excedido (Já registrou uma conta neste dispositivo)', 'error');
-          throw new Error('IP excedido');
-        }
-      }
-    } catch (e: any) {
-      if (e.message === 'IP excedido') throw e;
-      // silent — ip fetch failed, continua sem IP
-    }
 
     const { data: invokeData, error: invokeError } = await supabase.functions.invoke('secure-registration', {
       body: { action: 'register', phone: cleanPhone, password: pin, inviteCode: inviteCode || '', ipAddress: ipAddress }

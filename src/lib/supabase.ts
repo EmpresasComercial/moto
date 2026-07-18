@@ -1,23 +1,17 @@
 import { createClient } from '@supabase/supabase-js';
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 
-  (typeof window !== 'undefined'
-    ? `${window.location.origin}/api/data`
-    : 'http://localhost:3000/api/data');
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || 'proxy-secured';
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  throw new Error('As variáveis de ambiente VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY precisam de estar configuradas.');
+}
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   db: { schema: 'api' },
   realtime: {
-    // Vercel serverless does not support WebSocket upgrades.
-    // The app uses 60s polling as a fallback — Realtime is disabled here.
+    // Mantemos o polling de 60s como fallback para otimizar conexões.
     params: { eventsPerSecond: -1 },
-  },
-  global: {
-    headers: {
-      // Prevents supabase-js from trying to upgrade to WebSocket on Vercel.
-    },
   },
 });
 
