@@ -3,15 +3,14 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 import { defineConfig, loadEnv } from 'vite';
 
+import { cloudflare } from "@cloudflare/vite-plugin";
+
 export default defineConfig(({ mode }) => {
   // Load .env variables (server-side only — never bundled into the client)
   const env = loadEnv(mode, process.cwd(), '');
 
   return {
-    plugins: [
-      react(), 
-      tailwindcss()
-    ],
+    plugins: [react(), tailwindcss(), cloudflare()],
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
