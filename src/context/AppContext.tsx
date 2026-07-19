@@ -535,9 +535,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           (payload) => handleRealtimeChange('tarefa', payload)
         )
         .subscribe((status: string, err: any) => {
+          if (status === 'SUBSCRIBED') {
+            // Ligação WebSocket bem-sucedida — sem aviso.
+            return;
+          }
           if (err) {
-            // Falha no WebSocket — fallback por polling está ativo, ignorar.
-            console.warn('[Realtime] WebSocket unavailable, using polling fallback.');
+            // Loga o erro real para diagnóstico — fallback por polling está ativo.
+            console.warn('[Realtime] status:', status, '| erro:', err?.message ?? err);
           }
         });
     } catch {
