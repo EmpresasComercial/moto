@@ -490,18 +490,34 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     if (!isLoggedIn || !user?.id || isSessionExpired) return;
 
-    // Debounced handler: collapses bursts of Realtime events into a single fetch
-    const handleRealtimeChange = (source: string, payload: any) => {
-      console.log('[Realtime] Mudança recebida de:', source, 'payload:', payload);
+    const parseNum = (val: any, fallback: number = 0) => {
+      const n = Number(val);
+      return isNaN(n) ? fallback : n;
+    };
+
+    // Handler: atualiza o estado IMEDIATAMENTE a partir dos dados do evento Realtime
+    const handleRealtimeChange = (_source: string, payload: any) => {
       if (sessionExpiredRef.current) return;
-      // Cancel any pending call and schedule a fresh one after 500ms quiet period
+
+      const newData = payload?.new;
+      if (newData) {
+        if (newData.balance !== undefined || newData.balance_correte_usdt20 !== undefined) {
+          // profiles mudou — atualiza saldo diretamente
+          setStats(prev => ({
+            ...prev,
+            ...(newData.balance !== undefined && { balance: parseNum(newData.balance, prev.balance) }),
+            ...(newData.balance_correte_usdt20 !== undefined && { balanceUSDT: parseNum(newData.balance_correte_usdt20, prev.balanceUSDT) }),
+          }));
+        }
+      }
+
+      // Agendamento leve de refresh completo para sincronizar outros campos (level, etc.)
       if (realtimeDebounceRef.current) clearTimeout(realtimeDebounceRef.current);
       realtimeDebounceRef.current = setTimeout(async () => {
-        console.log('[Realtime] Atualizando dados da interface...');
-        lastFetchRef.current = 0; // reset throttle so forced fetch goes through
+        lastFetchRef.current = 0;
         await refreshUserProfile(false);
         await fetchFinancialStats(false);
-      }, 500);
+      }, 1500);
     };
 
     let channel: any = null;

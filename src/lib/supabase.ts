@@ -11,8 +11,6 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   db: { schema: 'api' },
   realtime: {
     params: { eventsPerSecond: -1 },
-    worker: true, // mantém a conexão estável mesmo quando a aba fica em segundo plano
-    reconnectAfterMs: (tries: number) => Math.min(1000 * Math.pow(2, tries), 30000), // backoff exponencial: evita ciclo rápido de retry
   },
 });
 
