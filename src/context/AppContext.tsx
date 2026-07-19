@@ -485,12 +485,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
 
     fetchAllData(true); // force on initial login
-
-    // Realtime covers live changes; 60s polling is just a safety net fallback
-    const interval = setInterval(() => {
-      fetchAllData(false);
-    }, 60000);
-    return () => clearInterval(interval);
   }, [isLoggedIn, isSessionExpired]);
 
   useEffect(() => {
