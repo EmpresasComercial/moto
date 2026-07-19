@@ -193,8 +193,9 @@ function MainAppLayout() {
   const [splashMessage, setSplashMessage] = useState<string | null>(null);
   useEffect(() => {
     const fetchSplash = async () => {
+      if (!isLoggedIn) return; // Apenas busca se o usuário estiver logado
       try {
-        const res = await gatewayCall(902, {}, false);
+        const res = await gatewayCall(902, {}, true); // requireAuth = true
         if (res?.success && res.result?.splash_message) {
           setSplashMessage(res.result.splash_message);
         }
@@ -203,7 +204,7 @@ function MainAppLayout() {
       }
     };
     fetchSplash();
-  }, []);
+  }, [isLoggedIn]);
   useEffect(() => {
     const mainArea = document.getElementById('main-scroll-area');
     if (mainArea) {

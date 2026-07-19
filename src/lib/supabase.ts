@@ -11,6 +11,8 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   db: { schema: 'api' },
   realtime: {
     params: { eventsPerSecond: -1 },
+    worker: true, // mantém a conexão estável mesmo quando a aba fica em segundo plano
+    reconnectAfterMs: (tries: number) => Math.min(1000 * Math.pow(2, tries), 30000), // backoff exponencial: evita ciclo rápido de retry
   },
 });
 
@@ -40,7 +42,7 @@ export const checkInternetConnectivity = async (timeoutMs = 4000): Promise<boole
   try {
 
     await fetch(INTERNET_CHECK_URL, {
-      method: 'HEAD',
+      method: 'GET',
       cache: 'no-cache',
       headers: {
         'apikey': SUPABASE_ANON_KEY
