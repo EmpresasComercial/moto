@@ -21,8 +21,7 @@ export const getAccessToken = async (): Promise<string | null> => {
   const { data } = await supabase.auth.getSession();
   return data.session?.access_token ?? null;
 };
-
-const INTERNET_CHECK_URL = `${SUPABASE_URL}/auth/v1`;
+const INTERNET_CHECK_URL = `${SUPABASE_URL}/auth/v1/health`;
 
 let lastConnectivityResult: boolean | null = null;
 let lastConnectivityCheckTime = 0;
