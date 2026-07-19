@@ -492,10 +492,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     // Debounced handler: collapses bursts of Realtime events into a single fetch
     const handleRealtimeChange = (source: string, payload: any) => {
+      console.log('[Realtime] Mudança recebida de:', source, 'payload:', payload);
       if (sessionExpiredRef.current) return;
       // Cancel any pending call and schedule a fresh one after 500ms quiet period
       if (realtimeDebounceRef.current) clearTimeout(realtimeDebounceRef.current);
       realtimeDebounceRef.current = setTimeout(async () => {
+        console.log('[Realtime] Atualizando dados da interface...');
         lastFetchRef.current = 0; // reset throttle so forced fetch goes through
         await refreshUserProfile(false);
         await fetchFinancialStats(false);
@@ -504,8 +506,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     let channel: any = null;
     try {
-      // Realtime via WebSocket — funciona no Render.
-      // Se estiver indisponível, faz fallback silencioso para o intervalo de polling de 60s acima.
+      console.log('[Realtime] Tentando subscrever no canal para utilizador:', user.id);
       channel = supabase
         .channel(`realtime_db_changes_${user.id}`)
         .on(
@@ -529,17 +530,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           (payload) => handleRealtimeChange('tarefa', payload)
         )
         .subscribe((status: string, err: any) => {
-          if (status === 'SUBSCRIBED') {
-            // Ligação WebSocket bem-sucedida — sem aviso.
-            return;
-          }
-          if (err) {
-            // Loga o erro real para diagnóstico — fallback por polling está ativo.
+          console.log('[Realtime] Status da subscrição:', status);
+          if (status !== 'SUBSCRIBED') {
             console.warn('[Realtime] status:', status, '| erro:', err?.message ?? err);
           }
         });
-    } catch {
-      // Silently ignore — polling fallback covers data freshness.
+    } catch (e: any) {
+      console.error('[Realtime] Erro ao tentar inicializar o canal:', e);
     }
 
     return () => {
