@@ -399,17 +399,22 @@ export const MeuTab: React.FC = () => {
           className="w-full max-w-[340px] bg-[#242d38] text-slate-800 rounded-[14px] p-4 mt-4 relative flex items-center justify-between z-10 mx-auto"
           id="meu-gold-coin-box"
         >
-          <div className="flex-1 grid grid-cols-2 text-left font-sans items-center">
-            <div>
-              <span className="text-[11px] text-neutral-400">Moeda de Ouro</span>
-              <div className="text-[18px] font-bold text-white flex items-baseline mt-1">
-                <span className="text-[10px] font-normal mr-0.5">KZ</span>
-                <span>{formattedBalance}</span>
+          <div className="flex-1 flex text-left font-sans items-center gap-3 min-w-0 pr-2">
+            <div className="flex-1 min-w-0">
+              <span className="text-[11px] text-neutral-400 block truncate">Moeda de Ouro</span>
+              <div className={`font-bold text-white flex items-baseline mt-1 min-w-0 ${
+                formattedBalance.length > 14 ? 'text-[13px]' : 
+                formattedBalance.length > 11 ? 'text-[15px]' : 'text-[18px]'
+              }`}>
+                <span className="text-[10px] font-normal mr-0.5 flex-shrink-0">KZ</span>
+                <span className="truncate">{formattedBalance}</span>
               </div>
             </div>
-            <div className="pl-2">
-              <span className="text-[11px] font-bold text-[#ff3b30]">USDT_TRC</span>
-              <div className="text-[18px] font-bold text-[#ff3b30] mt-1">
+            <div className="flex-shrink-0 pl-1">
+              <span className="text-[11px] font-bold text-[#ff3b30] block">USDT_TRC</span>
+              <div className={`font-bold text-[#ff3b30] mt-1 ${
+                Math.max(0, stats.balanceUSDT).toFixed(2).length > 8 ? 'text-[14px]' : 'text-[18px]'
+              }`}>
                 {Math.max(0, stats.balanceUSDT).toFixed(2)}
               </div>
             </div>
