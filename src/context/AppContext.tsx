@@ -518,7 +518,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           'postgres_changes',
           {
             event: '*',
-            schema: 'public',
+            schema: 'api',
             table: 'profiles',
             filter: `id=eq.${user.id}`,
           },
@@ -528,7 +528,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           'postgres_changes',
           {
             event: '*',
-            schema: 'public',
+            schema: 'api',
             table: 'tarefas_diarias',
             filter: `user_id=eq.${user.id}`,
           },
