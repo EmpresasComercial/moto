@@ -1,0 +1,8 @@
+{
+  "name": "Asiary Moto",
+  "description": "Plataforma web Asiary Moto para locação transparente de motocicletas com verificação de CNH, gestão de caução, reserva e acompanhamento de devolução.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

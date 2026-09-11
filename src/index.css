@@ -1,0 +1,79 @@
+@import "tailwindcss";
+
+@theme {
+  --color-emerald-50: #eafff2;
+  --color-emerald-100: #cbfae0;
+  --color-emerald-200: #9bf6c4;
+  --color-emerald-300: #5dec9e;
+  --color-emerald-400: #22de7a;
+  --color-emerald-500: #00c853;
+  --color-emerald-600: #00c853;
+  --color-emerald-700: #00b341;
+  --color-emerald-800: #009935;
+  --color-emerald-900: #007a2a;
+  --color-emerald-950: #00591e;
+  --color-vivid-green: #00c853;
+  --color-vivid-green-hover: #00b341;
+}
+
+html, body, #root {
+  background-color: #ffffff !important;
+  color: #0f172a;
+}
+
+/* Utilitários globais para botões verde forte e aceso */
+.btn-green-solid {
+  background-color: #00c853 !important;
+  color: #ffffff !important;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(0, 200, 83, 0.25);
+  transition: all 0.15s ease-in-out;
+}
+.btn-green-solid:hover {
+  background-color: #00b341 !important;
+  box-shadow: 0 4px 14px rgba(0, 200, 83, 0.35);
+}
+.btn-green-solid:active {
+  background-color: #009935 !important;
+}
+
+@keyframes continuousScroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-continuous-scroll {
+  display: flex;
+  width: max-content;
+  animation: continuousScroll 26s linear infinite;
+  will-change: transform;
+}
+
+.animate-continuous-scroll:hover {
+  animation-play-state: paused;
+}
+
+@keyframes textTickerScroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-text-ticker {
+  display: flex;
+  width: max-content;
+  animation: textTickerScroll 42s linear infinite;
+  will-change: transform;
+}
+
+.animate-text-ticker:hover {
+  animation-play-state: paused;
+}
+
