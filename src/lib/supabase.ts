@@ -1,10 +1,10 @@
 import { createClient } from '@supabase/supabase-js';
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://fycskldchqqqohgvioal.supabase.co';
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.placeholder';
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://placeholder.supabase.co';
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || 'placeholder-anon-key';
 
 if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
-  console.warn('Variáveis VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY não informadas no .env. Operando em modo de contingência local.');
+  console.warn('VITE_SUPABASE_URL ou VITE_SUPABASE_ANON_KEY não informados no .env local.');
 }
 
 export const DB_TIMEOUT_MS = 30000; // 30 segundos global
